@@ -44,6 +44,7 @@ set +x
     __CORRECT_WORDS[declare]="delcare declaer"
     __CORRECT_WORDS[default]="defalut deafult"
     __CORRECT_WORDS[dependencies]="deps dependenceis"
+    __CORRECT_WORDS[dependency]="dep dependenc"
     __CORRECT_WORDS[directory]="dir idr direcotry direcorty directroy"
     __CORRECT_WORDS[docker]="dokcer"
     __CORRECT_WORDS[double]="dbl"
