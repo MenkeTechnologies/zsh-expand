@@ -193,7 +193,7 @@ set +x
                         res=${res:gs@\\@\\\\@}
                         res=${res:gs@\\\\n@\\n@}
                         res=${res:gs@\$@\\\$@}
-                        res=${res:gs|@|$subForAtSign|}
+                        res=${res:gs|@|$(echo $subForAtSign)}
 LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$lastword_lbuffer\$@$res@")"
                         LBUFFER=${LBUFFER:gs|$subForAtSign|@|}
                         lenToFirstTS=${#BUFFER%%$__TS*}
@@ -219,7 +219,7 @@ LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$lastword_lbuffer\$@$res@")"
                 res=${res:gs@\\@\\\\@}
                 res=${res:gs@\\\\n@\\n@}
                 res=${res:gs@\$@\\\$@}
-                res=${res:gs|@|$subForAtSign|}
+                res=${res:gs|@|$(echo $subForAtSign)}
                 words=(${(z)res})
                 if [[ ${words[1]} == "$lastword_lbuffer" ]];then
 LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$lastword_lbuffer\$@\\\\$res@")"
