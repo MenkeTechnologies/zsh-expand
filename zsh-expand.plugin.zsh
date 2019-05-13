@@ -116,7 +116,7 @@ set +x
     __CORRECT_WORDS[with]="with wiht itwh iwth"
     __CORRECT_WORDS[why]="hwy wyh"
     __CORRECT_WORDS[without]="wo"
-    __CORRECT_WORDS[work]="wrk werk owrk work"
+    __CORRECT_WORDS[work]="wrk werk owrk wokr"
 
     local TEMP_BUFFER mywords badWords
     TEMP_BUFFER="$(print -r -- $LBUFFER | tr -d "()[]{}\$,%'\"" )"
