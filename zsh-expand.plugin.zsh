@@ -82,6 +82,7 @@ set +x
     __CORRECT_WORDS[name]="anme naem"
     __CORRECT_WORDS[network]="newtork entwork ntework"
     __CORRECT_WORDS[parameter]="parm"
+    __CORRECT_WORDS[parameters]="parms"
     __CORRECT_WORDS[perl]="prel"
     __CORRECT_WORDS[please]="plase plz"
     __CORRECT_WORDS[point]="opint ponit"
