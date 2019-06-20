@@ -69,6 +69,7 @@ set +x
     __CORRECT_WORDS[location]="locaiton lcoation"
     __CORRECT_WORDS[lock]="lokc lcok"
     __CORRECT_WORDS[more]="moer"
+    __CORRECT_WORDS[move]="moev"
     __CORRECT_WORDS[mount]="mounr mounf"
     __CORRECT_WORDS[namespace]="namepsace naemspace naempsace"
     __CORRECT_WORDS[night]="nite"
