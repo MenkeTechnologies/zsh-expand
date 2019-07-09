@@ -1,6 +1,5 @@
 subForAtSign=:::::---::::---:::::---
-expandGlobalAliases() {
-    lastword_lbuffer="$1"
+expandGlobalAliases() { lastword_lbuffer="$1"
     #expand alias
     res=${(Q)${(qqq)galiases[$lastword_lbuffer]:gs@\\@\\\\@}:gs@$@\\$@}
     res=${res//@/$subForAtSign}
@@ -117,6 +116,7 @@ set +x
     __CORRECT_WORDS[using]="suing usnig"
     __CORRECT_WORDS[usually]="usu"
     __CORRECT_WORDS[value]="vlaue valeu"
+    __CORRECT_WORDS[variable]="var vra"
     __CORRECT_WORDS[with]="with wiht itwh iwth"
     __CORRECT_WORDS[why]="hwy wyh"
     __CORRECT_WORDS[without]="wo"
