@@ -50,6 +50,7 @@ set +x
     __CORRECT_WORDS[double]="dbl"
     __CORRECT_WORDS[drag]="darg"
     __CORRECT_WORDS[echo]="ehco eho ceho ecoh eco"
+    __CORRECT_WORDS[environment]="env environ evn"
     __CORRECT_WORDS[exit]="eixt"
     __CORRECT_WORDS[expansion]="exp"
     __CORRECT_WORDS[file]="feil fiel"
