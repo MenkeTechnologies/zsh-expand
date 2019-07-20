@@ -39,6 +39,7 @@ set +x
     __CORRECT_WORDS[client]="cleint"
     __CORRECT_WORDS[click]="clikc"
     __CORRECT_WORDS[command]="cmd comand aommnd commnd"
+    __CORRECT_WORDS[count]="ocunt coont"
     __CORRECT_WORDS[create]="craete"
     __CORRECT_WORDS[custom]="custmo cusotm"
     __CORRECT_WORDS[declare]="delcare declaer"
