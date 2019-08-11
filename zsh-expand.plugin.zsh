@@ -48,6 +48,7 @@ __CORRECT_WORDS[dependencies]="deps dependenceis"
 __CORRECT_WORDS[dependency]="dep dependenc"
 __CORRECT_WORDS[directory]="dir idr direcotry direcorty directroy"
 __CORRECT_WORDS[docker]="dokcer"
+__CORRECT_WORDS[do_not]="dont"
 __CORRECT_WORDS[double]="dbl"
 __CORRECT_WORDS[drag]="darg"
 __CORRECT_WORDS[echo]="ehco eho ceho ecoh eco"
@@ -114,6 +115,7 @@ __CORRECT_WORDS[spelling]="spellign spelilng"
 __CORRECT_WORDS[state]="staet steta sttae"
 __CORRECT_WORDS[store]="tsore sotre"
 __CORRECT_WORDS[string]="stirng stinrg"
+__CORRECT_WORDS[substitute]="sub"
 __CORRECT_WORDS[SYSV]="sysv"
 __CORRECT_WORDS[than]="tahn"
 __CORRECT_WORDS[that]="taht"
@@ -148,14 +150,19 @@ supernatural-space() {
     finished=false
 
     for key in ${(k)__CORRECT_WORDS[@]}; do
+        if type -a $mywords[1] &>/dev/null; then
+            if (( ${#mywords} == 1)); then
+                break
+            fi
+        fi
         badWords=("${(z)__CORRECT_WORDS[$key]}")
         for misspelling in $badWords[@];do
             if [[ $mywords[-1] == $misspelling ]]; then
                 LBUFFER="$(print -r -- "$LBUFFER" | perl -pE \
                     "s@\\b$misspelling\\b\$@${key:gs/_/ /}@g")"
-                                        finished=true
-                                        CURSOR=$#LBUFFER
-                                        break
+                    finished=true
+                    CURSOR=$#LBUFFER
+                    break
             fi
         done
         [[ $finished == true ]] && break
