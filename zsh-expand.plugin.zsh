@@ -149,9 +149,9 @@ __CORRECT_WORDS[using]="suing usnig"
 __CORRECT_WORDS[usually]="usu"
 __CORRECT_WORDS[value]="vlaue valeu"
 __CORRECT_WORDS[variable]="var vra"
-__CORRECT_WORDS[with]="w/ with wiht itwh iwth"
+__CORRECT_WORDS[with]="with wiht itwh iwth"
 __CORRECT_WORDS[why]="hwy wyh"
-__CORRECT_WORDS[without]="wo"
+__CORRECT_WORDS[without]="wo w/o"
 __CORRECT_WORDS[work]="wrk werk owrk wokr"
 
 supernatural-space() {
