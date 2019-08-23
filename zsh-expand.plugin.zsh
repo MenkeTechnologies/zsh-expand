@@ -88,6 +88,7 @@ __CORRECT_WORDS[inside]="insdie isndie inisde isnide sindie"
 __CORRECT_WORDS[instead]="insaed instaed"
 __CORRECT_WORDS[iSCSI]="iscsi"
 __CORRECT_WORDS[ISO]="iso"
+__CORRECT_WORDS[JSON]="json"
 __CORRECT_WORDS[just]="jsut jutsi just"
 __CORRECT_WORDS[like]="liek"
 __CORRECT_WORDS[Linux]="linux"
@@ -167,6 +168,7 @@ __CORRECT_WORDS[with]="with wiht itwh iwth"
 __CORRECT_WORDS[why]="hwy wyh"
 __CORRECT_WORDS[without]="wo w/o"
 __CORRECT_WORDS[work]="wrk werk owrk wokr"
+__CORRECT_WORDS[YAML]="yaml"
 
 supernatural-space() {
     set +x
