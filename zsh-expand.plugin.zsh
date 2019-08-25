@@ -172,33 +172,11 @@ __CORRECT_WORDS[work]="wrk werk owrk wokr"
 __CORRECT_WORDS[YAML]="yaml"
 
 supernatural-space() {
-    set +x
 
     local TEMP_BUFFER mywords badWords
-    TEMP_BUFFER="$(print -r -- $LBUFFER | tr -d "()[]{}\$,%'\"" )"
-    mywords=("${(z)TEMP_BUFFER}")
+    #TEMP_BUFFER="$(print -r -- $LBUFFER | tr -d "()[]{}\$,%'\"" )"
+    #mywords=("${(z)TEMP_BUFFER}")
     finished=false
-
-    for key in ${(k)__CORRECT_WORDS[@]}; do
-        if type -a $mywords[1] &>/dev/null; then
-            if (( ${#mywords} == 1)); then
-                break
-            fi
-        fi
-        badWords=("${(z)__CORRECT_WORDS[$key]}")
-        for misspelling in $badWords[@];do
-            if [[ $mywords[-1] == $misspelling ]]; then
-                LBUFFER="$(print -r -- "$LBUFFER" | perl -pE \
-                    "s@\\b$misspelling\\b\$@${key:gs/_/ /}@g")"
-                    finished=true
-                    CURSOR=$#LBUFFER
-                    break
-            fi
-        done
-        [[ $finished == true ]] && break
-    done
-
-    __EXPAND=true
 
     #loop through words to get first and last words in partition
     mywordsleft=(${(z)LBUFFER})
@@ -237,6 +215,31 @@ supernatural-space() {
     #logg "first word = '$firstword_partition'"
     #logg "last word = '$lastword_lbuffer'"
     __ALIAS=false
+
+    for key in ${(k)__CORRECT_WORDS[@]}; do
+        if (( ${#mywords_partition} == 1)); then
+            if type -a $firstword_partition &>/dev/null; then
+                break
+            fi
+        fi
+        badWords=("${(z)__CORRECT_WORDS[$key]}")
+        for misspelling in $badWords[@];do
+            if [[ $lastword_partition == $misspelling ]]; then
+                LBUFFER="$(print -r -- "$LBUFFER" | perl -pE \
+                    "s@\\b$misspelling\\b\$@${key:gs/_/ /}@g")"
+                    finished=true
+                    CURSOR=$#LBUFFER
+                    break
+            fi
+        done
+        if [[ $finished == true ]];then
+            zle self-insert
+            return 0
+        fi
+    done
+
+    __EXPAND=true
+    set +x
 
 
     #dont expand =word because that is zle expand-word
@@ -365,7 +368,7 @@ supernatural-space() {
 }
 
 terminate-space(){
-LBUFFER+=" "
+    LBUFFER+=" "
 }
 
 zle -N supernatural-space
@@ -377,4 +380,3 @@ bindkey -M viins "^@" terminate-space
 zle -N expandGlobalAliases
 
 bindkey '\e^E' expandGlobalAliases
-
