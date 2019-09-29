@@ -181,6 +181,7 @@ __CORRECT_WORDS[with]="with wiht itwh iwth"
 __CORRECT_WORDS[why]="hwy wyh"
 __CORRECT_WORDS[without]="wo w/o"
 __CORRECT_WORDS[work]="wrk werk owrk wokr"
+__CORRECT_WORDS[XML]="xml"
 __CORRECT_WORDS[YAML]="yaml"
 
 supernatural-space() {
