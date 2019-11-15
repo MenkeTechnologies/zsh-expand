@@ -10,9 +10,9 @@ expandGlobalAliases() { lastword_lbuffer="$1"
     if (( $lenToFirstTS < ${#BUFFER} )); then
         CURSOR=$lenToFirstTS
         RBUFFER=${RBUFFER:$#__TS}
-        __EXPAND=false
+        __EXPANDED=false
     else
-        __EXPAND=true
+        __EXPANDED=true
     fi
 }
 
@@ -259,19 +259,19 @@ supernatural-space() {
         fi
     done
 
-    __EXPAND=true
+    __EXPANDED=true
     set +x
 
 
     #dont expand =word because that is zle expand-word
     if [[ ${lastword_lbuffer:0:1} != '=' ]] && (( $#lastword_lbuffer > 0 ));then
         if alias -r -- $lastword_lbuffer | \
-            command egrep -qv '(grc|_z|zshz|cd|hub)';then
+            command grep -Eqv '(grc|_z|zshz|cd|hub)';then
                 #logg "regular=>'$lastword_lbuffer'"
                 if (( $#mywords_lbuffer == 2 )); then
                     #regular alias expansion after sudo
                     if [[ $EXPAND_SECOND_POSITION == true ]]; then
-                        if echo "$firstword_partition" | grep -qE '(sudo|zpwr)';then
+                        if echo "$firstword_partition" | command grep -qE '(sudo|zpwr)';then
                             res="$(alias -r $lastword_lbuffer | cut -d= -f2-)"
                             #deal with ansi quotes $'
                             [[ $res[1] == \$ ]] && res=${res:1}
@@ -286,9 +286,44 @@ supernatural-space() {
                             if (( $lenToFirstTS < ${#BUFFER} )); then
                                 CURSOR=$lenToFirstTS
                                 RBUFFER=${RBUFFER:$#__TS}
-                                __EXPAND=false
+                                __EXPANDED=false
                             else
-                                __EXPAND=true
+                                __EXPANDED=true
+                            fi
+                        fi
+                    fi
+                elif (( $#mywords_lbuffer > 2 )); then
+                    #regular alias expansion after sudo -E
+                    if [[ $EXPAND_SECOND_POSITION == true ]]; then
+                        if echo "$firstword_partition" | command grep -qE '(sudo|zpwr)';then
+                            for (( i = 2; i < $#mywords_partition; ++i )); do
+                                word=${mywords_partition[$i]}
+                                already_expanded=false
+                                if printf "$word" | command grep -Eqv '(env|\-)'; then
+                                  already_expanded=true
+                                  __EXPANDED=true
+                                  break
+                                fi
+                            done
+                            if [[ $already_expanded != true ]]; then
+                                res="$(alias -r $lastword_lbuffer | cut -d= -f2-)"
+                                #deal with ansi quotes $'
+                                [[ $res[1] == \$ ]] && res=${res:1}
+                                res=${(Q)res}
+                                res=${res:gs@\\@\\\\@}
+                                res=${res:gs@\\\\n@\\n@}
+                                res=${res:gs@\$@\\\$@}
+                                res=${res:gs|@|$(echo $subForAtSign)}
+                                LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$lastword_lbuffer\$@$res@")"
+                                LBUFFER=${LBUFFER:gs|$subForAtSign|@|}
+                                lenToFirstTS=${#BUFFER%%$__TS*}
+                                if (( $lenToFirstTS < ${#BUFFER} )); then
+                                    CURSOR=$lenToFirstTS
+                                    RBUFFER=${RBUFFER:$#__TS}
+                                    __EXPANDED=false
+                                else
+                                    __EXPANDED=true
+                                fi
                             fi
                         fi
                     fi
@@ -317,9 +352,9 @@ supernatural-space() {
                     if (( $lenToFirstTS < ${#BUFFER} )); then
                         CURSOR=$lenToFirstTS
                         RBUFFER=${RBUFFER:$#__TS}
-                        __EXPAND=false
+                        __EXPANDED=false
                     else
-                        __EXPAND=true
+                        __EXPANDED=true
                     fi
                 fi
                 __ALIAS=true
@@ -328,40 +363,39 @@ supernatural-space() {
                 if [[ ${LBUFFER: -1} == " " ]]; then
                     LBUFFER="${LBUFFER:0:-1}"
                 fi
-                if echo "$lastword_lbuffer" | \fgrep -q '"'; then
+                if echo "$lastword_lbuffer" | command grep -Fq '"'; then
                     #expand on last word of "string" for global aliases only
                         lastword_lbuffer=${lastword_lbuffer:gs/\"//}
                         ary=(${(z)lastword_lbuffer})
                         lastword_lbuffer=$ary[-1]
                 fi
-                if alias -g -- $lastword_lbuffer | grep -q "." &>/dev/null;then
+                if alias -g -- $lastword_lbuffer | command grep -q "." &>/dev/null;then
                     #global alias expansion
                     #logg "global=>'$lastword_lbuffer'"
                     expandGlobalAliases "$lastword_lbuffer"
                     __ALIAS=true
                 fi
         fi
-
         if [[ ! -f "$lastword_lbuffer" ]]; then
             :
             #DNS lookups
             #type -a "$lastWord" &> /dev/null || {
-            #print -r -- $lastWord | grep -qE \
+            #print -r -- $lastWord | command grep -qE \
             #'^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}\.?$'\
             #&& {
             ##DNS lookup
             #A_Record=$(host $lastWord) 2>/dev/null \
             #&& {
-            #A_Record=$(print -r -- $A_Record | grep ' address' | head -1 | awk '{print $4}')
+            #A_Record=$(print -r -- $A_Record | command grep ' address' | head -1 | awk '{print $4}')
             #} || A_Record=bad
             #[[ $A_Record != bad ]] && \
             #LBUFFER="$(print -r -- "$LBUFFER" | sed -E "s@\\b$lastWord@$A_Record@g")"
             #} || {
-            #print -r -- $lastWord | grep -qE \
+            #print -r -- $lastWord | command grep -qE \
             #'\b([0-9]{1,3}\.){3}[0-9]{1,3}\b' && {
             ##reverse DNS lookup
             #PTR_Record=$(nslookup $lastWord) 2>/dev/null && {
-            #PTR_Record=$(print -r -- $PTR_Record | grep 'name = ' | tail -1 | awk '{print $4}')
+            #PTR_Record=$(print -r -- $PTR_Record | command grep 'name = ' | tail -1 | awk '{print $4}')
             #} || PTR_Record=bad
             #[[ $PTR_Record != bad ]] && \
             #LBUFFER="$(print -r -- "$LBUFFER" | sed -E "s@\\b$lastWord\\b@${PTR_Record:0:-1}@g")"
@@ -377,7 +411,7 @@ supernatural-space() {
         zle expand-word
     fi
 
-    if [[ $__EXPAND == true ]];then
+    if [[ $__EXPANDED == true ]];then
         #insert the space char
         zle self-insert
     else
@@ -385,7 +419,7 @@ supernatural-space() {
         zle self-insert
         zle backward-delete-char
     fi
-    set +x
+    #set +x
 }
 
 terminate-space(){
