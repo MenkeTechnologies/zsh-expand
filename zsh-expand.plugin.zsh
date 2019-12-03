@@ -256,15 +256,19 @@ supernatural-space() {
     fi
     firstword_partition=${mywords_lbuffer[1]}
     lastword_lbuffer=${mywords_lbuffer[-1]}
-    lastword_lbuffer=${${(z)${mywords_lbuffer//\"/}}[-1]}
+    lastword_lbuffer=${${(Az)${mywords_lbuffer//\"/}}[-1]}
     lastword_partition=${mywords_partition[-1]}
     if [[ $GLOBAL_DEBUG == true ]]; then
-        logg "first word = '$firstword_partition'"
-        logg "last word lbuf = '$lastword_lbuffer'"
-        logg "last word partition = '$lastword_partition'"
+        logg "first word = ...$firstword_partition..."
+        logg "last word lbuf = ...$lastword_lbuffer..."
+        logg "last word partition = ...$lastword_partition..."
     fi
     __ALIAS=false
 
+    lastword_noquote=${${(Az)${lastword_lbuffer//\'/}}[-1]}
+    if [[ $GLOBAL_DEBUG == true ]]; then
+        logg "last word no quote ...${lastword_noquote}..."
+    fi
     for key in ${(k)__CORRECT_WORDS[@]}; do
         if (( ${#mywords_partition} == 1)); then
             if type -a $firstword_partition &>/dev/null; then
@@ -273,7 +277,7 @@ supernatural-space() {
         fi
         badWords=("${(z)__CORRECT_WORDS[$key]}")
         for misspelling in $badWords[@];do
-            if [[ $lastword_lbuffer == $misspelling ]]; then
+            if [[ ${lastword_noquote} == $misspelling ]]; then
                 LBUFFER="$(print -r -- "$LBUFFER" | perl -pE \
                     "s@\\b$misspelling\\b\$@${key:gs/_/ /}@g")"
                     finished=true
