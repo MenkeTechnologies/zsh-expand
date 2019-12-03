@@ -213,7 +213,7 @@ __CORRECT_WORDS[YAML]="yaml"
 
 supernatural-space() {
 
-    if [[ $GLOBAL_DEBUG == true ]]; then
+    if [[ $GLOBAL_TRACE == true ]]; then
         set -x
     fi
 
@@ -251,13 +251,18 @@ supernatural-space() {
     ((lastIndex+=$#mywordsleft))
     mywords_lbuffer=($mywordsleft[$firstIndex,$#mywordsleft])
     mywords_partition=($mywordsall[$firstIndex,$lastIndex])
-    #logg "partition = '$mywords_lbuffer'"
+    if [[ GLOBAL_DEBUG == true ]]; then
+        logg "partition = '$mywords_lbuffer'"
+    fi
     firstword_partition=${mywords_lbuffer[1]}
     lastword_lbuffer=${mywords_lbuffer[-1]}
     lastword_lbuffer=${${(z)${mywords_lbuffer//\"/}}[-1]}
     lastword_partition=${mywords_partition[-1]}
-    #logg "first word = '$firstword_partition'"
-    #logg "last word = '$lastword_lbuffer'"
+    if [[ $GLOBAL_DEBUG == true ]]; then
+        logg "first word = '$firstword_partition'"
+        logg "last word lbuf = '$lastword_lbuffer'"
+        logg "last word partition = '$lastword_partition'"
+    fi
     __ALIAS=false
 
     for key in ${(k)__CORRECT_WORDS[@]}; do
@@ -268,7 +273,7 @@ supernatural-space() {
         fi
         badWords=("${(z)__CORRECT_WORDS[$key]}")
         for misspelling in $badWords[@];do
-            if [[ $lastword_partition == $misspelling ]]; then
+            if [[ $lastword_lbuffer == $misspelling ]]; then
                 LBUFFER="$(print -r -- "$LBUFFER" | perl -pE \
                     "s@\\b$misspelling\\b\$@${key:gs/_/ /}@g")"
                     finished=true
@@ -440,7 +445,7 @@ supernatural-space() {
         zle self-insert
         zle backward-delete-char
     fi
-    if [[ $GLOBAL_DEBUG == true ]]; then
+    if [[ $GLOBAL_TRACE == true ]]; then
         set +x
     fi
 }
