@@ -213,7 +213,7 @@ __CORRECT_WORDS[YAML]="yaml"
 
 supernatural-space() {
 
-    if [[ $GLOBAL_TRACE == true ]]; then
+    if [[ $ZPWR_TRACE == true ]]; then
         set -x
     fi
 
@@ -251,14 +251,14 @@ supernatural-space() {
     ((lastIndex+=$#mywordsleft))
     mywords_lbuffer=($mywordsleft[$firstIndex,$#mywordsleft])
     mywords_partition=($mywordsall[$firstIndex,$lastIndex])
-    if [[ GLOBAL_DEBUG == true ]]; then
+    if [[ $ZPWR_DEBUG == true ]]; then
         logg "partition = '$mywords_lbuffer'"
     fi
     firstword_partition=${mywords_lbuffer[1]}
     lastword_lbuffer=${mywords_lbuffer[-1]}
     lastword_lbuffer=${${(Az)${mywords_lbuffer//\"/}}[-1]}
     lastword_partition=${mywords_partition[-1]}
-    if [[ $GLOBAL_DEBUG == true ]]; then
+    if [[ $ZPWR_DEBUG == true ]]; then
         logg "first word = ...$firstword_partition..."
         logg "last word lbuf = ...$lastword_lbuffer..."
         logg "last word partition = ...$lastword_partition..."
@@ -266,7 +266,7 @@ supernatural-space() {
     __ALIAS=false
 
     lastword_noquote=${${(Az)${lastword_lbuffer//\'/}}[-1]}
-    if [[ $GLOBAL_DEBUG == true ]]; then
+    if [[ $ZPWR_DEBUG == true ]]; then
         logg "last word no quote ...${lastword_noquote}..."
     fi
     for key in ${(k)__CORRECT_WORDS[@]}; do
@@ -449,7 +449,7 @@ supernatural-space() {
         zle self-insert
         zle backward-delete-char
     fi
-    if [[ $GLOBAL_TRACE == true ]]; then
+    if [[ $ZPWR_TRACE == true ]]; then
         set +x
     fi
 }
@@ -461,8 +461,11 @@ terminate-space(){
 zle -N supernatural-space
 zle -N terminate-space
 
-bindkey -M viins " " supernatural-space
-bindkey -M viins "^@" terminate-space
+if [[ $ZPWR_EXPAND == true ]]; then
+    bindkey -M viins " " supernatural-space
+    bindkey -M viins "^@" terminate-space
+fi
+
 
 zle -N expandGlobalAliases
 
