@@ -1,4 +1,5 @@
 subForAtSign=:::::---::::---:::::---
+
 expandGlobalAliases() { lastword_lbuffer="$1"
     #expand alias
     res=${(Q)${(qqq)galiases[$lastword_lbuffer]:gs@\\@\\\\@}:gs@$@\\$@}
@@ -209,7 +210,12 @@ __CORRECT_WORDS[work]="wrk werk owrk wokr"
 __CORRECT_WORDS[XML]="xml"
 __CORRECT_WORDS[YAML]="yaml"
 
+
 supernatural-space() {
+
+    if [[ $GLOBAL_DEBUG == true ]]; then
+        set -x
+    fi
 
     local TEMP_BUFFER mywords badWords
     #TEMP_BUFFER="$(print -r -- $LBUFFER | tr -d "()[]{}\$,%'\"" )"
@@ -277,8 +283,6 @@ supernatural-space() {
     done
 
     __EXPANDED=true
-    set +x
-
 
     #dont expand =word because that is zle expand-word
     if [[ ${lastword_lbuffer:0:1} != '=' ]] && (( $#lastword_lbuffer > 0 ));then
@@ -436,7 +440,9 @@ supernatural-space() {
         zle self-insert
         zle backward-delete-char
     fi
-    #set +x
+    if [[ $GLOBAL_DEBUG == true ]]; then
+        set +x
+    fi
 }
 
 terminate-space(){
