@@ -444,7 +444,9 @@ supernatural-space() {
 
     if [[ $__EXPANDED == true ]];then
         #insert the space char
-        zle self-insert
+        if [[ $BUFFER[-1] != ' ' ]]; then
+            zle self-insert
+        fi
     else
         #invoke syntax highlighting
         zle self-insert
