@@ -462,7 +462,7 @@ terminate-space(){
 zle -N supernatural-space
 zle -N terminate-space
 
-if [[ $ZPWR_EXPAND == true ]]; then
+if [[ $ZPWR_EXPAND != false ]]; then
     bindkey -M viins " " supernatural-space
     bindkey -M viins "^@" terminate-space
 fi
