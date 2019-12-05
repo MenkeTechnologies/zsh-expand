@@ -7,10 +7,10 @@ expandGlobalAliases() { lastword_lbuffer="$1"
     LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$lastword_lbuffer\$@$res@")"
     LBUFFER=${LBUFFER//$subForAtSign/@}
     LBUFFER=${LBUFFER:gs|\\\\|\\|}
-    lenToFirstTS=${#BUFFER%%$__TS*}
+    lenToFirstTS=${#BUFFER%%$ZPWR_TABSTOP*}
     if (( $lenToFirstTS < ${#BUFFER} )); then
         CURSOR=$lenToFirstTS
-        RBUFFER=${RBUFFER:$#__TS}
+        RBUFFER=${RBUFFER:$#ZPWR_TABSTOP}
         __EXPANDED=false
     else
         __EXPANDED=true
@@ -314,10 +314,10 @@ supernatural-space() {
                             res=${res:gs|@|$(echo $subForAtSign)}
                             LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$lastword_lbuffer\$@$res@")"
                             LBUFFER=${LBUFFER:gs|$subForAtSign|@|}
-                            lenToFirstTS=${#BUFFER%%$__TS*}
+                            lenToFirstTS=${#BUFFER%%$ZPWR_TABSTOP*}
                             if (( $lenToFirstTS < ${#BUFFER} )); then
                                 CURSOR=$lenToFirstTS
-                                RBUFFER=${RBUFFER:$#__TS}
+                                RBUFFER=${RBUFFER:$#ZPWR_TABSTOP}
                                 __EXPANDED=false
                             else
                                 __EXPANDED=true
@@ -348,10 +348,10 @@ supernatural-space() {
                                 res=${res:gs|@|$(echo $subForAtSign)}
                                 LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$lastword_lbuffer\$@$res@")"
                                 LBUFFER=${LBUFFER:gs|$subForAtSign|@|}
-                                lenToFirstTS=${#BUFFER%%$__TS*}
+                                lenToFirstTS=${#BUFFER%%$ZPWR_TABSTOP*}
                                 if (( $lenToFirstTS < ${#BUFFER} )); then
                                     CURSOR=$lenToFirstTS
-                                    RBUFFER=${RBUFFER:$#__TS}
+                                    RBUFFER=${RBUFFER:$#ZPWR_TABSTOP}
                                     __EXPANDED=false
                                 else
                                     __EXPANDED=true
@@ -380,10 +380,10 @@ supernatural-space() {
                         LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$lastword_lbuffer\$@$res@")"
                     fi
                     LBUFFER=${LBUFFER//$subForAtSign/@}
-                    lenToFirstTS=${#BUFFER%%$__TS*}
+                    lenToFirstTS=${#BUFFER%%$ZPWR_TABSTOP*}
                     if (( $lenToFirstTS < ${#BUFFER} )); then
                         CURSOR=$lenToFirstTS
-                        RBUFFER=${RBUFFER:$#__TS}
+                        RBUFFER=${RBUFFER:$#ZPWR_TABSTOP}
                         __EXPANDED=false
                     else
                         __EXPANDED=true
