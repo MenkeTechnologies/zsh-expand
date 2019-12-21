@@ -1,9 +1,12 @@
 subForAtSign=:::::---::::---:::::---
 
-expandGlobalAliases() { lastword_lbuffer="$1"
-    #expand alias
+expandGlobalAliases() {
+    lastword_lbuffer="$1"
+    #expand alias and escaping backslash and double quotes
     res=${(Q)${(qqq)galiases[$lastword_lbuffer]:gs@\\@\\\\@}:gs@$@\\$@}
+    #substitute out @ because that is the substitution delimiter for perl
     res=${res//@/$subForAtSign}
+    #do the expansion with perl sub on the last word of left buffer
     LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$lastword_lbuffer\$@$res@")"
     LBUFFER=${LBUFFER//$subForAtSign/@}
     LBUFFER=${LBUFFER:gs|\\\\|\\|}
@@ -340,6 +343,7 @@ supernatural-space() {
                             res=${res:gs@\\\\n@\\n@}
                             res=${res:gs@\$@\\\$@}
                             res=${res:gs|@|$(echo $subForAtSign)}
+                        #do the expansion with perl sub on the last word of left buffer
                             LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$lastword_lbuffer\$@$res@")"
                             LBUFFER=${LBUFFER:gs|$subForAtSign|@|}
                             lenToFirstTS=${#BUFFER%%$ZPWR_TABSTOP*}
@@ -374,6 +378,7 @@ supernatural-space() {
                                 res=${res:gs@\\\\n@\\n@}
                                 res=${res:gs@\$@\\\$@}
                                 res=${res:gs|@|$(echo $subForAtSign)}
+                            #do the expansion with perl sub on the last word of left buffer
                                 LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$lastword_lbuffer\$@$res@")"
                                 LBUFFER=${LBUFFER:gs|$subForAtSign|@|}
                                 lenToFirstTS=${#BUFFER%%$ZPWR_TABSTOP*}
@@ -403,8 +408,10 @@ supernatural-space() {
                     res=${res:gs|@|$(echo $subForAtSign)}
                     words=(${(z)res})
                     if [[ ${words[1]} == "$lastword_lbuffer" ]];then
+                            #do the expansion with perl sub on the last word of left buffer
                         LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$lastword_lbuffer\$@\\\\$res@")"
                     else
+                            #do the expansion with perl sub on the last word of left buffer
                         LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$lastword_lbuffer\$@$res@")"
                     fi
                     LBUFFER=${LBUFFER//$subForAtSign/@}
