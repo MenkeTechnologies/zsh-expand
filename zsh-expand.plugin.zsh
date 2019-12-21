@@ -232,13 +232,19 @@ supernatural-space() {
 
     #loop through words to get first and last words in partition
     mywordsleft=(${(z)LBUFFER})
+    if [[ $ZPWR_DEBUG == true ]]; then
+        logg "my words left = $mywordsleft"
+    fi
     mywordsright=(${(z)RBUFFER})
+    if [[ $ZPWR_DEBUG == true ]]; then
+        logg "my words right = $mywordsright"
+    fi
     mywordsall=(${(z)BUFFER})
     firstIndex=0
     lastIndex=0
     for (( i = $#mywordsleft; i >= 0; i-- )); do
         case $mywordsleft[$i] in
-            \; | \| | '||' | '&&')
+            \;\; | \; | \| | '||' | '&&')
                 firstIndex=$((i+1))
                 break
                 ;;
@@ -246,15 +252,21 @@ supernatural-space() {
                 ;;
         esac
     done
+    if [[ $ZPWR_DEBUG == true ]]; then
+        logg "first index = $firstIndex"
+    fi
     for (( i = 0; i < $#mywordsright; i++ )); do
         case $mywordsright[$i] in
-            \; | \| | '||' | '&&') lastIndex=$((i-1))
+            \;\; | \; | \| | '||' | '&&') lastIndex=$((i-1))
                 break
                 ;;
             *)
                 ;;
         esac
     done
+    if [[ $ZPWR_DEBUG == true ]]; then
+        logg "last index = $lastIndex"
+    fi
 
     ((lastIndex+=$#mywordsleft))
     mywords_lbuffer=($mywordsleft[$firstIndex,$#mywordsleft])
@@ -267,7 +279,7 @@ supernatural-space() {
     lastword_lbuffer=${${(Az)${mywords_lbuffer//\"/}}[-1]}
     lastword_partition=${mywords_partition[-1]}
     if [[ $ZPWR_DEBUG == true ]]; then
-        logg "first word = ...$firstword_partition..."
+        logg "first word partition = ...$firstword_partition..."
         logg "last word lbuf = ...$lastword_lbuffer..."
         logg "last word partition = ...$lastword_partition..."
     fi
