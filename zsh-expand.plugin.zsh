@@ -240,9 +240,16 @@ supernatural-space() {
         logg "my words right = $mywordsright"
     fi
     mywordsall=(${(z)BUFFER})
+
+    #we must find the first index of the partition
     firstIndex=0
+    #we must find the last index of the partition
     lastIndex=0
+
     for (( i = $#mywordsleft; i >= 0; i-- )); do
+        # ;; ; | || && are partition separating chars
+        # we will split the commad line and get the partition of the caret
+        # aliases are valid in the first position after these chars
         case $mywordsleft[$i] in
             ';;' | \; | \| | '||' | '&&')
                 firstIndex=$((i+1))
@@ -257,6 +264,9 @@ supernatural-space() {
     fi
     for (( i = 0; i < $#mywordsright; i++ )); do
         case $mywordsright[$i] in
+        # ;; ; | || && are partition separating chars
+        # we will split the commad line and get the partition of the caret
+        # aliases are valid in the first position after these chars
             ';;' | \; | \| | '||' | '&&') lastIndex=$((i-1))
                 break
                 ;;
