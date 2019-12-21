@@ -244,7 +244,7 @@ supernatural-space() {
     lastIndex=0
     for (( i = $#mywordsleft; i >= 0; i-- )); do
         case $mywordsleft[$i] in
-            \;\; | \; | \| | '||' | '&&')
+            ';;' | \; | \| | '||' | '&&')
                 firstIndex=$((i+1))
                 break
                 ;;
@@ -257,7 +257,7 @@ supernatural-space() {
     fi
     for (( i = 0; i < $#mywordsright; i++ )); do
         case $mywordsright[$i] in
-            \;\; | \; | \| | '||' | '&&') lastIndex=$((i-1))
+            ';;' | \; | \| | '||' | '&&') lastIndex=$((i-1))
                 break
                 ;;
             *)
