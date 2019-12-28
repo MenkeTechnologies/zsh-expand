@@ -21,13 +21,13 @@ expandGlobalAliases() {
 }
 
 declare -A ZPWR_CORRECT_WORDS
-ZPWR_CORRECT_WORDS[about]="aobut"
+ZPWR_CORRECT_WORDS[about]="aobut abbout aabout"
 ZPWR_CORRECT_WORDS[alternate]="alternaet alterntae"
-ZPWR_CORRECT_WORDS[also]="laso alos"
+ZPWR_CORRECT_WORDS[also]="laso alos alsoo allso"
 ZPWR_CORRECT_WORDS[AKA]="aka"
 ZPWR_CORRECT_WORDS[and]="adn nad"
 ZPWR_CORRECT_WORDS[are]="aer rea"
-ZPWR_CORRECT_WORDS[array]="ary arr"
+ZPWR_CORRECT_WORDS[array]="ary arr aary aray"
 ZPWR_CORRECT_WORDS[ASCII]="ascii"
 ZPWR_CORRECT_WORDS[automatically]="auto"
 ZPWR_CORRECT_WORDS[AWS]="aws"
