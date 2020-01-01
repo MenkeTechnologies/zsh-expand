@@ -340,7 +340,7 @@ supernatural-space() {
                 if (( $#mywords_lbuffer == 2 )); then
                     #regular alias expansion after sudo
                     if [[ $ZPWR_EXPAND_SECOND_POSITION == true ]]; then
-                        if echo "$firstword_partition" | command grep -qE '(sudo|zpwr)';then
+                        if echo "$firstword_partition" | command grep -qE '(sudo|zpwr|env)';then
                             res="$(alias -r $lastword_lbuffer | cut -d= -f2-)"
                             #deal with ansi quotes $'
                             [[ $res[1] == \$ ]] && res=${res:1}
@@ -365,7 +365,7 @@ supernatural-space() {
                 elif (( $#mywords_lbuffer > 2 )); then
                     #regular alias expansion after sudo -E
                     if [[ $ZPWR_EXPAND_SECOND_POSITION == true ]]; then
-                        if echo "$firstword_partition" | command grep -qE '(sudo|zpwr)';then
+                        if echo "$firstword_partition" | command grep -qE '(sudo|zpwr|env)';then
                             for (( i = 2; i < $#mywords_partition; ++i )); do
                                 word=${mywords_partition[$i]}
                                 already_expanded=false
