@@ -1,25 +1,3 @@
-subForAtSign=:::::---::::---:::::---
-
-expandGlobalAliases() {
-    lastword_lbuffer="$1"
-    #expand alias and escaping backslash and double quotes
-    res=${(Q)${(qqq)galiases[$lastword_lbuffer]:gs@\\@\\\\@}:gs@$@\\$@}
-    #substitute out @ because that is the substitution delimiter for perl
-    res=${res//@/$subForAtSign}
-    #do the expansion with perl sub on the last word of left buffer
-    LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$lastword_lbuffer\$@$res@")"
-    LBUFFER=${LBUFFER//$subForAtSign/@}
-    LBUFFER=${LBUFFER:gs|\\\\|\\|}
-    lenToFirstTS=${#BUFFER%%$ZPWR_TABSTOP*}
-    if (( $lenToFirstTS < ${#BUFFER} )); then
-        CURSOR=$lenToFirstTS
-        RBUFFER=${RBUFFER:$#ZPWR_TABSTOP}
-        __EXPANDED=false
-    else
-        __EXPANDED=true
-    fi
-}
-
 declare -A ZPWR_CORRECT_WORDS
 ZPWR_CORRECT_WORDS[about]="aobut abbout aabout"
 ZPWR_CORRECT_WORDS[alternate]="alternaet alterntae"
@@ -241,18 +219,34 @@ ZPWR_CORRECT_WORDS[work]="wrk werk owrk wokr"
 ZPWR_CORRECT_WORDS[XML]="xml"
 ZPWR_CORRECT_WORDS[YAML]="yaml"
 
+function correctWord(){
+    for key in ${(k)ZPWR_CORRECT_WORDS[@]}; do
+        if (( ${#mywords_partition} == 1)); then
+            if type -a $firstword_partition &>/dev/null; then
+                break
+            fi
+        fi
+        badWords=("${(z)ZPWR_CORRECT_WORDS[$key]}")
+        for misspelling in $badWords[@];do
+            if [[ ${lastword_noquote} == $misspelling ]]; then
+                LBUFFER="$(print -r -- "$LBUFFER" | perl -pE \
+                    "s@\\b$misspelling\\b\$@${key:gs/_/ /}@g")"
+                                    #finished=true
+                                    foundIncorrect=true
+                                    CURSOR=$#LBUFFER
+                                    break
+            fi
+        done
+        if [[ $finished == true ]];then
+            zle self-insert
+            return 0
+        fi
+    done
+}
 
-supernatural-space() {
+subForAtSign=:::::---::::---:::::---
 
-    if [[ $ZPWR_TRACE == true ]]; then
-        set -x
-    fi
-
-    local TEMP_BUFFER mywords badWords
-    #TEMP_BUFFER="$(print -r -- $LBUFFER | tr -d "()[]{}\$,%'\"" )"
-    #mywords=("${(z)TEMP_BUFFER}")
-    finished=false
-
+function parseWords(){
     #loop through words to get first and last words in partition
     mywordsleft=(${(z)LBUFFER})
     if [[ $ZPWR_DEBUG == true ]]; then
@@ -264,33 +258,33 @@ supernatural-space() {
     fi
     mywordsall=(${(z)BUFFER})
 
-    #we must find the first index of the partition
-    firstIndex=0
-    #we must find the last index of the partition
-    lastIndex=0
+        #we must find the first index of the partition
+        firstIndex=0
+        #we must find the last index of the partition
+        lastIndex=0
 
-    for (( i = $#mywordsleft; i >= 0; i-- )); do
-        # ;; ; | || && are partition separating chars
-        # we will split the commad line and get the partition of the caret
-        # aliases are valid in the first position after these chars
-        case $mywordsleft[$i] in
-            ';;' | \; | \| | '||' | '&&')
-                firstIndex=$((i+1))
-                break
-                ;;
-            *)
-                ;;
-        esac
-    done
-    if [[ $ZPWR_DEBUG == true ]]; then
-        logg "first index = $firstIndex"
-    fi
-    for (( i = 0; i < $#mywordsright; i++ )); do
-        case $mywordsright[$i] in
-        # ;; ; | || && are partition separating chars
-        # we will split the commad line and get the partition of the caret
-        # aliases are valid in the first position after these chars
-            ';;' | \; | \| | '||' | '&&') lastIndex=$((i-1))
+        for (( i = $#mywordsleft; i >= 0; i-- )); do
+            # ;; ; | || && are partition separating chars
+            # we will split the commad line and get the partition of the caret
+            # aliases are valid in the first position after these chars
+            case $mywordsleft[$i] in
+                ';;' | \; | \| | '||' | '&&')
+                    firstIndex=$((i+1))
+                    break
+                    ;;
+                *)
+                    ;;
+            esac
+        done
+        if [[ $ZPWR_DEBUG == true ]]; then
+            logg "first index = $firstIndex"
+        fi
+        for (( i = 0; i < $#mywordsright; i++ )); do
+            case $mywordsright[$i] in
+                # ;; ; | || && are partition separating chars
+                # we will split the commad line and get the partition of the caret
+                # aliases are valid in the first position after these chars
+                ';;' | \; | \| | '||' | '&&') lastIndex=$((i-1))
                 break
                 ;;
             *)
@@ -312,39 +306,63 @@ supernatural-space() {
     lastword_lbuffer=${${(Az)${mywords_lbuffer//\"/}}[-1]}
     lastword_partition=${mywords_partition[-1]}
     if [[ $ZPWR_DEBUG == true ]]; then
-        logg "first word partition = ...$firstword_partition..."
-        logg "last word lbuf = ...$lastword_lbuffer..."
-        logg "last word partition = ...$lastword_partition..."
+        logg "first word partition before spelling = ...$firstword_partition..."
+        logg "last word lbuf before spelling = ...$lastword_lbuffer..."
+        logg "last word partition before spelling = ...$lastword_partition..."
     fi
-    __ALIAS=false
 
     lastword_noquote=${${(Az)${lastword_lbuffer//\'/}}[-1]}
     if [[ $ZPWR_DEBUG == true ]]; then
         logg "last word no quote ...${lastword_noquote}..."
     fi
-    for key in ${(k)ZPWR_CORRECT_WORDS[@]}; do
-        if (( ${#mywords_partition} == 1)); then
-            if type -a $firstword_partition &>/dev/null; then
-                break
-            fi
-        fi
-        badWords=("${(z)ZPWR_CORRECT_WORDS[$key]}")
-        for misspelling in $badWords[@];do
-            if [[ ${lastword_noquote} == $misspelling ]]; then
-                LBUFFER="$(print -r -- "$LBUFFER" | perl -pE \
-                    "s@\\b$misspelling\\b\$@${key:gs/_/ /}@g")"
-                    finished=true
-                    CURSOR=$#LBUFFER
-                    break
-            fi
-        done
-        if [[ $finished == true ]];then
-            zle self-insert
-            return 0
-        fi
-    done
+}
 
+function expandGlobalAliases() {
+    lastword_lbuffer="$1"
+    #expand alias and escaping backslash and double quotes
+    res=${(Q)${(qqq)galiases[$lastword_lbuffer]:gs@\\@\\\\@}:gs@$@\\$@}
+    #substitute out @ because that is the substitution delimiter for perl
+    res=${res//@/$subForAtSign}
+    #do the expansion with perl sub on the last word of left buffer
+    LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$lastword_lbuffer\$@$res@")"
+    LBUFFER=${LBUFFER//$subForAtSign/@}
+    LBUFFER=${LBUFFER:gs|\\\\|\\|}
+    lenToFirstTS=${#BUFFER%%$ZPWR_TABSTOP*}
+    if (( $lenToFirstTS < ${#BUFFER} )); then
+        CURSOR=$lenToFirstTS
+        RBUFFER=${RBUFFER:$#ZPWR_TABSTOP}
+        __EXPANDED=false
+    else
+        __EXPANDED=true
+    fi
+}
+
+supernatural-space() {
+
+    if [[ $ZPWR_TRACE == true ]]; then
+        set -x
+    fi
+
+    local TEMP_BUFFER mywords badWords
+    #TEMP_BUFFER="$(print -r -- $LBUFFER | tr -d "()[]{}\$,%'\"" )"
+    #mywords=("${(z)TEMP_BUFFER}")
+    finished=false
+
+    parseWords
+
+    local foundIncorrect=false
+
+    correctWord
+
+    if [[ $foundIncorrect = true && $ZPWR_CORRECT_EXPAND = true ]]; then
+        if [[ $ZPWR_DEBUG == true ]]; then
+           logg "RE-EXPAND after incorrect spelling" 
+        fi
+        parseWords
+    fi
+    
     __EXPANDED=true
+    __ALIAS=false
 
     #dont expand =word because that is zle expand-word
     if [[ ${lastword_lbuffer:0:1} != '=' ]] && (( $#lastword_lbuffer > 0 ));then
