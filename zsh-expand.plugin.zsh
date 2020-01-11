@@ -244,8 +244,6 @@ function correctWord(){
     done
 }
 
-subForAtSign=:::::---::::---:::::---
-
 function parseWords(){
     #loop through words to get first and last words in partition
     mywordsleft=(${(z)LBUFFER})
@@ -317,6 +315,9 @@ function parseWords(){
     fi
 }
 
+
+subForAtSign=:::::---::::---:::::---
+
 function expandGlobalAliases() {
     lastword_lbuffer="$1"
     #expand alias and escaping backslash and double quotes
@@ -337,7 +338,7 @@ function expandGlobalAliases() {
     fi
 }
 
-supernatural-space() {
+function supernatural-space() {
 
     if [[ $ZPWR_TRACE == true ]]; then
         set -x
