@@ -1,12 +1,12 @@
 # zsh-expand
-This plugins expands regular aliases, global aliases, incorrect spellings and phrases, globs, history expansion and parameters with the spacebar key.
+This plugins expands regular aliases, global aliases, incorrect spellings and phrases, globs, history expansion and $parameters with the spacebar key.
 
 Expansion of regular aliases is done in the command/first position of a statement and after certain commands (sudo, env, zpwr) when in other positions in a statement.
 
-Expansion of global aliases, incorrect spellings and phrases is global to command line.
+Expansion of global aliases, incorrect spellings and phrases, globs, history expansion and $parameters is global to command line.
 
-## Bypass expansion
-Expansion can be temporarily bypassed with control-space
+## Bypassing expansion
+Expansion can be temporarily bypassed with control-space.
 
 ## Install for Oh My Zsh
 
