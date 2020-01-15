@@ -220,6 +220,7 @@ ZPWR_CORRECT_WORDS[without]="wo w/o"
 ZPWR_CORRECT_WORDS[work]="wrk werk owrk wokr"
 ZPWR_CORRECT_WORDS[XML]="xml"
 ZPWR_CORRECT_WORDS[YAML]="yaml"
+ZPWR_CORRECT_WORDS[your]="yuor ur"
 
 function correctWord(){
     for key in ${(k)ZPWR_CORRECT_WORDS[@]}; do
