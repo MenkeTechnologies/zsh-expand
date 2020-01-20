@@ -538,12 +538,17 @@ function supernatural-space() {
 
     if [[ $ZPWR_DEBUG == true ]]; then
         logg "__EXPANDED = $__EXPANDED"
+        logg "__ALIAS = $__ALIAS"
     fi
 
     if [[ $__EXPANDED == true ]];then
         #insert the space char
-        if [[ $BUFFER[-1] != ' ' ]]; then
+        if [[ $LBUFFER[-1] != ' ' ]]; then
             zle self-insert
+        else
+            if [[ $__ALIAS != true ]]; then
+                zle self-insert
+            fi
         fi
     else
         #invoke syntax highlighting
