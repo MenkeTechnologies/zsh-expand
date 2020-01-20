@@ -1,3 +1,31 @@
+function nonFileExpansion(){
+    :
+    #DNS lookups
+    #type -a "$lastWord" &> /dev/null || {
+    #print -r -- $lastWord | command grep -qE \
+    #'^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}\.?$'\
+    #&& {
+    ##DNS lookup
+    #A_Record=$(host $lastWord) 2>/dev/null \
+    #&& {
+    #A_Record=$(print -r -- $A_Record | command grep ' address' | head -1 | awk '{print $4}')
+    #} || A_Record=bad
+    #[[ $A_Record != bad ]] && \
+    #LBUFFER="$(print -r -- "$LBUFFER" | sed -E "s@\\b$lastWord@$A_Record@g")"
+    #} || {
+    #print -r -- $lastWord | command grep -qE \
+    #'\b([0-9]{1,3}\.){3}[0-9]{1,3}\b' && {
+    ##reverse DNS lookup
+    #PTR_Record=$(nslookup $lastWord) 2>/dev/null && {
+    #PTR_Record=$(print -r -- $PTR_Record | command grep 'name = ' | tail -1 | awk '{print $4}')
+    #} || PTR_Record=bad
+    #[[ $PTR_Record != bad ]] && \
+    #LBUFFER="$(print -r -- "$LBUFFER" | sed -E "s@\\b$lastWord\\b@${PTR_Record:0:-1}@g")"
+    #}
+    #}
+    #}
+}
+
 expandAfterThese='(sudo|zpwr|env)'
 
 declare -A ZPWR_CORRECT_WORDS
@@ -377,7 +405,9 @@ function supernatural-space() {
     if [[ ${lastword_lbuffer:0:1} != '=' ]] && (( $#lastword_lbuffer > 0 ));then
         if alias -r -- $lastword_lbuffer | \
             command grep -Eqv '(grc|_z|zshz|cd|hub)';then
-                #logg "regular=>'$lastword_lbuffer'"
+                if [[ $ZPWR_DEBUG == true ]]; then
+                    logg "regular=>'$lastword_lbuffer'"
+                fi
                 if (( $#mywords_lbuffer == 2 )); then
                     #regular alias expansion after sudo
                     if [[ $ZPWR_EXPAND_SECOND_POSITION == true ]]; then
@@ -474,7 +504,10 @@ function supernatural-space() {
                 __ALIAS=true
             else
                 #remove space from menuselect spacebar
-                if [[ ${LBUFFER: -1} == " " ]]; then
+                if [[ ${LBUFFER: -1} == " " && __EXPANDED == true ]]; then
+                    if [[ $ZPWR_DEBUG == true ]]; then
+                       logg "removing space"
+                    fi
                     LBUFFER="${LBUFFER:0:-1}"
                 fi
                 if echo "$lastword_lbuffer" | command grep -Fq '"'; then
@@ -485,44 +518,26 @@ function supernatural-space() {
                 fi
                 if alias -g -- $lastword_lbuffer | command grep -q "." &>/dev/null;then
                     #global alias expansion
-                    #logg "global=>'$lastword_lbuffer'"
+                    if [[ $ZPWR_DEBUG == true ]]; then
+                        logg "global=>'$lastword_lbuffer'"
+                    fi
                     expandGlobalAliases "$lastword_lbuffer"
                     __ALIAS=true
                 fi
         fi
         if [[ ! -f "$lastword_lbuffer" ]]; then
-            :
-            #DNS lookups
-            #type -a "$lastWord" &> /dev/null || {
-            #print -r -- $lastWord | command grep -qE \
-            #'^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}\.?$'\
-            #&& {
-            ##DNS lookup
-            #A_Record=$(host $lastWord) 2>/dev/null \
-            #&& {
-            #A_Record=$(print -r -- $A_Record | command grep ' address' | head -1 | awk '{print $4}')
-            #} || A_Record=bad
-            #[[ $A_Record != bad ]] && \
-            #LBUFFER="$(print -r -- "$LBUFFER" | sed -E "s@\\b$lastWord@$A_Record@g")"
-            #} || {
-            #print -r -- $lastWord | command grep -qE \
-            #'\b([0-9]{1,3}\.){3}[0-9]{1,3}\b' && {
-            ##reverse DNS lookup
-            #PTR_Record=$(nslookup $lastWord) 2>/dev/null && {
-            #PTR_Record=$(print -r -- $PTR_Record | command grep 'name = ' | tail -1 | awk '{print $4}')
-            #} || PTR_Record=bad
-            #[[ $PTR_Record != bad ]] && \
-            #LBUFFER="$(print -r -- "$LBUFFER" | sed -E "s@\\b$lastWord\\b@${PTR_Record:0:-1}@g")"
-            #}
-            #}
-            #}
+            nonFileExpansion
         else
-            #its a file
+            :
         fi
     fi
     if [[ $__ALIAS != true ]]; then
         #expand globs, parameters and =
         zle expand-word
+    fi
+
+    if [[ $ZPWR_DEBUG == true ]]; then
+        logg "__EXPANDED = $__EXPANDED"
     fi
 
     if [[ $__EXPANDED == true ]];then
