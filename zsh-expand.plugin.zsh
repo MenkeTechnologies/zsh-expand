@@ -231,6 +231,14 @@ ZPWR_CORRECT_WORDS[XML]="xml"
 ZPWR_CORRECT_WORDS[YAML]="yaml"
 ZPWR_CORRECT_WORDS[your]="yuor ur"
 
+if ! type -- "loggDebug" &>/dev/null;then
+    function loggDebug(){
+        :
+    }
+fi
+
+
+
 function commonParamExpansion(){
     res="$(alias -r $lastword_lbuffer | cut -d= -f2-)"
     #deal with ansi quotes $'
@@ -309,13 +317,9 @@ function correctWord(){
 function parseWords(){
     #loop through words to get first and last words in partition
     mywordsleft=(${(z)LBUFFER})
-    if [[ $ZPWR_DEBUG == true ]]; then
-        logg "my words left = $mywordsleft"
-    fi
+    loggDebug "my words left = $mywordsleft"
     mywordsright=(${(z)RBUFFER})
-    if [[ $ZPWR_DEBUG == true ]]; then
-        logg "my words right = $mywordsright"
-    fi
+    loggDebug "my words right = $mywordsright"
     mywordsall=(${(z)BUFFER})
 
         #we must find the first index of the partition
@@ -336,9 +340,7 @@ function parseWords(){
                     ;;
             esac
         done
-        if [[ $ZPWR_DEBUG == true ]]; then
-            logg "first index = $firstIndex"
-        fi
+        loggDebug "first index = $firstIndex"
         for (( i = 0; i < $#mywordsright; i++ )); do
             case $mywordsright[$i] in
                 # ;; ; | || && are partition separating chars
@@ -351,30 +353,26 @@ function parseWords(){
                 ;;
         esac
     done
-    if [[ $ZPWR_DEBUG == true ]]; then
-        logg "last index = $lastIndex"
-    fi
+    loggDebug "last index = $lastIndex"
 
     ((lastIndex+=$#mywordsleft))
     mywords_lbuffer=($mywordsleft[$firstIndex,$#mywordsleft])
     mywords_partition=($mywordsall[$firstIndex,$lastIndex])
-    if [[ $ZPWR_DEBUG == true ]]; then
-        logg "partition = '$mywords_lbuffer'"
-    fi
+
+    loggDebug "partition = '$mywords_lbuffer'"
+
     firstword_partition=${mywords_lbuffer[1]}
     lastword_lbuffer=${mywords_lbuffer[-1]}
     lastword_lbuffer=${${(Az)${mywords_lbuffer//\"/}}[-1]}
     lastword_partition=${mywords_partition[-1]}
-    if [[ $ZPWR_DEBUG == true ]]; then
-        logg "first word partition before spelling = ...$firstword_partition..."
-        logg "last word lbuf before spelling = ...$lastword_lbuffer..."
-        logg "last word partition before spelling = ...$lastword_partition..."
-    fi
+
+    loggDebug "first word partition before spelling = ...$firstword_partition..."
+    loggDebug "last word lbuf before spelling = ...$lastword_lbuffer..."
+    loggDebug "last word partition before spelling = ...$lastword_partition..."
 
     lastword_noquote=${${(Az)${lastword_lbuffer//\'/}}[-1]}
-    if [[ $ZPWR_DEBUG == true ]]; then
-        logg "last word no quote ...${lastword_noquote}..."
-    fi
+
+    loggDebug "last word no quote ...${lastword_noquote}..."
 }
 
 
@@ -411,9 +409,7 @@ function supernatural-space() {
     correctWord
 
     if [[ $foundIncorrect = true && $ZPWR_CORRECT_EXPAND = true ]]; then
-        if [[ $ZPWR_DEBUG == true ]]; then
-           logg "RE-EXPAND after incorrect spelling" 
-        fi
+        loggDebug "RE-EXPAND after incorrect spelling" 
         parseWords
     fi
     
@@ -424,16 +420,12 @@ function supernatural-space() {
     if [[ ${lastword_lbuffer:0:1} != '=' ]] && (( $#lastword_lbuffer > 0 ));then
         if alias -r -- $lastword_lbuffer | \
             command grep -Eqv '(grc|_z|zshz|cd|hub)';then
-                if [[ $ZPWR_DEBUG == true ]]; then
-                    logg "regular=>'$lastword_lbuffer'"
-                fi
+                loggDebug "regular=>'$lastword_lbuffer'"
                 if (( $#mywords_lbuffer == 2 )); then
                     #regular alias expansion after sudo
                     if [[ $ZPWR_EXPAND_SECOND_POSITION == true ]]; then
                         if echo "$firstword_partition" | command grep -qE $firstPositionRegex;then
-                            if [[ $ZPWR_DEBUG == true ]]; then
-                                logg "matched $firstword_partition with $firstPositionRegex with 2 == $#mywords_lbuffer"
-                            fi
+                            loggDebug "matched $firstword_partition with $firstPositionRegex with 2 == $#mywords_lbuffer"
                             commonParamExpansion
                         #do the expansion with perl sub on the last word of left buffer
                             LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$lastword_lbuffer\$@$res@")"
@@ -445,9 +437,7 @@ function supernatural-space() {
                     #regular alias expansion after sudo -E or sudo env or sudo env -e or sudo -E env -e -a -f etc
                     if [[ $ZPWR_EXPAND_SECOND_POSITION == true ]]; then
                         if echo "$firstword_partition" | command grep -qE $firstPositionRegex;then
-                            if [[ $ZPWR_DEBUG == true ]]; then
-                                logg "matched $firstword_partition with $firstPositionRegex with $#mywords_lbuffer > 2"
-                            fi
+                            loggDebug "matched $firstword_partition with $firstPositionRegex with $#mywords_lbuffer > 2"
                             for (( i = 2; i < $#mywords_partition; ++i )); do
                                 word=${mywords_partition[$i]}
                                 already_expanded=false
@@ -486,14 +476,10 @@ function supernatural-space() {
                 fi
                 __ALIAS_WAS_EXPANDED=true
             else
-                if [[ $ZPWR_DEBUG == true ]]; then
-                    logg "NOT regular=>'$lastword_lbuffer'"
-                fi
+                loggDebug "NOT regular=>'$lastword_lbuffer'"
                 #remove space from menuselect spacebar
                 if [[ ${LBUFFER: -1} == " " && __EXPANDED == true ]]; then
-                    if [[ $ZPWR_DEBUG == true ]]; then
-                       logg "removing space"
-                    fi
+                    loggDebug "removing space"
                     LBUFFER="${LBUFFER:0:-1}"
                 fi
                 if echo "$lastword_lbuffer" | command grep -Fq '"'; then
@@ -504,9 +490,7 @@ function supernatural-space() {
                 fi
                 if alias -g -- $lastword_lbuffer | command grep -q "." &>/dev/null;then
                     #global alias expansion
-                    if [[ $ZPWR_DEBUG == true ]]; then
-                        logg "global=>'$lastword_lbuffer'"
-                    fi
+                    loggDebug "global=>'$lastword_lbuffer'"
                     expandGlobalAliases "$lastword_lbuffer"
                     __ALIAS_WAS_EXPANDED=true
                 fi
@@ -522,10 +506,8 @@ function supernatural-space() {
         zle expand-word
     fi
 
-    if [[ $ZPWR_DEBUG == true ]]; then
-        logg "__EXPANDED = $__EXPANDED"
-        logg "__ALIAS_WAS_EXPANDED = $__ALIAS_WAS_EXPANDED"
-    fi
+    loggDebug "__EXPANDED = $__EXPANDED"
+    loggDebug "__ALIAS_WAS_EXPANDED = $__ALIAS_WAS_EXPANDED"
 
     if [[ $__EXPANDED == true ]];then
         #insert the space char
