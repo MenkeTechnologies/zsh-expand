@@ -1,3 +1,14 @@
+function goToTabStopOrEndOfLBuffer(){
+    lenToFirstTS=${#LBUFFER%%$ZPWR_TABSTOP*}
+    if (( $lenToFirstTS < ${#LBUFFER} )); then
+        CURSOR=$lenToFirstTS
+        RBUFFER=${RBUFFER:$#ZPWR_TABSTOP}
+        __EXPANDED=false
+    else
+        __EXPANDED=true
+    fi
+}
+
 function nonFileExpansion(){
     :
     #DNS lookups
@@ -366,14 +377,7 @@ function expandGlobalAliases() {
     LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$lastword_lbuffer\$@$res@")"
     LBUFFER=${LBUFFER//$subForAtSign/@}
     LBUFFER=${LBUFFER:gs|\\\\|\\|}
-    lenToFirstTS=${#BUFFER%%$ZPWR_TABSTOP*}
-    if (( $lenToFirstTS < ${#BUFFER} )); then
-        CURSOR=$lenToFirstTS
-        RBUFFER=${RBUFFER:$#ZPWR_TABSTOP}
-        __EXPANDED=false
-    else
-        __EXPANDED=true
-    fi
+    goToTabStopOrEndOfLBuffer
 }
 
 function supernatural-space() {
@@ -401,7 +405,7 @@ function supernatural-space() {
     fi
     
     __EXPANDED=true
-    __ALIAS=false
+    __ALIAS_WAS_EXPANDED=false
 
     #dont expand =word because that is zle expand-word
     if [[ ${lastword_lbuffer:0:1} != '=' ]] && (( $#lastword_lbuffer > 0 ));then
@@ -425,14 +429,7 @@ function supernatural-space() {
                         #do the expansion with perl sub on the last word of left buffer
                             LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$lastword_lbuffer\$@$res@")"
                             LBUFFER=${LBUFFER:gs|$subForAtSign|@|}
-                            lenToFirstTS=${#BUFFER%%$ZPWR_TABSTOP*}
-                            if (( $lenToFirstTS < ${#BUFFER} )); then
-                                CURSOR=$lenToFirstTS
-                                RBUFFER=${RBUFFER:$#ZPWR_TABSTOP}
-                                __EXPANDED=false
-                            else
-                                __EXPANDED=true
-                            fi
+                            goToTabStopOrEndOfLBuffer
                         fi
                     fi
                 elif (( $#mywords_lbuffer > 2 )); then
@@ -460,14 +457,7 @@ function supernatural-space() {
                             #do the expansion with perl sub on the last word of left buffer
                                 LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$lastword_lbuffer\$@$res@")"
                                 LBUFFER=${LBUFFER:gs|$subForAtSign|@|}
-                                lenToFirstTS=${#BUFFER%%$ZPWR_TABSTOP*}
-                                if (( $lenToFirstTS < ${#BUFFER} )); then
-                                    CURSOR=$lenToFirstTS
-                                    RBUFFER=${RBUFFER:$#ZPWR_TABSTOP}
-                                    __EXPANDED=false
-                                else
-                                    __EXPANDED=true
-                                fi
+                                goToTabStopOrEndOfLBuffer
                             fi
                         fi
                     fi
@@ -494,17 +484,13 @@ function supernatural-space() {
                         LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$lastword_lbuffer\$@$res@")"
                     fi
                     LBUFFER=${LBUFFER//$subForAtSign/@}
-                    lenToFirstTS=${#BUFFER%%$ZPWR_TABSTOP*}
-                    if (( $lenToFirstTS < ${#BUFFER} )); then
-                        CURSOR=$lenToFirstTS
-                        RBUFFER=${RBUFFER:$#ZPWR_TABSTOP}
-                        __EXPANDED=false
-                    else
-                        __EXPANDED=true
-                    fi
+                    goToTabStopOrEndOfLBuffer
                 fi
-                __ALIAS=true
+                __ALIAS_WAS_EXPANDED=true
             else
+                if [[ $ZPWR_DEBUG == true ]]; then
+                    logg "NOT regular=>'$lastword_lbuffer'"
+                fi
                 #remove space from menuselect spacebar
                 if [[ ${LBUFFER: -1} == " " && __EXPANDED == true ]]; then
                     if [[ $ZPWR_DEBUG == true ]]; then
@@ -524,7 +510,7 @@ function supernatural-space() {
                         logg "global=>'$lastword_lbuffer'"
                     fi
                     expandGlobalAliases "$lastword_lbuffer"
-                    __ALIAS=true
+                    __ALIAS_WAS_EXPANDED=true
                 fi
         fi
         if [[ ! -f "$lastword_lbuffer" ]]; then
@@ -533,14 +519,14 @@ function supernatural-space() {
             :
         fi
     fi
-    if [[ $__ALIAS != true ]]; then
+    if [[ $__ALIAS_WAS_EXPANDED != true ]]; then
         #expand globs, parameters and =
         zle expand-word
     fi
 
     if [[ $ZPWR_DEBUG == true ]]; then
         logg "__EXPANDED = $__EXPANDED"
-        logg "__ALIAS = $__ALIAS"
+        logg "__ALIAS_WAS_EXPANDED = $__ALIAS_WAS_EXPANDED"
     fi
 
     if [[ $__EXPANDED == true ]];then
@@ -548,7 +534,7 @@ function supernatural-space() {
         if [[ $LBUFFER[-1] != ' ' ]]; then
             zle self-insert
         else
-            if [[ $__ALIAS != true ]]; then
+            if [[ $__ALIAS_WAS_EXPANDED != true ]]; then
                 zle self-insert
             fi
         fi
