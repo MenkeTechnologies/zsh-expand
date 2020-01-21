@@ -442,7 +442,7 @@ function supernatural-space() {
                         fi
                     fi
                 elif (( $#mywords_lbuffer > 2 )); then
-                    #regular alias expansion after sudo -E or sudo env
+                    #regular alias expansion after sudo -E or sudo env or sudo env -e or sudo -E env -e -a -f etc
                     if [[ $ZPWR_EXPAND_SECOND_POSITION == true ]]; then
                         if echo "$firstword_partition" | command grep -qE $firstPositionRegex;then
                             if [[ $ZPWR_DEBUG == true ]]; then
