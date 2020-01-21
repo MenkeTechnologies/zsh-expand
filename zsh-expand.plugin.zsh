@@ -1,43 +1,5 @@
-function goToTabStopOrEndOfLBuffer(){
-    lenToFirstTS=${#LBUFFER%%$ZPWR_TABSTOP*}
-    if (( $lenToFirstTS < ${#LBUFFER} )); then
-        CURSOR=$lenToFirstTS
-        RBUFFER=${RBUFFER:$#ZPWR_TABSTOP}
-        __EXPANDED=false
-    else
-        __EXPANDED=true
-    fi
-}
-
-function nonFileExpansion(){
-    :
-    #DNS lookups
-    #type -a "$lastWord" &> /dev/null || {
-    #print -r -- $lastWord | command grep -qE \
-    #'^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}\.?$'\
-    #&& {
-    ##DNS lookup
-    #A_Record=$(host $lastWord) 2>/dev/null \
-    #&& {
-    #A_Record=$(print -r -- $A_Record | command grep ' address' | head -1 | awk '{print $4}')
-    #} || A_Record=bad
-    #[[ $A_Record != bad ]] && \
-    #LBUFFER="$(print -r -- "$LBUFFER" | sed -E "s@\\b$lastWord@$A_Record@g")"
-    #} || {
-    #print -r -- $lastWord | command grep -qE \
-    #'\b([0-9]{1,3}\.){3}[0-9]{1,3}\b' && {
-    ##reverse DNS lookup
-    #PTR_Record=$(nslookup $lastWord) 2>/dev/null && {
-    #PTR_Record=$(print -r -- $PTR_Record | command grep 'name = ' | tail -1 | awk '{print $4}')
-    #} || PTR_Record=bad
-    #[[ $PTR_Record != bad ]] && \
-    #LBUFFER="$(print -r -- "$LBUFFER" | sed -E "s@\\b$lastWord\\b@${PTR_Record:0:-1}@g")"
-    #}
-    #}
-    #}
-}
-
-expandAfterThese='(sudo|zpwr|env)'
+firstPositionRegex='\b(sudo|zpwr|env)\b'
+secondPositionRegex='\b(env|\-)\b'
 
 declare -A ZPWR_CORRECT_WORDS
 ZPWR_CORRECT_WORDS[about]="aobut abbout aabout"
@@ -116,6 +78,7 @@ ZPWR_CORRECT_WORDS[file]="feil fie fiel ifle fille fillee"
 ZPWR_CORRECT_WORDS[files]="ifles fies filles filees"
 ZPWR_CORRECT_WORDS[final]="fnial fianl finl"
 ZPWR_CORRECT_WORDS[finger]="fingre finegr figner"
+ZPWR_CORRECT_WORDS[first]="firsst firstt"
 ZPWR_CORRECT_WORDS[for]="forr forrr fro rfo rof fr ofr"
 ZPWR_CORRECT_WORDS[found]="ofund fuond foudn"
 ZPWR_CORRECT_WORDS[function]="fxn func fn"
@@ -268,6 +231,56 @@ ZPWR_CORRECT_WORDS[XML]="xml"
 ZPWR_CORRECT_WORDS[YAML]="yaml"
 ZPWR_CORRECT_WORDS[your]="yuor ur"
 
+function commonParamExpansion(){
+    res="$(alias -r $lastword_lbuffer | cut -d= -f2-)"
+    #deal with ansi quotes $'
+    [[ $res[1] == \$ ]] && res=${res:1}
+    res=${(Q)res}
+    res=${res:gs@\\@\\\\@}
+    res=${res:gs@\\\\n@\\n@}
+    res=${res:gs@\$@\\\$@}
+    res=${res:gs|@|$(echo $subForAtSign)}
+}
+
+function goToTabStopOrEndOfLBuffer(){
+    lenToFirstTS=${#LBUFFER%%$ZPWR_TABSTOP*}
+    if (( $lenToFirstTS < ${#LBUFFER} )); then
+        CURSOR=$lenToFirstTS
+        RBUFFER=${RBUFFER:$#ZPWR_TABSTOP}
+        __EXPANDED=false
+    else
+        __EXPANDED=true
+    fi
+}
+
+function nonFileExpansion(){
+    :
+    #DNS lookups
+    #type -a "$lastWord" &> /dev/null || {
+    #print -r -- $lastWord | command grep -qE \
+    #'^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}\.?$'\
+    #&& {
+    ##DNS lookup
+    #A_Record=$(host $lastWord) 2>/dev/null \
+    #&& {
+    #A_Record=$(print -r -- $A_Record | command grep ' address' | head -1 | awk '{print $4}')
+    #} || A_Record=bad
+    #[[ $A_Record != bad ]] && \
+    #LBUFFER="$(print -r -- "$LBUFFER" | sed -E "s@\\b$lastWord@$A_Record@g")"
+    #} || {
+    #print -r -- $lastWord | command grep -qE \
+    #'\b([0-9]{1,3}\.){3}[0-9]{1,3}\b' && {
+    ##reverse DNS lookup
+    #PTR_Record=$(nslookup $lastWord) 2>/dev/null && {
+    #PTR_Record=$(print -r -- $PTR_Record | command grep 'name = ' | tail -1 | awk '{print $4}')
+    #} || PTR_Record=bad
+    #[[ $PTR_Record != bad ]] && \
+    #LBUFFER="$(print -r -- "$LBUFFER" | sed -E "s@\\b$lastWord\\b@${PTR_Record:0:-1}@g")"
+    #}
+    #}
+    #}
+}
+
 function correctWord(){
     for key in ${(k)ZPWR_CORRECT_WORDS[@]}; do
         if (( ${#mywords_partition} == 1)); then
@@ -280,10 +293,10 @@ function correctWord(){
             if [[ ${lastword_noquote} == $misspelling ]]; then
                 LBUFFER="$(print -r -- "$LBUFFER" | perl -pE \
                     "s@\\b$misspelling\\b\$@${key:gs/_/ /}@g")"
-                                    #finished=true
-                                    foundIncorrect=true
-                                    CURSOR=$#LBUFFER
-                                    break
+                #finished=true
+                foundIncorrect=true
+                CURSOR=$#LBUFFER
+                break
             fi
         done
         if [[ $finished == true ]];then
@@ -417,15 +430,11 @@ function supernatural-space() {
                 if (( $#mywords_lbuffer == 2 )); then
                     #regular alias expansion after sudo
                     if [[ $ZPWR_EXPAND_SECOND_POSITION == true ]]; then
-                        if echo "$firstword_partition" | command grep -qE $expandAfterThese;then
-                            res="$(alias -r $lastword_lbuffer | cut -d= -f2-)"
-                            #deal with ansi quotes $'
-                            [[ $res[1] == \$ ]] && res=${res:1}
-                            res=${(Q)res}
-                            res=${res:gs@\\@\\\\@}
-                            res=${res:gs@\\\\n@\\n@}
-                            res=${res:gs@\$@\\\$@}
-                            res=${res:gs|@|$(echo $subForAtSign)}
+                        if echo "$firstword_partition" | command grep -qE $firstPositionRegex;then
+                            if [[ $ZPWR_DEBUG == true ]]; then
+                                logg "matched $firstword_partition with $firstPositionRegex with 2 == $#mywords_lbuffer"
+                            fi
+                            commonParamExpansion
                         #do the expansion with perl sub on the last word of left buffer
                             LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$lastword_lbuffer\$@$res@")"
                             LBUFFER=${LBUFFER:gs|$subForAtSign|@|}
@@ -433,27 +442,23 @@ function supernatural-space() {
                         fi
                     fi
                 elif (( $#mywords_lbuffer > 2 )); then
-                    #regular alias expansion after sudo -E
+                    #regular alias expansion after sudo -E or sudo env
                     if [[ $ZPWR_EXPAND_SECOND_POSITION == true ]]; then
-                        if echo "$firstword_partition" | command grep -qE $expandAfterThese;then
+                        if echo "$firstword_partition" | command grep -qE $firstPositionRegex;then
+                            if [[ $ZPWR_DEBUG == true ]]; then
+                                logg "matched $firstword_partition with $firstPositionRegex with $#mywords_lbuffer > 2"
+                            fi
                             for (( i = 2; i < $#mywords_partition; ++i )); do
                                 word=${mywords_partition[$i]}
                                 already_expanded=false
-                                if printf "$word" | command grep -Eqv '(env|\-)'; then
+                                if printf "$word" | command grep -Eqv $secondPositionRegex; then
                                   already_expanded=true
                                   __EXPANDED=true
                                   break
                                 fi
                             done
                             if [[ $already_expanded != true ]]; then
-                                res="$(alias -r $lastword_lbuffer | cut -d= -f2-)"
-                                #deal with ansi quotes $'
-                                [[ $res[1] == \$ ]] && res=${res:1}
-                                res=${(Q)res}
-                                res=${res:gs@\\@\\\\@}
-                                res=${res:gs@\\\\n@\\n@}
-                                res=${res:gs@\$@\\\$@}
-                                res=${res:gs|@|$(echo $subForAtSign)}
+                                commonParamExpansion
                             #do the expansion with perl sub on the last word of left buffer
                                 LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$lastword_lbuffer\$@$res@")"
                                 LBUFFER=${LBUFFER:gs|$subForAtSign|@|}
@@ -467,14 +472,7 @@ function supernatural-space() {
                     if [[ ${LBUFFER: -1} == " " ]]; then
                         LBUFFER="${LBUFFER:0:-1}"
                     fi
-                    res="$(alias -r $lastword_lbuffer | cut -d= -f2-)"
-                    #deal with ansi quotes $'
-                    [[ $res[1] == \$ ]] && res=${res:1}
-                    res=${(Q)res}
-                    res=${res:gs@\\@\\\\@}
-                    res=${res:gs@\\\\n@\\n@}
-                    res=${res:gs@\$@\\\$@}
-                    res=${res:gs|@|$(echo $subForAtSign)}
+                    commonParamExpansion
                     words=(${(z)res})
                     if [[ ${words[1]} == "$lastword_lbuffer" ]];then
                             #do the expansion with perl sub on the last word of left buffer
