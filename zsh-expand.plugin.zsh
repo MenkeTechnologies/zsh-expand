@@ -1,5 +1,5 @@
 firstPositionRegex='\b(sudo|zpwr|env)\b'
-secondPositionRegex='\b(env|\-)\b'
+secondPositionRegex='\b(env|\-.)\b'
 
 declare -A ZPWR_CORRECT_WORDS
 ZPWR_CORRECT_WORDS[about]="aobut abbout aabout"
@@ -446,7 +446,7 @@ function supernatural-space() {
                                 if printf "$word" | command grep -Eqv $secondPositionRegex; then
                                   STOP_EXPANSION_FAILED_REGEX=true
                                   __EXPANDED=true
-                                  loggDebug "failed regex $word for $secondPositionRegex"
+                                  loggDebug "failed regex '$secondPositionRegex' for '$word'"
                                   break
                                 fi
                             done
