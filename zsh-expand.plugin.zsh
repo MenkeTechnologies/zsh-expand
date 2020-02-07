@@ -442,19 +442,22 @@ function supernatural-space() {
                             loggDebug "matched $firstword_partition with $firstPositionRegex with $#mywords_lbuffer > 2"
                             for (( i = 2; i < $#mywords_partition; ++i )); do
                                 word=${mywords_partition[$i]}
-                                already_expanded=false
+                                STOP_EXPANSION_FAILED_REGEX=false
                                 if printf "$word" | command grep -Eqv $secondPositionRegex; then
-                                  already_expanded=true
+                                  STOP_EXPANSION_FAILED_REGEX=true
                                   __EXPANDED=true
+                                  loggDebug "failed regex $word for $secondPositionRegex"
                                   break
                                 fi
                             done
-                            if [[ $already_expanded != true ]]; then
+                            if [[ $STOP_EXPANSION_FAILED_REGEX == false ]]; then
                                 commonParamExpansion
                             #do the expansion with perl sub on the last word of left buffer
                                 LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$lastword_lbuffer\$@$res@")"
                                 LBUFFER=${LBUFFER:gs|$subForAtSign|@|}
                                 goToTabStopOrEndOfLBuffer
+                            else
+                                loggDebug "not expanding $lastword_lbuffer with 1st pos:$firstPositionRegex and 2nd pos:$secondPositionRegex"
                             fi
                         fi
                     fi
