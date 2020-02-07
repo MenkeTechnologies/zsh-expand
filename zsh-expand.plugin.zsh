@@ -1,5 +1,5 @@
 firstPositionRegex='\b(sudo|zpwr|env)\b'
-secondPositionRegex='\b(env|\-.)\b'
+secondPositionRegex='(\-.|env)\b'
 
 declare -A ZPWR_CORRECT_WORDS
 ZPWR_CORRECT_WORDS[about]="aobut abbout aabout"
@@ -438,15 +438,15 @@ function supernatural-space() {
                 elif (( $#mywords_lbuffer > 2 )); then
                     #regular alias expansion after sudo -E or sudo env or sudo env -e or sudo -E env -e -a -f etc
                     if [[ $ZPWR_EXPAND_SECOND_POSITION == true ]]; then
-                        if echo "$firstword_partition" | command grep -qE $firstPositionRegex;then
+                        if echo "$firstword_partition" | command grep -qsE $firstPositionRegex;then
                             loggDebug "matched $firstword_partition with $firstPositionRegex with $#mywords_lbuffer > 2"
                             for (( i = 2; i < $#mywords_partition; ++i )); do
                                 word=${mywords_partition[$i]}
                                 STOP_EXPANSION_FAILED_REGEX=false
-                                if printf "$word" | command grep -Eqv $secondPositionRegex; then
+                                if ! printf "$word" | command grep -qsE $secondPositionRegex; then
                                   STOP_EXPANSION_FAILED_REGEX=true
                                   __EXPANDED=true
-                                  loggDebug "failed regex '$secondPositionRegex' for '$word'"
+                                  loggDebug "failed grep -Eqv '$secondPositionRegex' for word:'$word'"
                                   break
                                 fi
                             done
