@@ -1,5 +1,5 @@
 firstPositionRegex='\b(sudo|zpwr|env)\b'
-secondPositionRegex='^(\-.|env)\b'
+secondPositionRegex='^(\-.*|env)\b'
 
 declare -A ZPWR_CORRECT_WORDS
 ZPWR_CORRECT_WORDS[about]="aobut abbout aabout"
