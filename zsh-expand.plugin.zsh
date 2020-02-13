@@ -158,6 +158,7 @@ ZPWR_CORRECT_WORDS[probe]="porbe rpobe"
 ZPWR_CORRECT_WORDS[project]="projcet proejct proeject porject projeccct projecct porjecct"
 ZPWR_CORRECT_WORDS[property]="prop"
 ZPWR_CORRECT_WORDS[properties]="props"
+ZPWR_CORRECT_WORDS[punctuation]="punct"
 ZPWR_CORRECT_WORDS[radius]="radisu raduis"
 ZPWR_CORRECT_WORDS[range]="rnage arnge"
 ZPWR_CORRECT_WORDS[RGB]="rgb"
@@ -305,7 +306,7 @@ function correctWord(){
         fi
         badWords=("${(z)ZPWR_CORRECT_WORDS[$key]}")
         for misspelling in $badWords[@];do
-            if [[ ${lastword_noquote} == $misspelling ]]; then
+            if [[ ${lastword_remove_special} == $misspelling ]]; then
                 LBUFFER="$(print -r -- "$LBUFFER" | perl -pE \
                     "s@\\b$misspelling\\b\$@${key:gs/_/ /}@g")"
                 #finished=true
@@ -377,9 +378,9 @@ function parseWords(){
     loggDebug "last word lbuf before spelling = ...$lastword_lbuffer..."
     loggDebug "last word partition before spelling = ...$lastword_partition..."
 
-    lastword_noquote=${${(Az)${lastword_lbuffer//\'/}}[-1]}
+    lastword_remove_special=${${(Az)${lastword_lbuffer//[\[\]\{\}\(\)\']/}}[-1]}
 
-    loggDebug "last word no quote ...${lastword_noquote}..."
+    loggDebug "last word no special chars...${lastword_remove_special}..."
 }
 
 
