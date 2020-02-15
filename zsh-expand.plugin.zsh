@@ -5,6 +5,7 @@ declare -A ZPWR_CORRECT_WORDS
 ZPWR_CORRECT_WORDS[about]="aobut abbout aabout"
 ZPWR_CORRECT_WORDS[alternate]="alternaet alterntae"
 ZPWR_CORRECT_WORDS[also]="laso alos alsoo allso"
+ZPWR_CORRECT_WORDS[all]="alll al aall"
 ZPWR_CORRECT_WORDS[AKA]="aka"
 ZPWR_CORRECT_WORDS[and]="adn nad"
 ZPWR_CORRECT_WORDS[ANSI]="ansi"
