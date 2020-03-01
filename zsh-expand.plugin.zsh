@@ -1,5 +1,6 @@
-firstPositionRegex='\b(sudo|zpwr|env)\b'
-secondPositionRegex='^(\-.*|env)$'
+blacklistFirstPosRegex='=.?(grc|_z|zshz|cd|hub|_zsh_tmux_.*)'
+continueFirstPositionRegex='\b(sudo|zpwr|env)\b'
+continueSecondPositionRegex='^(\-.*|env)$'
 
 declare -A ZPWR_CORRECT_WORDS
 ZPWR_CORRECT_WORDS[about]="aobut abbout aabout"
@@ -442,13 +443,13 @@ function supernatural-space() {
     #dont expand =word because that is zle expand-word
     if [[ ${lastword_lbuffer:0:1} != '=' ]] && (( $#lastword_lbuffer > 0 ));then
         if alias -r -- $lastword_lbuffer | \
-            command grep -Eqv '=.(grc|_z|zshz|cd|hub)';then
+            command grep -Eqv $blacklistFirstPosRegex;then
                 loggDebug "regular=>'$lastword_lbuffer'"
                 if (( $#mywords_lbuffer == 2 )); then
                     #regular alias expansion after sudo
                     if [[ $ZPWR_EXPAND_SECOND_POSITION == true ]]; then
-                        if echo "$firstword_partition" | command grep -qE $firstPositionRegex;then
-                            loggDebug "matched $firstword_partition with $firstPositionRegex with 2 == $#mywords_lbuffer"
+                        if echo "$firstword_partition" | command grep -qE $continueFirstPositionRegex;then
+                            loggDebug "matched $firstword_partition with $continueFirstPositionRegex with 2 == $#mywords_lbuffer"
                             commonParamExpansion
                         #do the expansion with perl sub on the last word of left buffer
                             LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$lastword_lbuffer\$@$res@")"
@@ -459,15 +460,15 @@ function supernatural-space() {
                 elif (( $#mywords_lbuffer > 2 )); then
                     #regular alias expansion after sudo -E or sudo env or sudo env -e or sudo -E env -e -a -f etc
                     if [[ $ZPWR_EXPAND_SECOND_POSITION == true ]]; then
-                        if echo "$firstword_partition" | command grep -qsE $firstPositionRegex;then
-                            loggDebug "matched $firstword_partition with $firstPositionRegex with $#mywords_lbuffer > 2"
+                        if echo "$firstword_partition" | command grep -qsE $continueFirstPositionRegex;then
+                            loggDebug "matched $firstword_partition with $continueFirstPositionRegex with $#mywords_lbuffer > 2"
                             for (( i = 2; i < $#mywords_partition; ++i )); do
                                 word=${mywords_partition[$i]}
                                 STOP_EXPANSION_FAILED_REGEX=false
-                                if ! printf "$word" | command grep -qsE $secondPositionRegex; then
+                                if ! printf "$word" | command grep -qsE $continueSecondPositionRegex; then
                                   STOP_EXPANSION_FAILED_REGEX=true
                                   __EXPANDED=true
-                                  loggDebug "failed grep -Eqv '$secondPositionRegex' for word:'$word'"
+                                  loggDebug "failed grep -Eqv '$continueSecondPositionRegex' for word:'$word'"
                                   break
                                 fi
                             done
@@ -478,7 +479,7 @@ function supernatural-space() {
                                 LBUFFER=${LBUFFER:gs|$subForAtSign|@|}
                                 goToTabStopOrEndOfLBuffer
                             else
-                                loggDebug "not expanding $lastword_lbuffer with 1st pos:$firstPositionRegex and 2nd pos:$secondPositionRegex"
+                                loggDebug "not expanding $lastword_lbuffer with 1st pos:$continueFirstPositionRegex and 2nd pos:$continueSecondPositionRegex"
                             fi
                         fi
                     fi
