@@ -442,7 +442,7 @@ function supernatural-space() {
     #dont expand =word because that is zle expand-word
     if [[ ${lastword_lbuffer:0:1} != '=' ]] && (( $#lastword_lbuffer > 0 ));then
         if alias -r -- $lastword_lbuffer | \
-            command grep -Eqv '(grc|_z|zshz|cd|hub)';then
+            command grep -Eqv '=.(grc|_z|zshz|cd|hub)';then
                 loggDebug "regular=>'$lastword_lbuffer'"
                 if (( $#mywords_lbuffer == 2 )); then
                     #regular alias expansion after sudo
