@@ -1,4 +1,4 @@
-blacklistFirstPosRegex='=.?(grc|_z|zshz|cd|hub|_zsh_tmux_.*)'
+blacklistFirstPosRegex='=.?(grc|_z|zshz|cd|hub|_zsh_tmux_.*|_rails_.*)'
 continueFirstPositionRegex='\b(sudo|zpwr|env)\b'
 continueSecondPositionRegex='^(\-.*|env)$'
 
