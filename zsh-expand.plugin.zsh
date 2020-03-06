@@ -443,84 +443,88 @@ function supernatural-space() {
     #dont expand =word because that is zle expand-word
     if [[ ${lastword_lbuffer:0:1} != '=' ]] && (( $#lastword_lbuffer > 0 ));then
         if alias -r -- $lastword_lbuffer | \
-            command grep -Eqv $blacklistFirstPosRegex;then
-                loggDebug "regular=>'$lastword_lbuffer'"
-                if (( $#mywords_lbuffer == 2 )); then
-                    #regular alias expansion after sudo
-                    if [[ $ZPWR_EXPAND_SECOND_POSITION == true ]]; then
-                        if echo "$firstword_partition" | command grep -qE $continueFirstPositionRegex;then
-                            loggDebug "matched $firstword_partition with $continueFirstPositionRegex with 2 == $#mywords_lbuffer"
+        command grep -Eqv $blacklistFirstPosRegex;then
+            loggDebug "regular=>'$lastword_lbuffer'"
+            if (( $#mywords_lbuffer == 2 )); then
+                #regular alias expansion after sudo
+                if [[ $ZPWR_EXPAND_SECOND_POSITION == true ]]; then
+                    if echo "$firstword_partition" | command grep -qE $continueFirstPositionRegex;then
+                        loggDebug "matched $firstword_partition with $continueFirstPositionRegex with 2 == $#mywords_lbuffer"
+                        commonParamExpansion
+                    #do the expansion with perl sub on the last word of left buffer
+                        LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$lastword_lbuffer\$@$res@")"
+                        LBUFFER=${LBUFFER:gs|$subForAtSign|@|}
+                        goToTabStopOrEndOfLBuffer
+                    fi
+                fi
+            elif (( $#mywords_lbuffer > 2 )); then
+                #regular alias expansion after sudo -E or sudo env or sudo env -e or sudo -E env -e -a -f etc
+                if [[ $ZPWR_EXPAND_SECOND_POSITION == true ]]; then
+                    if echo "$firstword_partition" | command grep -qsE $continueFirstPositionRegex;then
+                        loggDebug "matched $firstword_partition with $continueFirstPositionRegex with $#mywords_lbuffer > 2"
+                        for (( i = 2; i < $#mywords_partition; ++i )); do
+                            word=${mywords_partition[$i]}
+                            STOP_EXPANSION_FAILED_REGEX=false
+                            if ! printf "$word" | command grep -qsE $continueSecondPositionRegex; then
+                                STOP_EXPANSION_FAILED_REGEX=true
+                                __EXPANDED=true
+                                loggDebug "failed grep -Eqv '$continueSecondPositionRegex' for word:'$word'"
+                                break
+                            fi
+                        done
+                        if [[ $STOP_EXPANSION_FAILED_REGEX == false ]]; then
                             commonParamExpansion
                         #do the expansion with perl sub on the last word of left buffer
                             LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$lastword_lbuffer\$@$res@")"
                             LBUFFER=${LBUFFER:gs|$subForAtSign|@|}
                             goToTabStopOrEndOfLBuffer
+                        else
+                            loggDebug "not expanding $lastword_lbuffer with 1st pos:$continueFirstPositionRegex and 2nd pos:$continueSecondPositionRegex"
                         fi
                     fi
-                elif (( $#mywords_lbuffer > 2 )); then
-                    #regular alias expansion after sudo -E or sudo env or sudo env -e or sudo -E env -e -a -f etc
-                    if [[ $ZPWR_EXPAND_SECOND_POSITION == true ]]; then
-                        if echo "$firstword_partition" | command grep -qsE $continueFirstPositionRegex;then
-                            loggDebug "matched $firstword_partition with $continueFirstPositionRegex with $#mywords_lbuffer > 2"
-                            for (( i = 2; i < $#mywords_partition; ++i )); do
-                                word=${mywords_partition[$i]}
-                                STOP_EXPANSION_FAILED_REGEX=false
-                                if ! printf "$word" | command grep -qsE $continueSecondPositionRegex; then
-                                  STOP_EXPANSION_FAILED_REGEX=true
-                                  __EXPANDED=true
-                                  loggDebug "failed grep -Eqv '$continueSecondPositionRegex' for word:'$word'"
-                                  break
-                                fi
-                            done
-                            if [[ $STOP_EXPANSION_FAILED_REGEX == false ]]; then
-                                commonParamExpansion
-                            #do the expansion with perl sub on the last word of left buffer
-                                LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$lastword_lbuffer\$@$res@")"
-                                LBUFFER=${LBUFFER:gs|$subForAtSign|@|}
-                                goToTabStopOrEndOfLBuffer
-                            else
-                                loggDebug "not expanding $lastword_lbuffer with 1st pos:$continueFirstPositionRegex and 2nd pos:$continueSecondPositionRegex"
-                            fi
-                        fi
-                    fi
-                elif (( $#mywords_lbuffer == 1 )); then
-                    #regular alias expansion
-                    #remove space from menuselect spacebar
-                    if [[ ${LBUFFER: -1} == " " ]]; then
-                        LBUFFER="${LBUFFER:0:-1}"
-                    fi
-                    commonParamExpansion
-                    words=(${(z)res})
-                    if [[ ${words[1]} == "$lastword_lbuffer" ]];then
-                            #do the expansion with perl sub on the last word of left buffer
-                        LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$lastword_lbuffer\$@\\\\$res@")"
-                    else
-                            #do the expansion with perl sub on the last word of left buffer
-                        LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$lastword_lbuffer\$@$res@")"
-                    fi
-                    LBUFFER=${LBUFFER//$subForAtSign/@}
-                    goToTabStopOrEndOfLBuffer
                 fi
-                __ALIAS_WAS_EXPANDED=true
-            else
-                loggDebug "NOT regular=>'$lastword_lbuffer'"
+            elif (( $#mywords_lbuffer == 1 )); then
+                #regular alias expansion
                 #remove space from menuselect spacebar
-                if [[ ${LBUFFER: -1} == " " && __EXPANDED == true ]]; then
-                    loggDebug "removing space"
+                if [[ ${LBUFFER: -1} == " " ]]; then
                     LBUFFER="${LBUFFER:0:-1}"
                 fi
-                if echo "$lastword_lbuffer" | command grep -Fq '"'; then
-                    #expand on last word of "string" for global aliases only
-                        lastword_lbuffer=${lastword_lbuffer:gs/\"//}
-                        ary=(${(z)lastword_lbuffer})
-                        lastword_lbuffer=$ary[-1]
+                commonParamExpansion
+                words=(${(z)res})
+                if [[ ${words[1]} == "$lastword_lbuffer" ]];then
+                        #do the expansion with perl sub on the last word of left buffer
+                    LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$lastword_lbuffer\$@\\\\$res@")"
+                else
+                        #do the expansion with perl sub on the last word of left buffer
+                    LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$lastword_lbuffer\$@$res@")"
                 fi
-                if alias -g -- $lastword_lbuffer | command grep -q "." &>/dev/null;then
-                    #global alias expansion
-                    loggDebug "global=>'$lastword_lbuffer'"
-                    expandGlobalAliases "$lastword_lbuffer"
-                    __ALIAS_WAS_EXPANDED=true
+                LBUFFER=${LBUFFER//$subForAtSign/@}
+                goToTabStopOrEndOfLBuffer
+            fi
+            __ALIAS_WAS_EXPANDED=true
+        else
+            loggDebug "NOT regular=>'$lastword_lbuffer'"
+            #remove space from menuselect spacebar
+            if [[ ${LBUFFER: -1} == " " && __EXPANDED == true ]]; then
+                loggDebug "removing space menu select"
+                LBUFFER="${LBUFFER:0:-1}"
+            fi
+            if echo "$lastword_lbuffer" | command grep -Fq '"'; then
+                #expand on last word of "string" for global aliases only
+                    lastword_lbuffer=${lastword_lbuffer:gs/\"//}
+                    ary=(${(z)lastword_lbuffer})
+                    lastword_lbuffer=$ary[-1]
+            fi
+            if alias -g -- $lastword_lbuffer | command grep -q "." &>/dev/null;then
+                #global alias expansion
+                if [[ ${LBUFFER: -1} == " " ]]; then
+                    loggDebug "removing space global alias menu select"
+                    LBUFFER="${LBUFFER:0:-1}"
                 fi
+                loggDebug "global=>'$lastword_lbuffer'"
+                expandGlobalAliases "$lastword_lbuffer"
+                __ALIAS_WAS_EXPANDED=true
+            fi
         fi
         if [[ ! -f "$lastword_lbuffer" ]]; then
             nonFileExpansion
