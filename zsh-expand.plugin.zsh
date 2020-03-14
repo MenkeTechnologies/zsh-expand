@@ -1,3 +1,5 @@
+#{{{                    MARK:variables
+#**************************************************************
 blacklistFirstPosRegex='=.?(grc|_z|zshz|cd|hub|_zsh_tmux_.*|_rails_.*|mvn-or.*|gradle-or.*)'
 continueFirstPositionRegex='\b(sudo|zpwr|env)\b'
 continueSecondPositionRegex='^(\-.*|env)$'
@@ -254,14 +256,16 @@ ZPWR_CORRECT_WORDS[work]="wrk werk owrk wokr"
 ZPWR_CORRECT_WORDS[XML]="xml"
 ZPWR_CORRECT_WORDS[YAML]="yaml"
 ZPWR_CORRECT_WORDS[your]="yuor ur"
+#}}}***********************************************************
 
+#{{{                    MARK:access functions
+#**************************************************************
+#dummy function if plugin used outside of zpwr
 if ! type -- "loggDebug" &>/dev/null;then
     function loggDebug(){
         :
     }
 fi
-
-
 
 function commonParamExpansion(){
     res="$(alias -r $lastword_lbuffer | cut -d= -f2-)"
@@ -415,6 +419,10 @@ function expandGlobalAliases() {
     goToTabStopOrEndOfLBuffer
 }
 
+#}}}***********************************************************
+
+#{{{                    MARK:main fn
+#**************************************************************
 function supernatural-space() {
 
     if [[ $ZPWR_TRACE == true ]]; then
@@ -558,7 +566,10 @@ function supernatural-space() {
         set +x
     fi
 }
+#}}}***********************************************************
 
+#{{{                    MARK:keybind
+#**************************************************************
 terminate-space(){
     LBUFFER+=" "
 }
@@ -575,3 +586,4 @@ fi
 zle -N expandGlobalAliases
 
 bindkey '\e^E' expandGlobalAliases
+#}}}***********************************************************
