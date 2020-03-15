@@ -278,9 +278,22 @@ function commonParamExpansion(){
     res=${res:gs|@|$(echo $subForAtSign)}
 }
 
+if ! (( $+ZPWR_VARS )); then
+    declare -A ZPWR_VARS
+fi
+
 function goToTabStopOrEndOfLBuffer(){
     lenToFirstTS=${#LBUFFER%%$ZPWR_TABSTOP*}
+
     if (( $lenToFirstTS < ${#LBUFFER} )); then
+        loggDebug "this is a tabstop"
+        #check if numbered tabstop
+        #if num tabstop then set flag in ZPWR_VARS with value to all indexes
+        #sub out all num tabstops
+        #insert key fn will send key to all indexes apply any modifications
+        #keep track of num keys to have activated region
+        ZPWR_VARS[indexTS$num]=$lenToFirstTS
+
         CURSOR=$lenToFirstTS
         RBUFFER=${RBUFFER:$#ZPWR_TABSTOP}
         __EXPANDED=false
@@ -441,10 +454,10 @@ function supernatural-space() {
     correctWord
 
     if [[ $foundIncorrect = true && $ZPWR_CORRECT_EXPAND = true ]]; then
-        loggDebug "RE-EXPAND after incorrect spelling" 
+        loggDebug "RE-EXPAND after incorrect spelling"
         parseWords
     fi
-    
+
     __EXPANDED=true
     __ALIAS_WAS_EXPANDED=false
 
