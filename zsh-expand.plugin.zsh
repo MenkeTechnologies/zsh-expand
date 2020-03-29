@@ -1,6 +1,6 @@
 #{{{                    MARK:variables
 #**************************************************************
-blacklistFirstPosRegex='=.?(grc|_z|zshz|cd|hub|_zsh_tmux_.*|_rails_.*|_rake_.*|mvn-or.*|gradle-or.*|noglob .*)'
+blacklistFirstPosRegex='=.?(grc|_z|zshz|cd|hub|_zsh_tmux_.*|_rails_.*|_rake_.*|mvn-or.*|gradle-or.*|noglob .*|rlwrap .*)'
 continueFirstPositionRegex='\b(sudo|zpwr|env)\b'
 continueSecondPositionRegex='^(\-.*|env)$'
 
