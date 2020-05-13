@@ -340,12 +340,33 @@ function nonFileExpansion(){
 }
 
 function correctWord(){
-    for key in ${(k)ZPWR_CORRECT_WORDS[@]}; do
-        if (( ${#mywords_partition} == 1)); then
-            if type -a $firstword_partition &>/dev/null; then
-                break
-            fi
+    local SKIP_DUE_TO_FIRST SKIP_DUE_TO_SECOND
+    SKIP_DUE_TO_FIRST=false
+    SKIP_DUE_TO_SECOND=false
+
+    if (( ${#mywords_partition} == 1)); then
+        if type -a $firstword_partition &>/dev/null; then
+            SKIP_DUE_TO_FIRST=true
+            return
         fi
+    else
+        if echo "$firstword_partition" | command grep -qsE $continueFirstPositionRegex;then
+            for (( i = 2; i <= $#mywords_partition; ++i )); do
+                word=${mywords_partition[$i]}
+                if ((i == $#mywords_partition)); then
+                    if type -a $word &>/dev/null; then
+                        SKIP_DUE_TO_SECOND=true
+                        return
+                    fi
+                fi
+                if ! printf "$word" | command grep -qsE $continueSecondPositionRegex; then
+                    break
+                fi
+            done
+        fi
+    fi
+
+    for key in ${(k)ZPWR_CORRECT_WORDS[@]}; do
         badWords=("${(z)ZPWR_CORRECT_WORDS[$key]}")
         for misspelling in $badWords[@];do
             if [[ ${lastword_remove_special} == $misspelling ]]; then
