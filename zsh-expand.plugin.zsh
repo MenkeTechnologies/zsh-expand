@@ -357,9 +357,10 @@ function correctWord(){
                     if type -a $word &>/dev/null; then
                         SKIP_DUE_TO_SECOND=true
                         return
+                    else
+                        break
                     fi
-                fi
-                if ! printf "$word" | command grep -qsE $continueSecondPositionRegex; then
+                elif ! printf "$word" | command grep -qsE $continueSecondPositionRegex; then
                     break
                 fi
             done
