@@ -220,6 +220,7 @@ ZPWR_CORRECT_WORDS[standard]="std"
 ZPWR_CORRECT_WORDS[store]="tsore sotre stoer"
 ZPWR_CORRECT_WORDS[string]="stirng stinrg"
 ZPWR_CORRECT_WORDS[substitute]="sub"
+ZPWR_CORRECT_WORDS[sudo]="usdo usssdo usddo"
 ZPWR_CORRECT_WORDS[SYSV]="sysv"
 ZPWR_CORRECT_WORDS[than]="tahn"
 ZPWR_CORRECT_WORDS[that]="taht"
@@ -340,13 +341,10 @@ function nonFileExpansion(){
 }
 
 function correctWord(){
-    local SKIP_DUE_TO_FIRST SKIP_DUE_TO_SECOND
-    SKIP_DUE_TO_FIRST=false
-    SKIP_DUE_TO_SECOND=false
 
     if (( ${#mywords_partition} == 1)); then
         if type -a $firstword_partition &>/dev/null; then
-            SKIP_DUE_TO_FIRST=true
+            loggDebug "No correction from 1 word => '"'$firstword_partition'"'_____ = ""'$firstword_partition'"
             return
         fi
     else
@@ -355,7 +353,7 @@ function correctWord(){
                 word=${mywords_partition[$i]}
                 if ((i == $#mywords_partition)); then
                     if type -a $word &>/dev/null; then
-                        SKIP_DUE_TO_SECOND=true
+                        loggDebug "No correction from >= 2 words => '"'$word'"'_____ = ""'$word'"
                         return
                     else
                         break
@@ -366,6 +364,8 @@ function correctWord(){
             done
         fi
     fi
+
+    loggDebug "______'"'attempt correction'"'_____ = ""'$lastword_remove_special'"
 
     for key in ${(k)ZPWR_CORRECT_WORDS[@]}; do
         badWords=("${(z)ZPWR_CORRECT_WORDS[$key]}")
