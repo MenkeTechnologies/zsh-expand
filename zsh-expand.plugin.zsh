@@ -192,6 +192,7 @@ ZPWR_CORRECT_WORDS[range]="rnage arnge"
 ZPWR_CORRECT_WORDS[RGB]="rgb"
 ZPWR_CORRECT_WORDS[redo]="rdeo reod edro erdo redoo reddo"
 ZPWR_CORRECT_WORDS[remote]="remoet"
+ZPWR_CORRECT_WORDS[replace]='replaec relpace'
 ZPWR_CORRECT_WORDS[repository]="repo rpeo"
 ZPWR_CORRECT_WORDS[repositories]="repos rpeos"
 ZPWR_CORRECT_WORDS[result]="res resullt resultt"
