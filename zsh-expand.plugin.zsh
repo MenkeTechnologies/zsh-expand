@@ -358,7 +358,7 @@ function correctWord(){
             return
         fi
     else
-        if echo "$firstword_partition" | command grep -qsE $continueFirstPositionRegex;then
+        if printf -- "$firstword_partition" | command grep -qsE $continueFirstPositionRegex;then
             for (( i = 2; i <= $#mywords_partition; ++i )); do
                 word=${mywords_partition[$i]}
                 if ((i == $#mywords_partition)); then
@@ -368,7 +368,7 @@ function correctWord(){
                     else
                         break
                     fi
-                elif ! printf "$word" | command grep -qsE $continueSecondPositionRegex; then
+                elif ! printf -- "$word" | command grep -qsE $continueSecondPositionRegex; then
                     break
                 fi
             done
@@ -510,7 +510,7 @@ function supernatural-space() {
             if (( $#mywords_lbuffer == 2 )); then
                 #regular alias expansion after sudo
                 if [[ $ZPWR_EXPAND_SECOND_POSITION == true ]]; then
-                    if echo "$firstword_partition" | command grep -qE $continueFirstPositionRegex;then
+                    if printf -- "$firstword_partition" | command grep -qE $continueFirstPositionRegex;then
                         loggDebug "matched $firstword_partition with $continueFirstPositionRegex with 2 == $#mywords_lbuffer"
                         commonParamExpansion
                     #do the expansion with perl sub on the last word of left buffer
@@ -522,12 +522,12 @@ function supernatural-space() {
             elif (( $#mywords_lbuffer > 2 )); then
                 #regular alias expansion after sudo -E or sudo env or sudo env -e or sudo -E env -e -a -f etc
                 if [[ $ZPWR_EXPAND_SECOND_POSITION == true ]]; then
-                    if echo "$firstword_partition" | command grep -qsE $continueFirstPositionRegex;then
+                    if printf -- "$firstword_partition" | command grep -qsE $continueFirstPositionRegex;then
                         loggDebug "matched $firstword_partition with $continueFirstPositionRegex with $#mywords_lbuffer > 2"
                         for (( i = 2; i < $#mywords_partition; ++i )); do
                             word=${mywords_partition[$i]}
                             STOP_EXPANSION_FAILED_REGEX=false
-                            if ! printf "$word" | command grep -qsE $continueSecondPositionRegex; then
+                            if ! printf -- "$word" | command grep -qsE $continueSecondPositionRegex; then
                                 STOP_EXPANSION_FAILED_REGEX=true
                                 __EXPANDED=true
                                 loggDebug "failed grep -Eqv '$continueSecondPositionRegex' for word:'$word'"
