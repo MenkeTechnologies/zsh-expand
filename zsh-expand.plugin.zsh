@@ -5,7 +5,8 @@ commonRegex='sudo|zpwr|env|=|command|builtin'
 continueFirstPositionRegex='\b('$commonRegex')\b'
 # skip options in second and onwards
 continueSecondAndOnwardsPositionRegex='^('$commonRegex'|-.*|--)$'
-optionSpaceArgRegex='^(--?\S+\s\S+)$'
+optionSpaceArgRegex='^(--?\S+\s+[^-]+)$'
+foundIncorrect=false
 
 declare -A ZPWR_CORRECT_WORDS
 ZPWR_CORRECT_WORDS[about]="aobut abbout aabout"
@@ -308,6 +309,8 @@ if ! (( $+ZPWR_VARS )); then
 fi
 
 function goToTabStopOrEndOfLBuffer(){
+    local lenToFirstTS
+
     lenToFirstTS=${#LBUFFER%%$ZPWR_TABSTOP*}
 
     if (( $lenToFirstTS < ${#LBUFFER} )); then
@@ -369,6 +372,15 @@ function correctWord(){
             for (( i = 2; i <= $#mywords_partition; ++i )); do
                 word=${mywords_partition[$i]}
                 nextWord=${mywords_partition[$i+1]}
+
+                if printf -- "$word $nextWord" | command grep -qsE $optionSpaceArgRegex; then
+                    loggDebug "matched grep -Eqv '$optionSpaceArgRegex' for word:'$word $nextWord'"
+                    if (( (i + 1) < $#mywords_partition )); then
+                        ((++i))
+                        continue
+                    fi
+                fi
+
                 if ((i == $#mywords_partition)); then
                     if type -a $word &>/dev/null; then
                         loggDebug "No correction from >= 2 words => '"'$word'"'_____ = ""'$word'"
@@ -376,15 +388,8 @@ function correctWord(){
                     else
                         break
                     fi
-                else
-                    if printf -- "$word $nextWord" | command grep -qsE $optionSpaceArgRegex; then
-                        ((++i))
-                        continue
-                    fi
-
-                    if ! printf -- "$word" | command grep -qsE $continueSecondAndOnwardsPositionRegex; then
+                elif ! printf -- "$word" | command grep -qsE $continueSecondAndOnwardsPositionRegex; then
                         break
-                    fi
                 fi
             done
         fi
@@ -505,7 +510,6 @@ function supernatural-space() {
 
     parseWords
 
-    local foundIncorrect=false
 
     correctWord
 
@@ -544,9 +548,12 @@ function supernatural-space() {
                             nextWord=${mywords_partition[$i+1]}
                             STOP_EXPANSION_FAILED_REGEX=false
 
-                            if printf -- "$word $nextWord" | command grep -qsE $optionSpaceArgRegex; then
-                                ((++i))
-                                continue
+                            if (( (i + 1) < $#mywords_partition )); then
+                                if printf -- "$word $nextWord" | command grep -qsE $optionSpaceArgRegex; then
+                                    loggDebug "matched grep -Eqv '$optionSpaceArgRegex' for word:'$word $nextWord'"
+                                    ((++i))
+                                    continue
+                                fi
                             fi
 
                             if ! printf -- "$word" | command grep -qsE $continueSecondAndOnwardsPositionRegex; then
