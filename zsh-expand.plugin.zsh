@@ -1,8 +1,9 @@
 #{{{                    MARK:variables
 #**************************************************************
 blacklistFirstPosRegex='=.?(omz_history|grc|_z|zshz|cd|hub|_zsh_tmux_.*|_rails_.*|_rake_.*|mvn-or.*|gradle-or.*|noglob .*|rlwrap .*)'
-continueFirstPositionRegex='\b(sudo|zpwr|env|=)\b'
-continueSecondPositionRegex='^(\-.*|env|=)$'
+commonRegex='sudo|zpwr|env|=|command|builtin'
+continueFirstPositionRegex='\b('$commonRegex')\b'
+continueSecondPositionRegex='^('$commonRegex'|\-.*)$'
 
 declare -A ZPWR_CORRECT_WORDS
 ZPWR_CORRECT_WORDS[about]="aobut abbout aabout"
