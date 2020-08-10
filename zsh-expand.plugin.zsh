@@ -3,7 +3,9 @@
 blacklistFirstPosRegex='=.?(omz_history|grc|_z|zshz|cd|hub|_zsh_tmux_.*|_rails_.*|_rake_.*|mvn-or.*|gradle-or.*|noglob .*|rlwrap .*)'
 commonRegex='sudo|zpwr|env|=|command|builtin'
 continueFirstPositionRegex='\b('$commonRegex')\b'
-continueSecondPositionRegex='^('$commonRegex'|\-.*)$'
+# skip options in second and onwards
+continueSecondAndOnwardsPositionRegex='^('$commonRegex'|-.*|--)$'
+optionSpaceArgRegex='^(--?\S+\s\S+)$'
 
 declare -A ZPWR_CORRECT_WORDS
 ZPWR_CORRECT_WORDS[about]="aobut abbout aabout"
@@ -355,6 +357,8 @@ function nonFileExpansion(){
 
 function correctWord(){
 
+    local word nextWord
+
     if (( ${#mywords_partition} == 1)); then
         if type -a $firstword_partition &>/dev/null; then
             loggDebug "No correction from 1 word => '"'$firstword_partition'"'_____ = ""'$firstword_partition'"
@@ -364,6 +368,7 @@ function correctWord(){
         if printf -- "$firstword_partition" | command grep -qsE $continueFirstPositionRegex;then
             for (( i = 2; i <= $#mywords_partition; ++i )); do
                 word=${mywords_partition[$i]}
+                nextWord=${mywords_partition[$i+1]}
                 if ((i == $#mywords_partition)); then
                     if type -a $word &>/dev/null; then
                         loggDebug "No correction from >= 2 words => '"'$word'"'_____ = ""'$word'"
@@ -371,8 +376,15 @@ function correctWord(){
                     else
                         break
                     fi
-                elif ! printf -- "$word" | command grep -qsE $continueSecondPositionRegex; then
-                    break
+                else
+                    if printf -- "$word $nextWord" | command grep -qsE $optionSpaceArgRegex; then
+                        ((++i))
+                        continue
+                    fi
+
+                    if ! printf -- "$word" | command grep -qsE $continueSecondAndOnwardsPositionRegex; then
+                        break
+                    fi
                 fi
             done
         fi
@@ -486,7 +498,7 @@ function supernatural-space() {
         set -x
     fi
 
-    local TEMP_BUFFER mywords badWords
+    local TEMP_BUFFER mywords badWords word nextWord
     #TEMP_BUFFER="$(print -r -- $LBUFFER | tr -d "()[]{}\$,%'\"" )"
     #mywords=("${(z)TEMP_BUFFER}")
     finished=false
@@ -529,11 +541,18 @@ function supernatural-space() {
                         loggDebug "matched $firstword_partition with $continueFirstPositionRegex with $#mywords_lbuffer > 2"
                         for (( i = 2; i < $#mywords_partition; ++i )); do
                             word=${mywords_partition[$i]}
+                            nextWord=${mywords_partition[$i+1]}
                             STOP_EXPANSION_FAILED_REGEX=false
-                            if ! printf -- "$word" | command grep -qsE $continueSecondPositionRegex; then
+
+                            if printf -- "$word $nextWord" | command grep -qsE $optionSpaceArgRegex; then
+                                ((++i))
+                                continue
+                            fi
+
+                            if ! printf -- "$word" | command grep -qsE $continueSecondAndOnwardsPositionRegex; then
                                 STOP_EXPANSION_FAILED_REGEX=true
                                 __EXPANDED=true
-                                loggDebug "failed grep -Eqv '$continueSecondPositionRegex' for word:'$word'"
+                                loggDebug "failed grep -Eqv '$continueSecondAndOnwardsPositionRegex' for word:'$word'"
                                 break
                             fi
                         done
@@ -544,7 +563,7 @@ function supernatural-space() {
                             LBUFFER=${LBUFFER:gs|$subForAtSign|@|}
                             goToTabStopOrEndOfLBuffer
                         else
-                            loggDebug "not expanding $lastword_lbuffer with 1st pos:$continueFirstPositionRegex and 2nd pos:$continueSecondPositionRegex"
+                            loggDebug "not expanding $lastword_lbuffer with 1st pos:$continueFirstPositionRegex and 2nd pos:$continueSecondAndOnwardsPositionRegex"
                         fi
                     fi
                 fi
