@@ -5,7 +5,7 @@ commonRegex='sudo|zpwr|env|.*=.*|command|builtin'
 continueFirstPositionRegex='\b('$commonRegex')\b'
 # skip options in second and onwards
 continueSecondAndOnwardsPositionRegex='^('$commonRegex'|-.*|--)$'
-optionSpaceArgRegex='^(--?\S+\s+[^-]+)$'
+continueOptionSpaceArgSecondAndOnwardsPositionRegex='^(--?\S+\s+[^-]+)$'
 foundIncorrect=false
 
 declare -A ZPWR_CORRECT_WORDS
@@ -373,8 +373,8 @@ function correctWord(){
                 word=${mywords_partition[$i]}
                 nextWord=${mywords_partition[$i+1]}
 
-                if printf -- "$word $nextWord" | command grep -qsE $optionSpaceArgRegex; then
-                    loggDebug "matched grep -Eqv '$optionSpaceArgRegex' for word:'$word $nextWord'"
+                if printf -- "$word $nextWord" | command grep -qsE $continueOptionSpaceArgSecondAndOnwardsPositionRegex; then
+                    loggDebug "matched grep -Eqv '$continueOptionSpaceArgSecondAndOnwardsPositionRegex' for word:'$word $nextWord'"
                     if (( (i + 1) < $#mywords_partition )); then
                         ((++i))
                         continue
@@ -549,8 +549,8 @@ function supernatural-space() {
                             STOP_EXPANSION_FAILED_REGEX=false
 
                             if (( (i + 1) < $#mywords_partition )); then
-                                if printf -- "$word $nextWord" | command grep -qsE $optionSpaceArgRegex; then
-                                    loggDebug "matched grep -Eqv '$optionSpaceArgRegex' for word:'$word $nextWord'"
+                                if printf -- "$word $nextWord" | command grep -qsE $continueOptionSpaceArgSecondAndOnwardsPositionRegex; then
+                                    loggDebug "matched grep -Eqv '$continueOptionSpaceArgSecondAndOnwardsPositionRegex' for word:'$word $nextWord'"
                                     ((++i))
                                     continue
                                 fi
