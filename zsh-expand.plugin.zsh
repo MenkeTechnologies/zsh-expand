@@ -15,7 +15,7 @@ ZPWR_VARS[foundIncorrect]=false
 
 ZPWR_VARS[subForAtSign]=:::::---::::---:::::---
 
-#globals
+# globals
 ZPWR_EXPAND_WORDS_LPARTITION=()
 ZPWR_EXPAND_WORDS_PARTITION=()
 
@@ -297,17 +297,17 @@ ZPWR_CORRECT_WORDS[your]="yuor ur"
 
 #{{{                    MARK:accessory functions
 #**************************************************************
-#dummy function if plugin used outside of zpwr
+# dummy function if plugin used outside of zpwr
 if ! type -- "loggDebug" &>/dev/null;then
     function loggDebug(){
         :
     }
 fi
 
-function commonParamExpansion(){
+function commonParameterExpansion(){
 
     ZPWR_VARS[res]="$(alias -r $ZPWR_VARS[lastword_lbuffer] | cut -d= -f2-)"
-    #deal with ansi quotes $'
+    # deal with ansi quotes $'
     [[ $ZPWR_VARS[res][1] == \$ ]] && ZPWR_VARS[res]=${ZPWR_VARS[res]:1}
     ZPWR_VARS[res]=${(Q)ZPWR_VARS[res]}
     ZPWR_VARS[res]=${ZPWR_VARS[res]:gs@\\@\\\\@}
@@ -324,11 +324,11 @@ function goToTabStopOrEndOfLBuffer(){
 
     if (( $lenToFirstTS < ${#LBUFFER} )); then
         loggDebug "this is a tabstop"
-        #check if numbered tabstop
-        #if num tabstop then set flag in ZPWR_VARS with value to all indexes
-        #sub out all num tabstops
-        #insert key fn will send key to all indexes apply any modifications
-        #keep track of num keys to have activated region
+        # check if numbered tabstop
+        # if num tabstop then set flag in ZPWR_VARS with value to all indexes
+        # sub out all num tabstops
+        # insert key fn will send key to all indexes apply any modifications
+        # keep track of num keys to have activated region
         ZPWR_VARS[indexTS$num]=$lenToFirstTS
 
         CURSOR=$lenToFirstTS
@@ -412,7 +412,7 @@ function correctWord(){
             if [[ ${ZPWR_VARS[lastword_remove_special]} == $misspelling ]]; then
                 LBUFFER="$(print -r -- "$LBUFFER" | perl -pE \
                     "s@\\b$misspelling\\b\$@${key:gs/_/ /}@g")"
-                #ZPWR_VARS[finished]=true
+                # ZPWR_VARS[finished]=true
                 ZPWR_VARS[foundIncorrect]=true
                 CURSOR=$#LBUFFER
                 break
@@ -430,16 +430,16 @@ function parseWords(){
     local i lastword_partition firstIndex lastIndex
     local -a mywordsleft mywordsright mywordsall
 
-    #loop through words to get first and last words in partition
+    # loop through words to get first and last words in partition
     mywordsleft=(${(z)LBUFFER})
     loggDebug "my words left = $mywordsleft"
     mywordsright=(${(z)RBUFFER})
     loggDebug "my words right = $mywordsright"
     mywordsall=(${(z)BUFFER})
 
-    #we must find the first index of the partition
+    # we must find the first index of the partition
     firstIndex=0
-    #we must find the last index of the partition
+    # we must find the last index of the partition
     lastIndex=0
 
     for (( i = $#mywordsleft; i >= 0; i-- )); do
@@ -521,9 +521,9 @@ function supernatural-space() {
         set -x
     fi
 
-    local tempBuffer mywords badWords word nextWord i stopExpansionFailedRegex aliasWasExpanded words ary
-    #tempBuffer="$(print -r -- $LBUFFER | tr -d "()[]{}\$,%'\"" )"
-    #mywords=("${(z)tempBuffer}")
+    local tempBuffer mywords badWords word nextWord i shouldStopExpansionFailedRegex aliasWasExpanded words ary
+    # tempBuffer="$(print -r -- $LBUFFER | tr -d "()[]{}\$,%'\"" )"
+    # mywords=("${(z)tempBuffer}")
     ZPWR_VARS[finished]=false
 
     parseWords
@@ -544,19 +544,19 @@ function supernatural-space() {
         command grep -Eqv $ZPWR_VARS[blacklistFirstPosRegex];then
             loggDebug "regular=>'$ZPWR_VARS[lastword_lbuffer]'"
             if (( ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]} == 2 )); then
-                #regular alias expansion after sudo
+                # regular alias expansion after sudo
                 if [[ $ZPWR_EXPAND_SECOND_POSITION == true ]]; then
                     if printf -- "$ZPWR_VARS[firstword_partition]" | command grep -qE $ZPWR_VARS[continueFirstPositionRegex];then
                         loggDebug "matched $ZPWR_VARS[firstword_partition] with $ZPWR_VARS[continueFirstPositionRegex] with 2 == ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]}"
-                        commonParamExpansion
-                    #do the expansion with perl sub on the last word of left buffer
+                        commonParameterExpansion
+                    # do the expansion with perl sub on the last word of left buffer
                         LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$ZPWR_VARS[lastword_lbuffer]\$@$ZPWR_VARS[res]@")"
                         LBUFFER=${LBUFFER:gs|$ZPWR_VARS[subForAtSign]|@|}
                         goToTabStopOrEndOfLBuffer
                     fi
                 fi
             elif (( ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]} > 2 )); then
-                #regular alias expansion after sudo -E or sudo env or sudo env -e or sudo -E env -e -a -f etc
+                # regular alias expansion after sudo -E or sudo env or sudo env -e or sudo -E env -e -a -f etc
                 if [[ $ZPWR_EXPAND_SECOND_POSITION == true ]]; then
                     if printf -- "$ZPWR_VARS[firstword_partition]" | command grep -qsE $ZPWR_VARS[continueFirstPositionRegex];then
                         loggDebug "matched $ZPWR_VARS[firstword_partition] with $ZPWR_VARS[continueFirstPositionRegex] with $#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION] > 2"
@@ -565,7 +565,7 @@ function supernatural-space() {
                             word=${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_PARTITION][$i]}
                             # zsh only supports nested arrays with indirection
                             nextWord=${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_PARTITION][$i+1]}
-                            stopExpansionFailedRegex=false
+                            shouldStopExpansionFailedRegex=false
 
                             if (( (i + 1) < ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_PARTITION]} )); then
                                 if printf -- "$word $nextWord" | command grep -qsE $ZPWR_VARS[continueOptionSpaceArgSecondAndOnwardsPositionRegex]; then
@@ -576,15 +576,15 @@ function supernatural-space() {
                             fi
 
                             if ! printf -- "$word" | command grep -qsE $ZPWR_VARS[continueSecondAndOnwardsPositionRegex]; then
-                                stopExpansionFailedRegex=true
+                                shouldStopExpansionFailedRegex=true
                                 ZPWR_VARS[__EXPANDED]=true
                                 loggDebug "failed grep -Eqv '$ZPWR_VARS[continueSecondAndOnwardsPositionRegex]' for word:'$word'"
                                 break
                             fi
                         done
-                        if [[ $stopExpansionFailedRegex == false ]]; then
-                            commonParamExpansion
-                        #do the expansion with perl sub on the last word of left buffer
+                        if [[ $shouldStopExpansionFailedRegex == false ]]; then
+                            commonParameterExpansion
+                            # do the expansion with perl sub on the last word of left buffer
                             LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$ZPWR_VARS[lastword_lbuffer]\$@$ZPWR_VARS[res]@")"
                             LBUFFER=${LBUFFER:gs|$ZPWR_VARS[subForAtSign]|@|}
                             goToTabStopOrEndOfLBuffer
@@ -594,18 +594,18 @@ function supernatural-space() {
                     fi
                 fi
             elif (( ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]} == 1 )); then
-                #regular alias expansion
-                #remove space from menuselect spacebar
+                # regular alias expansion
+                # remove space from menuselect spacebar
                 if [[ ${LBUFFER: -1} == " " ]]; then
                     LBUFFER="${LBUFFER:0:-1}"
                 fi
-                commonParamExpansion
+                commonParameterExpansion
                 words=(${(z)ZPWR_VARS[res]})
                 if [[ ${words[1]} == "$ZPWR_VARS[lastword_lbuffer]" ]];then
-                        #do the expansion with perl sub on the last word of left buffer
+                    # do the expansion with perl sub on the last word of left buffer
                     LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$ZPWR_VARS[lastword_lbuffer]\$@\\\\$ZPWR_VARS[res]@")"
                 else
-                        #do the expansion with perl sub on the last word of left buffer
+                    # do the expansion with perl sub on the last word of left buffer
                     LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$ZPWR_VARS[lastword_lbuffer]\$@$ZPWR_VARS[res]@")"
                 fi
                 LBUFFER=${LBUFFER//$ZPWR_VARS[subForAtSign]/@}
@@ -614,19 +614,19 @@ function supernatural-space() {
             aliasWasExpanded=true
         else
             loggDebug "NOT regular=>'$ZPWR_VARS[lastword_lbuffer]'"
-            #remove space from menuselect spacebar
+            # remove space from menuselect spacebar
             if [[ ${LBUFFER: -1} == " " && ZPWR_VARS[__EXPANDED] == true ]]; then
                 loggDebug "removing space menu select"
                 LBUFFER="${LBUFFER:0:-1}"
             fi
             if echo "$ZPWR_VARS[lastword_lbuffer]" | command grep -Fq '"'; then
-                #expand on last word of "string" for global aliases only
+                # expand on last word of "string" for global aliases only
                     ZPWR_VARS[lastword_lbuffer]=${ZPWR_VARS[lastword_lbuffer]:gs/\"//}
                     ary=(${(z)ZPWR_VARS[lastword_lbuffer]})
                     ZPWR_VARS[lastword_lbuffer]=$ary[-1]
             fi
             if alias -g -- $ZPWR_VARS[lastword_lbuffer] | command grep -q "." &>/dev/null;then
-                #global alias expansion
+                # global alias expansion
                 if [[ ${LBUFFER: -1} == " " ]]; then
                     loggDebug "removing space global alias menu select"
                     LBUFFER="${LBUFFER:0:-1}"
@@ -643,7 +643,7 @@ function supernatural-space() {
         fi
     fi
     if [[ $aliasWasExpanded != true ]]; then
-        #expand globs, parameters and =
+        # expand globs, parameters and =
         zle expand-word
     fi
 
@@ -651,7 +651,7 @@ function supernatural-space() {
     loggDebug "aliasWasExpanded = $aliasWasExpanded"
 
     if [[ $ZPWR_VARS[__EXPANDED] == true ]];then
-        #insert the space char
+        # insert the space char
         if [[ $LBUFFER[-1] != ' ' ]]; then
             zle self-insert
         else
@@ -660,7 +660,7 @@ function supernatural-space() {
             fi
         fi
     else
-        #invoke syntax highlighting
+        # invoke syntax highlighting
         zle self-insert
         zle backward-delete-char
     fi
