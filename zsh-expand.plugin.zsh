@@ -542,8 +542,29 @@ function supernatural-space() {
     if [[ ${ZPWR_VARS[lastword_lbuffer]:0:1} != '=' ]] && (( $#ZPWR_VARS[lastword_lbuffer] > 0 ));then
         if alias -r -- $ZPWR_VARS[lastword_lbuffer] | \
         command grep -Eqv $ZPWR_VARS[blacklistFirstPosRegex];then
+
             loggDebug "regular=>'$ZPWR_VARS[lastword_lbuffer]'"
-            if (( ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]} == 2 )); then
+
+            if (( ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]} == 1 )); then
+                # regular alias expansion
+                # remove space from menuselect spacebar
+                if [[ ${LBUFFER: -1} == " " ]]; then
+                    LBUFFER="${LBUFFER:0:-1}"
+                fi
+                commonParameterExpansion
+                words=(${(z)ZPWR_VARS[res]})
+                if [[ ${words[1]} == "$ZPWR_VARS[lastword_lbuffer]" ]];then
+                    # do the expansion with perl sub on the last word of left buffer
+                    LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$ZPWR_VARS[lastword_lbuffer]\$@\\\\$ZPWR_VARS[res]@")"
+                else
+                    # do the expansion with perl sub on the last word of left buffer
+                    LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$ZPWR_VARS[lastword_lbuffer]\$@$ZPWR_VARS[res]@")"
+                fi
+                LBUFFER=${LBUFFER//$ZPWR_VARS[subForAtSign]/@}
+                goToTabStopOrEndOfLBuffer
+                aliasWasExpanded=true
+
+            elif (( ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]} == 2 )); then
                 # regular alias expansion after sudo
                 if [[ $ZPWR_EXPAND_SECOND_POSITION == true ]]; then
                     if printf -- "$ZPWR_VARS[firstword_partition]" | command grep -qE $ZPWR_VARS[continueFirstPositionRegex];then
@@ -555,6 +576,7 @@ function supernatural-space() {
                         goToTabStopOrEndOfLBuffer
                     fi
                 fi
+
             elif (( ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]} > 2 )); then
                 # regular alias expansion after sudo -E or sudo env or sudo env -e or sudo -E env -e -a -f etc
                 if [[ $ZPWR_EXPAND_SECOND_POSITION == true ]]; then
@@ -593,25 +615,7 @@ function supernatural-space() {
                         fi
                     fi
                 fi
-            elif (( ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]} == 1 )); then
-                # regular alias expansion
-                # remove space from menuselect spacebar
-                if [[ ${LBUFFER: -1} == " " ]]; then
-                    LBUFFER="${LBUFFER:0:-1}"
-                fi
-                commonParameterExpansion
-                words=(${(z)ZPWR_VARS[res]})
-                if [[ ${words[1]} == "$ZPWR_VARS[lastword_lbuffer]" ]];then
-                    # do the expansion with perl sub on the last word of left buffer
-                    LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$ZPWR_VARS[lastword_lbuffer]\$@\\\\$ZPWR_VARS[res]@")"
-                else
-                    # do the expansion with perl sub on the last word of left buffer
-                    LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$ZPWR_VARS[lastword_lbuffer]\$@$ZPWR_VARS[res]@")"
-                fi
-                LBUFFER=${LBUFFER//$ZPWR_VARS[subForAtSign]/@}
-                goToTabStopOrEndOfLBuffer
             fi
-            aliasWasExpanded=true
         else
             loggDebug "NOT regular=>'$ZPWR_VARS[lastword_lbuffer]'"
             # remove space from menuselect spacebar
