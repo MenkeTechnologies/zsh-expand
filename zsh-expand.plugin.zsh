@@ -514,7 +514,7 @@ function isLastWordLastCommand(){
                 goToTabStopOrEndOfLBuffer
             fi
         fi
-        ZPWR_VARS[LAST_WORD_WAS_VALID]=true
+        ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND]=true
         ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
 
     elif (( ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]} == 2 )); then
@@ -531,7 +531,7 @@ function isLastWordLastCommand(){
                         goToTabStopOrEndOfLBuffer
                     fi
                 fi
-                ZPWR_VARS[LAST_WORD_WAS_VALID]=true
+                ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND]=true
                 ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
             fi
         fi
@@ -573,7 +573,7 @@ function isLastWordLastCommand(){
                             goToTabStopOrEndOfLBuffer
                         fi
                     fi
-                    ZPWR_VARS[LAST_WORD_WAS_VALID]=true
+                    ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND]=true
                     ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
                 else
                     loggDebug "not expanding $ZPWR_VARS[lastword_lbuffer] with 1st pos:$ZPWR_VARS[continueFirstPositionRegex] and 2nd pos:$ZPWR_VARS[continueSecondAndOnwardsPositionRegex]"
@@ -635,7 +635,7 @@ function supernatural-space() {
     fi
 
     ZPWR_VARS[NEED_TO_ADD_SPACECHAR]=true
-    ZPWR_VARS[LAST_WORD_WAS_VALID]=false
+    ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND]=false
 
     #dont expand =word because that is zle expand-word
     if [[ ${ZPWR_VARS[lastword_lbuffer]:0:1} != '=' ]] && (( $#ZPWR_VARS[lastword_lbuffer] > 0 ));then
@@ -666,7 +666,7 @@ function supernatural-space() {
                 fi
                 loggDebug "global=>'$ZPWR_VARS[lastword_lbuffer]'"
                 expandGlobalAliases "$ZPWR_VARS[lastword_lbuffer]"
-                ZPWR_VARS[LAST_WORD_WAS_VALID]=true
+                ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND]=true
                 ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
             fi
         fi
@@ -676,20 +676,20 @@ function supernatural-space() {
             :
         fi
     fi
-    if [[ $ZPWR_VARS[LAST_WORD_WAS_VALID] != true ]]; then
+    if [[ $ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND] != true ]]; then
         # expand file globs, history expansions, command expansion, parameter expansion and =command
         zle expand-word
     fi
 
     loggDebug "ZPWR_VARS[NEED_TO_ADD_SPACECHAR] = $ZPWR_VARS[NEED_TO_ADD_SPACECHAR]"
-    loggDebug "ZPWR_VARS[LAST_WORD_WAS_VALID] = $ZPWR_VARS[LAST_WORD_WAS_VALID]"
+    loggDebug "ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND] = $ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND]"
 
     if [[ $ZPWR_VARS[NEED_TO_ADD_SPACECHAR] == true ]];then
         # insert the space char
         if [[ $LBUFFER[-1] != ' ' ]]; then
             zle self-insert
         else
-            if [[ $ZPWR_VARS[LAST_WORD_WAS_VALID] != true ]]; then
+            if [[ $ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND] != true ]]; then
                 zle self-insert
             fi
         fi
