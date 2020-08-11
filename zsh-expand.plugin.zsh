@@ -1,7 +1,7 @@
 #{{{                    MARK:variables
 #**************************************************************
 blacklistFirstPosRegex='=.?(omz_history|grc|_z|zshz|cd|hub|_zsh_tmux_.*|_rails_.*|_rake_.*|mvn-or.*|gradle-or.*|noglob .*|rlwrap .*)'
-commonRegex='sudo|zpwr|env|=|command|builtin'
+commonRegex='sudo|zpwr|env|.*=.*|command|builtin'
 continueFirstPositionRegex='\b('$commonRegex')\b'
 # skip options in second and onwards
 continueSecondAndOnwardsPositionRegex='^('$commonRegex'|-.*|--)$'
