@@ -214,7 +214,7 @@ ZPWR_CORRECT_WORDS[remote]="remoet"
 ZPWR_CORRECT_WORDS[replace]='replaec relpace'
 ZPWR_CORRECT_WORDS[repository]="repo rpeo"
 ZPWR_CORRECT_WORDS[repositories]="repos rpeos"
-ZPWR_CORRECT_WORDS[result]="ZPWR_VARS[res] resullt resultt"
+ZPWR_CORRECT_WORDS[result]="ZPWR_VARS[EXPANDED] resullt resultt"
 ZPWR_CORRECT_WORDS[reverse]="rvs revrse"
 ZPWR_CORRECT_WORDS[route]="rotue roote"
 ZPWR_CORRECT_WORDS[runnning]="runnign"
@@ -501,21 +501,21 @@ function isLastWordLastCommand(){
         fi
         if [[ $expand == expand ]]; then
             commonParameterExpansion
-            words=(${(z)ZPWR_VARS[res]})
+            words=(${(z)ZPWR_VARS[EXPANDED]})
             if [[ ${words[1]} == "$ZPWR_VARS[lastword_lbuffer]" ]];then
                 # do the expansion with perl sub on the last word of left buffer
-                LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$ZPWR_VARS[lastword_lbuffer]\$@\\\\$ZPWR_VARS[res]@")"
+                LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$ZPWR_VARS[lastword_lbuffer]\$@\\\\$ZPWR_VARS[EXPANDED]@")"
             else
                 # do the expansion with perl sub on the last word of left buffer
-                LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$ZPWR_VARS[lastword_lbuffer]\$@$ZPWR_VARS[res]@")"
+                LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$ZPWR_VARS[lastword_lbuffer]\$@$ZPWR_VARS[EXPANDED]@")"
             fi
             LBUFFER=${LBUFFER//$ZPWR_VARS[subForAtSign]/@}
             if [[ $moveCursor == moveCursor ]]; then
                 goToTabStopOrEndOfLBuffer
             fi
         fi
-        ZPWR_VARS[WAS_EXPANDED]=true
-        ZPWR_VARS[LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
+        ZPWR_VARS[LAST_WORD_WAS_VALID]=true
+        ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
 
     elif (( ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]} == 2 )); then
         # regular alias expansion after sudo
@@ -525,14 +525,14 @@ function isLastWordLastCommand(){
                 if [[ $expand == expand ]]; then
                     commonParameterExpansion
                     # do the expansion with perl sub on the last word of left buffer
-                    LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$ZPWR_VARS[lastword_lbuffer]\$@$ZPWR_VARS[res]@")"
+                    LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$ZPWR_VARS[lastword_lbuffer]\$@$ZPWR_VARS[EXPANDED]@")"
                     LBUFFER=${LBUFFER:gs|$ZPWR_VARS[subForAtSign]|@|}
                     if [[ $moveCursor == moveCursor ]]; then
                         goToTabStopOrEndOfLBuffer
                     fi
                 fi
-                ZPWR_VARS[WAS_EXPANDED]=true
-                ZPWR_VARS[LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
+                ZPWR_VARS[LAST_WORD_WAS_VALID]=true
+                ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
             fi
         fi
 
@@ -567,14 +567,14 @@ function isLastWordLastCommand(){
                     if [[ $expand == expand ]]; then
                         commonParameterExpansion
                         # do the expansion with perl sub on the last word of left buffer
-                        LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$ZPWR_VARS[lastword_lbuffer]\$@$ZPWR_VARS[res]@")"
+                        LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$ZPWR_VARS[lastword_lbuffer]\$@$ZPWR_VARS[EXPANDED]@")"
                         LBUFFER=${LBUFFER:gs|$ZPWR_VARS[subForAtSign]|@|}
                         if [[ $moveCursor == moveCursor ]]; then
                             goToTabStopOrEndOfLBuffer
                         fi
                     fi
-                    ZPWR_VARS[WAS_EXPANDED]=true
-                    ZPWR_VARS[LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
+                    ZPWR_VARS[LAST_WORD_WAS_VALID]=true
+                    ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
                 else
                     loggDebug "not expanding $ZPWR_VARS[lastword_lbuffer] with 1st pos:$ZPWR_VARS[continueFirstPositionRegex] and 2nd pos:$ZPWR_VARS[continueSecondAndOnwardsPositionRegex]"
                 fi
@@ -587,24 +587,24 @@ function isLastWordLastCommand(){
 
 function commonParameterExpansion(){
 
-    ZPWR_VARS[res]="$(alias -r $ZPWR_VARS[lastword_lbuffer] | cut -d= -f2-)"
+    ZPWR_VARS[EXPANDED]="$(alias -r $ZPWR_VARS[lastword_lbuffer] | cut -d= -f2-)"
     # deal with ansi quotes $'
-    [[ $ZPWR_VARS[res][1] == \$ ]] && ZPWR_VARS[res]=${ZPWR_VARS[res]:1}
-    ZPWR_VARS[res]=${(Q)ZPWR_VARS[res]}
-    ZPWR_VARS[res]=${ZPWR_VARS[res]:gs@\\@\\\\@}
-    ZPWR_VARS[res]=${ZPWR_VARS[res]:gs@\\\\n@\\n@}
-    ZPWR_VARS[res]=${ZPWR_VARS[res]:gs@\$@\\\$@}
-    ZPWR_VARS[res]=${ZPWR_VARS[res]:gs|@|$(echo $ZPWR_VARS[subForAtSign])}
+    [[ $ZPWR_VARS[EXPANDED][1] == \$ ]] && ZPWR_VARS[EXPANDED]=${ZPWR_VARS[EXPANDED]:1}
+    ZPWR_VARS[EXPANDED]=${(Q)ZPWR_VARS[EXPANDED]}
+    ZPWR_VARS[EXPANDED]=${ZPWR_VARS[EXPANDED]:gs@\\@\\\\@}
+    ZPWR_VARS[EXPANDED]=${ZPWR_VARS[EXPANDED]:gs@\\\\n@\\n@}
+    ZPWR_VARS[EXPANDED]=${ZPWR_VARS[EXPANDED]:gs@\$@\\\$@}
+    ZPWR_VARS[EXPANDED]=${ZPWR_VARS[EXPANDED]:gs|@|$(echo $ZPWR_VARS[subForAtSign])}
 }
 
 function expandGlobalAliases() {
     ZPWR_VARS[lastword_lbuffer]="$1"
     #expand alias and escaping backslash and double quotes
-    ZPWR_VARS[res]=${(Q)${(qqq)galiases[$ZPWR_VARS[lastword_lbuffer]]:gs@\\@\\\\@}:gs@$@\\$@}
+    ZPWR_VARS[EXPANDED]=${(Q)${(qqq)galiases[$ZPWR_VARS[lastword_lbuffer]]:gs@\\@\\\\@}:gs@$@\\$@}
     #substitute out @ because that is the substitution delimiter for perl
-    ZPWR_VARS[res]=${ZPWR_VARS[res]//@/$ZPWR_VARS[subForAtSign]}
+    ZPWR_VARS[EXPANDED]=${ZPWR_VARS[EXPANDED]//@/$ZPWR_VARS[subForAtSign]}
     #do the expansion with perl sub on the last word of left buffer
-    LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$ZPWR_VARS[lastword_lbuffer]\$@$ZPWR_VARS[res]@")"
+    LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$ZPWR_VARS[lastword_lbuffer]\$@$ZPWR_VARS[EXPANDED]@")"
     LBUFFER=${LBUFFER//$ZPWR_VARS[subForAtSign]/@}
     LBUFFER=${LBUFFER:gs|\\\\|\\|}
     goToTabStopOrEndOfLBuffer
@@ -635,7 +635,7 @@ function supernatural-space() {
     fi
 
     ZPWR_VARS[NEED_TO_ADD_SPACECHAR]=true
-    ZPWR_VARS[WAS_EXPANDED]=false
+    ZPWR_VARS[LAST_WORD_WAS_VALID]=false
 
     #dont expand =word because that is zle expand-word
     if [[ ${ZPWR_VARS[lastword_lbuffer]:0:1} != '=' ]] && (( $#ZPWR_VARS[lastword_lbuffer] > 0 ));then
@@ -666,8 +666,8 @@ function supernatural-space() {
                 fi
                 loggDebug "global=>'$ZPWR_VARS[lastword_lbuffer]'"
                 expandGlobalAliases "$ZPWR_VARS[lastword_lbuffer]"
-                ZPWR_VARS[WAS_EXPANDED]=true
-                ZPWR_VARS[LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
+                ZPWR_VARS[LAST_WORD_WAS_VALID]=true
+                ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
             fi
         fi
         if [[ ! -f "$ZPWR_VARS[lastword_lbuffer]" ]]; then
@@ -676,20 +676,20 @@ function supernatural-space() {
             :
         fi
     fi
-    if [[ $ZPWR_VARS[WAS_EXPANDED] != true ]]; then
+    if [[ $ZPWR_VARS[LAST_WORD_WAS_VALID] != true ]]; then
         # expand file globs, history expansions, command expansion, parameter expansion and =command
         zle expand-word
     fi
 
     loggDebug "ZPWR_VARS[NEED_TO_ADD_SPACECHAR] = $ZPWR_VARS[NEED_TO_ADD_SPACECHAR]"
-    loggDebug "ZPWR_VARS[WAS_EXPANDED] = $ZPWR_VARS[WAS_EXPANDED]"
+    loggDebug "ZPWR_VARS[LAST_WORD_WAS_VALID] = $ZPWR_VARS[LAST_WORD_WAS_VALID]"
 
     if [[ $ZPWR_VARS[NEED_TO_ADD_SPACECHAR] == true ]];then
         # insert the space char
         if [[ $LBUFFER[-1] != ' ' ]]; then
             zle self-insert
         else
-            if [[ $ZPWR_VARS[WAS_EXPANDED] != true ]]; then
+            if [[ $ZPWR_VARS[LAST_WORD_WAS_VALID] != true ]]; then
                 zle self-insert
             fi
         fi
