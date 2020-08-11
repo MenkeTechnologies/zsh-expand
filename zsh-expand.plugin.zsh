@@ -1,6 +1,7 @@
 #{{{                    MARK:Global variables
 #**************************************************************
 if ! (( $+ZPWR_VARS )); then
+    # global contaner to hold globals
     declare -A ZPWR_VARS
 fi
 
