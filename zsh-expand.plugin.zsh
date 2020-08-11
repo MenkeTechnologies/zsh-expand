@@ -364,26 +364,26 @@ function correctWord(){
 
     local word nextWord badWords misspelling key
 
-    if (( ${#ZPWR_VARS[mywords_partition]} == 1)); then
+    if (( ${(P)#ZPWR_VARS[mywords_partition]} == 1)); then
         if type -a $ZPWR_VARS[firstword_partition] &>/dev/null; then
             loggDebug "No correction from 1 word => '"'$ZPWR_VARS[firstword_partition]'"'_____ = ""'$ZPWR_VARS[firstword_partition]'"
             return
         fi
     else
         if printf -- "$ZPWR_VARS[firstword_partition]" | command grep -qsE $ZPWR_VARS[continueFirstPositionRegex];then
-            for (( i = 2; i <= $#ZPWR_VARS[mywords_partition]; ++i )); do
-                word=${ZPWR_VARS[mywords_partition][$i]}
-                nextWord=${ZPWR_VARS[mywords_partition][$i+1]}
+            for (( i = 2; i <= ${(P)#ZPWR_VARS[mywords_partition]}; ++i )); do
+                word=${(P)ZPWR_VARS[mywords_partition][$i]}
+                nextWord=${(P)ZPWR_VARS[mywords_partition][$i+1]}
 
                 if printf -- "$word $nextWord" | command grep -qsE $ZPWR_VARS[continueOptionSpaceArgSecondAndOnwardsPositionRegex]; then
                     loggDebug "matched grep -Eqv '$ZPWR_VARS[continueOptionSpaceArgSecondAndOnwardsPositionRegex]' for word:'$word $nextWord'"
-                    if (( (i + 1) < $#ZPWR_VARS[mywords_partition] )); then
+                    if (( (i + 1) < ${(P)#ZPWR_VARS[mywords_partition]} )); then
                         ((++i))
                         continue
                     fi
                 fi
 
-                if ((i == $#ZPWR_VARS[mywords_partition])); then
+                if ((i == ${(P)#ZPWR_VARS[mywords_partition]} )); then
                     if type -a $word &>/dev/null; then
                         loggDebug "No correction from >= 2 words => '"'$word'"'_____ = ""'$word'"
                         return
@@ -397,12 +397,12 @@ function correctWord(){
         fi
     fi
 
-    loggDebug "______'"'attempt correction'"'_____ = ""'$ZPWR[lastword_remove_special]'"
+    loggDebug "______'"'attempt correction'"'_____ = ""'$ZPWR_VARS[lastword_remove_special]'"
 
     for key in ${(k)ZPWR_CORRECT_WORDS[@]}; do
         badWords=("${(z)ZPWR_CORRECT_WORDS[$key]}")
         for misspelling in $badWords[@];do
-            if [[ ${ZPWR[lastword_remove_special]} == $misspelling ]]; then
+            if [[ ${ZPWR_VARS[lastword_remove_special]} == $misspelling ]]; then
                 LBUFFER="$(print -r -- "$LBUFFER" | perl -pE \
                     "s@\\b$misspelling\\b\$@${key:gs/_/ /}@g")"
                 #ZPWR_VARS[finished]=true
@@ -420,7 +420,8 @@ function correctWord(){
 
 function parseWords(){
 
-    local i mywordsleft mywordsright mywordsall lastword_partition firstIndex lastIndex
+    local i lastword_partition firstIndex lastIndex
+    local -a mywordsleft mywordsright mywordsall
 
     #loop through words to get first and last words in partition
     mywordsleft=(${(z)LBUFFER})
@@ -464,24 +465,27 @@ function parseWords(){
     done
     loggDebug "last index = $lastIndex"
 
-    ((lastIndex+=$#mywordsleft))
-    ZPWR_VARS[mywords_lbuffer]=($mywordsleft[$firstIndex,$#mywordsleft])
-    ZPWR_VARS[mywords_partition]=($mywordsall[$firstIndex,$lastIndex])
+    (( lastIndex += $#mywordsleft ))
+    mywords_lbuffer=($mywordsleft[$firstIndex,$#mywordsleft])
+    ZPWR_VARS[mywords_lbuffer]=mywords_lbuffer
+    mywords_partition=($mywordsall[$firstIndex,$lastIndex])
+    ZPWR_VARS[mywords_partition]=mywords_partition
 
-    loggDebug "partition = '$ZPWR_VARS[mywords_lbuffer]'"
+    loggDebug "partition = '${(P)ZPWR_VARS[mywords_lbuffer]}'"
 
-    ZPWR_VARS[firstword_partition]=${ZPWR_VARS[mywords_lbuffer][1]}
-    ZPWR_VARS[lastword_lbuffer]=${ZPWR_VARS[mywords_lbuffer][-1]}
-    ZPWR_VARS[lastword_lbuffer]=${${(Az)${ZPWR_VARS[mywords_lbuffer]//\"/}}[-1]}
-    lastword_partition=${ZPWR_VARS[mywords_partition][-1]}
+    ZPWR_VARS[firstword_partition]=${(P)ZPWR_VARS[mywords_lbuffer][1]}
+    ZPWR_VARS[lastword_lbuffer]=${(P)ZPWR_VARS[mywords_lbuffer][-1]}
+    ZPWR_VARS[lastword_lbuffer]=${${(Az)${(P)ZPWR_VARS[mywords_lbuffer]//\"/}}[-1]}
+    lastword_partition=${(P)ZPWR_VARS[mywords_partition][-1]}
 
     loggDebug "first word partition before spelling = ...$ZPWR_VARS[firstword_partition]..."
     loggDebug "last word lbuf before spelling = ...$ZPWR_VARS[lastword_lbuffer]..."
     loggDebug "last word partition before spelling = ...$lastword_partition..."
 
-    ZPWR[lastword_remove_special]=${${(Az)${ZPWR_VARS[lastword_lbuffer]//[\[\]\{\}\(\)\']/}}[-1]}
+    lastword_partition=${${(Az)${ZPWR_VARS[lastword_lbuffer]//[\[\]\{\}\(\)\']/}}[-1]}
+    ZPWR_VARS[lastword_remove_special]=$lastword_partition
 
-    loggDebug "last word no special chars...${ZPWR[lastword_remove_special]}..."
+    loggDebug "last word no special chars...${ZPWR_VARS[lastword_remove_special]}..."
 }
 
 function expandGlobalAliases() {
@@ -529,11 +533,11 @@ function supernatural-space() {
         if alias -r -- $ZPWR_VARS[lastword_lbuffer] | \
         command grep -Eqv $ZPWR_VARS[blacklistFirstPosRegex];then
             loggDebug "regular=>'$ZPWR_VARS[lastword_lbuffer]'"
-            if (( $#ZPWR_VARS[mywords_lbuffer] == 2 )); then
+            if (( ${(P)#ZPWR_VARS[mywords_lbuffer]} == 2 )); then
                 #regular alias expansion after sudo
                 if [[ $ZPWR_EXPAND_SECOND_POSITION == true ]]; then
                     if printf -- "$ZPWR_VARS[firstword_partition]" | command grep -qE $ZPWR_VARS[continueFirstPositionRegex];then
-                        loggDebug "matched $ZPWR_VARS[firstword_partition] with $ZPWR_VARS[continueFirstPositionRegex] with 2 == $#ZPWR_VARS[mywords_lbuffer]"
+                        loggDebug "matched $ZPWR_VARS[firstword_partition] with $ZPWR_VARS[continueFirstPositionRegex] with 2 == ${(P)#ZPWR_VARS[mywords_lbuffer]}"
                         commonParamExpansion
                     #do the expansion with perl sub on the last word of left buffer
                         LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$ZPWR_VARS[lastword_lbuffer]\$@$ZPWR_VARS[res]@")"
@@ -541,17 +545,19 @@ function supernatural-space() {
                         goToTabStopOrEndOfLBuffer
                     fi
                 fi
-            elif (( $#ZPWR_VARS[mywords_lbuffer] > 2 )); then
+            elif (( ${(P)#ZPWR_VARS[mywords_lbuffer]} > 2 )); then
                 #regular alias expansion after sudo -E or sudo env or sudo env -e or sudo -E env -e -a -f etc
                 if [[ $ZPWR_EXPAND_SECOND_POSITION == true ]]; then
                     if printf -- "$ZPWR_VARS[firstword_partition]" | command grep -qsE $ZPWR_VARS[continueFirstPositionRegex];then
                         loggDebug "matched $ZPWR_VARS[firstword_partition] with $ZPWR_VARS[continueFirstPositionRegex] with $#ZPWR_VARS[mywords_lbuffer] > 2"
-                        for (( i = 2; i < $#ZPWR_VARS[mywords_partition]; ++i )); do
-                            word=${ZPWR_VARS[mywords_partition][$i]}
-                            nextWord=${ZPWR_VARS[mywords_partition][$i+1]}
+                        for (( i = 2; i < ${(P)#ZPWR_VARS[mywords_partition]}; ++i )); do
+                            # zsh only supports nested arrays with indirection
+                            word=${(P)ZPWR_VARS[mywords_partition][$i]}
+                            # zsh only supports nested arrays with indirection
+                            nextWord=${(P)ZPWR_VARS[mywords_partition][$i+1]}
                             stopExpansionFailedRegex=false
 
-                            if (( (i + 1) < $#ZPWR_VARS[mywords_partition] )); then
+                            if (( (i + 1) < ${(P)#ZPWR_VARS[mywords_partition]} )); then
                                 if printf -- "$word $nextWord" | command grep -qsE $ZPWR_VARS[continueOptionSpaceArgSecondAndOnwardsPositionRegex]; then
                                     loggDebug "matched grep -Eqv '$ZPWR_VARS[continueOptionSpaceArgSecondAndOnwardsPositionRegex]' for word:'$word $nextWord'"
                                     ((++i))
@@ -577,7 +583,7 @@ function supernatural-space() {
                         fi
                     fi
                 fi
-            elif (( $#ZPWR_VARS[mywords_lbuffer] == 1 )); then
+            elif (( ${(P)#ZPWR_VARS[mywords_lbuffer]} == 1 )); then
                 #regular alias expansion
                 #remove space from menuselect spacebar
                 if [[ ${LBUFFER: -1} == " " ]]; then
