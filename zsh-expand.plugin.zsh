@@ -333,9 +333,9 @@ function goToTabStopOrEndOfLBuffer(){
 
         CURSOR=$lenToFirstTS
         RBUFFER=${RBUFFER:$#ZPWR_TABSTOP}
-        ZPWR_VARS[__EXPANDED]=false
+        ZPWR_VARS[NEED_TO_ADD_SPACECHAR]=false
     else
-        ZPWR_VARS[__EXPANDED]=true
+        ZPWR_VARS[NEED_TO_ADD_SPACECHAR]=true
     fi
 }
 
@@ -521,7 +521,7 @@ function supernatural-space() {
         set -x
     fi
 
-    local tempBuffer mywords badWords word nextWord i shouldStopExpansionFailedRegex aliasWasExpanded words ary
+    local tempBuffer mywords badWords word nextWord i shouldStopExpansionDueToFailedRegex aliasWasExpanded words ary
     # tempBuffer="$(print -r -- $LBUFFER | tr -d "()[]{}\$,%'\"" )"
     # mywords=("${(z)tempBuffer}")
     ZPWR_VARS[finished]=false
@@ -535,7 +535,7 @@ function supernatural-space() {
         parseWords
     fi
 
-    ZPWR_VARS[__EXPANDED]=true
+    ZPWR_VARS[NEED_TO_ADD_SPACECHAR]=true
     aliasWasExpanded=false
 
     #dont expand =word because that is zle expand-word
@@ -587,7 +587,7 @@ function supernatural-space() {
                             word=${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_PARTITION][$i]}
                             # zsh only supports nested arrays with indirection
                             nextWord=${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_PARTITION][$i+1]}
-                            shouldStopExpansionFailedRegex=false
+                            shouldStopExpansionDueToFailedRegex=false
 
                             if (( (i + 1) < ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_PARTITION]} )); then
                                 if printf -- "$word $nextWord" | command grep -qsE $ZPWR_VARS[continueOptionSpaceArgSecondAndOnwardsPositionRegex]; then
@@ -598,13 +598,13 @@ function supernatural-space() {
                             fi
 
                             if ! printf -- "$word" | command grep -qsE $ZPWR_VARS[continueSecondAndOnwardsPositionRegex]; then
-                                shouldStopExpansionFailedRegex=true
-                                ZPWR_VARS[__EXPANDED]=true
+                                shouldStopExpansionDueToFailedRegex=true
+                                ZPWR_VARS[NEED_TO_ADD_SPACECHAR]=true
                                 loggDebug "failed grep -Eqv '$ZPWR_VARS[continueSecondAndOnwardsPositionRegex]' for word:'$word'"
                                 break
                             fi
                         done
-                        if [[ $shouldStopExpansionFailedRegex == false ]]; then
+                        if [[ $shouldStopExpansionDueToFailedRegex == false ]]; then
                             commonParameterExpansion
                             # do the expansion with perl sub on the last word of left buffer
                             LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$ZPWR_VARS[lastword_lbuffer]\$@$ZPWR_VARS[res]@")"
@@ -619,7 +619,7 @@ function supernatural-space() {
         else
             loggDebug "NOT regular=>'$ZPWR_VARS[lastword_lbuffer]'"
             # remove space from menuselect spacebar
-            if [[ ${LBUFFER: -1} == " " && ZPWR_VARS[__EXPANDED] == true ]]; then
+            if [[ ${LBUFFER: -1} == " " && ZPWR_VARS[NEED_TO_ADD_SPACECHAR] == true ]]; then
                 loggDebug "removing space menu select"
                 LBUFFER="${LBUFFER:0:-1}"
             fi
@@ -647,14 +647,14 @@ function supernatural-space() {
         fi
     fi
     if [[ $aliasWasExpanded != true ]]; then
-        # expand globs, parameters and =
+        # expand file globs, history expansions, command expansion, parameter expansion and =command
         zle expand-word
     fi
 
-    loggDebug "ZPWR_VARS[__EXPANDED] = $ZPWR_VARS[__EXPANDED]"
+    loggDebug "ZPWR_VARS[NEED_TO_ADD_SPACECHAR] = $ZPWR_VARS[NEED_TO_ADD_SPACECHAR]"
     loggDebug "aliasWasExpanded = $aliasWasExpanded"
 
-    if [[ $ZPWR_VARS[__EXPANDED] == true ]];then
+    if [[ $ZPWR_VARS[NEED_TO_ADD_SPACECHAR] == true ]];then
         # insert the space char
         if [[ $LBUFFER[-1] != ' ' ]]; then
             zle self-insert
