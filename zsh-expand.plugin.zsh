@@ -16,7 +16,7 @@ ZPWR_VARS[foundIncorrect]=false
 ZPWR_VARS[subForAtSign]=:::::---::::---:::::---
 
 #globals
-ZPWR_EXPAND_WORDS_LBUFFER=()
+ZPWR_EXPAND_WORDS_LPARTITION=()
 ZPWR_EXPAND_WORDS_PARTITION=()
 
 declare -A ZPWR_CORRECT_WORDS
@@ -475,17 +475,17 @@ function parseWords(){
     (( lastIndex += $#mywordsleft ))
 
 
-    ZPWR_EXPAND_WORDS_LBUFFER=($mywordsleft[$firstIndex,$#mywordsleft])
-    ZPWR_VARS[ZPWR_EXPAND_WORDS_LBUFFER]=ZPWR_EXPAND_WORDS_LBUFFER
+    ZPWR_EXPAND_WORDS_LPARTITION=($mywordsleft[$firstIndex,$#mywordsleft])
+    ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]=ZPWR_EXPAND_WORDS_LPARTITION
 
     ZPWR_EXPAND_WORDS_PARTITION=($mywordsall[$firstIndex,$lastIndex])
     ZPWR_VARS[ZPWR_EXPAND_WORDS_PARTITION]=ZPWR_EXPAND_WORDS_PARTITION
 
-    loggDebug "partition = '${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LBUFFER]}'"
+    loggDebug "partition = '${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]}'"
 
-    ZPWR_VARS[firstword_partition]=${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LBUFFER][1]}
-    ZPWR_VARS[lastword_lbuffer]=${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LBUFFER][-1]}
-    ZPWR_VARS[lastword_lbuffer]=${${(Az)${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LBUFFER]//\"/}}[-1]}
+    ZPWR_VARS[firstword_partition]=${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION][1]}
+    ZPWR_VARS[lastword_lbuffer]=${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION][-1]}
+    ZPWR_VARS[lastword_lbuffer]=${${(Az)${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]//\"/}}[-1]}
     lastword_partition=${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_PARTITION][-1]}
 
     loggDebug "first word partition before spelling = ...$ZPWR_VARS[firstword_partition]..."
@@ -543,11 +543,11 @@ function supernatural-space() {
         if alias -r -- $ZPWR_VARS[lastword_lbuffer] | \
         command grep -Eqv $ZPWR_VARS[blacklistFirstPosRegex];then
             loggDebug "regular=>'$ZPWR_VARS[lastword_lbuffer]'"
-            if (( ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LBUFFER]} == 2 )); then
+            if (( ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]} == 2 )); then
                 #regular alias expansion after sudo
                 if [[ $ZPWR_EXPAND_SECOND_POSITION == true ]]; then
                     if printf -- "$ZPWR_VARS[firstword_partition]" | command grep -qE $ZPWR_VARS[continueFirstPositionRegex];then
-                        loggDebug "matched $ZPWR_VARS[firstword_partition] with $ZPWR_VARS[continueFirstPositionRegex] with 2 == ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LBUFFER]}"
+                        loggDebug "matched $ZPWR_VARS[firstword_partition] with $ZPWR_VARS[continueFirstPositionRegex] with 2 == ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]}"
                         commonParamExpansion
                     #do the expansion with perl sub on the last word of left buffer
                         LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$ZPWR_VARS[lastword_lbuffer]\$@$ZPWR_VARS[res]@")"
@@ -555,11 +555,11 @@ function supernatural-space() {
                         goToTabStopOrEndOfLBuffer
                     fi
                 fi
-            elif (( ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LBUFFER]} > 2 )); then
+            elif (( ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]} > 2 )); then
                 #regular alias expansion after sudo -E or sudo env or sudo env -e or sudo -E env -e -a -f etc
                 if [[ $ZPWR_EXPAND_SECOND_POSITION == true ]]; then
                     if printf -- "$ZPWR_VARS[firstword_partition]" | command grep -qsE $ZPWR_VARS[continueFirstPositionRegex];then
-                        loggDebug "matched $ZPWR_VARS[firstword_partition] with $ZPWR_VARS[continueFirstPositionRegex] with $#ZPWR_VARS[ZPWR_EXPAND_WORDS_LBUFFER] > 2"
+                        loggDebug "matched $ZPWR_VARS[firstword_partition] with $ZPWR_VARS[continueFirstPositionRegex] with $#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION] > 2"
                         for (( i = 2; i < ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_PARTITION]}; ++i )); do
                             # zsh only supports nested arrays with indirection
                             word=${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_PARTITION][$i]}
@@ -593,7 +593,7 @@ function supernatural-space() {
                         fi
                     fi
                 fi
-            elif (( ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LBUFFER]} == 1 )); then
+            elif (( ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]} == 1 )); then
                 #regular alias expansion
                 #remove space from menuselect spacebar
                 if [[ ${LBUFFER: -1} == " " ]]; then
