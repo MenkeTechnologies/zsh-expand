@@ -7,8 +7,8 @@
 ##### Purpose: zsh script to parse words and expand words
 ##### Notes:Usage for external service.  Must have BUFFER, LBUFFER, BUFFER set like in ZLE
 # parseWords; isLastWordLastCommand
-#if $ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND] == true; then
-# echo $ZPWR_VARS[ORIGINAL_LAST_COMMAND]
+# if $ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND] == true; then
+#   echo $ZPWR_VARS[ORIGINAL_LAST_COMMAND]
 # fi
 #}}}***********************************************************
 
