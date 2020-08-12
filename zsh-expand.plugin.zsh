@@ -293,6 +293,7 @@ ZPWR_CORRECT_WORDS[value]="vlaue valeu"
 ZPWR_CORRECT_WORDS[variable]="var vra"
 ZPWR_CORRECT_WORDS[variables]="vars"
 ZPWR_CORRECT_WORDS[vector]="vectoor"
+ZPWR_CORRECT_WORDS[verb]="vverb erbb vverbb verbb'
 ZPWR_CORRECT_WORDS[version]="verssion verion verison versioon"
 ZPWR_CORRECT_WORDS[Version]="Verssion Verion Verison"
 ZPWR_CORRECT_WORDS[vim]="ivm"
