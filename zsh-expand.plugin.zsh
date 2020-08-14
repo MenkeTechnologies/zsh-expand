@@ -16,14 +16,16 @@
 0="${${ZERO:-${0:#$ZSH_ARGZERO}}:-${(%):-%N}}"
 0="${${(M)0:#/*}:-$PWD/$0}"
 
-if ! source "${0:h}/expandApi.sh";then
-    echo failed source "${0:h}/expandApi.sh" >&2
-    return 1
-fi
-
 if ! (( $+ZPWR_VARS )); then
     # global contaner to hold globals
     declare -A ZPWR_VARS
+fi
+
+ZPWR_VARS[EXPAND_API]=${0:h}/expand-api.sh
+
+if ! source $ZPWR_VARS[EXPAND_API];then
+    echo "failed source $ZPWR_VARS[EXPAND_API]" >&2
+    return 1
 fi
 
 ZPWR_VARS[blacklistFirstPosRegex]='=.?(omz_history|grc|_z|zshz|cd|hub|_zsh_tmux_.*|_rails_.*|_rake_.*|mvn-or.*|gradle-or.*|noglob .*|rlwrap .*)'
