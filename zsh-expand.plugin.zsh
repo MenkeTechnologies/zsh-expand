@@ -5,11 +5,18 @@
 ##### GitHub: https://github.com/MenkeTechnologies
 ##### Date: Tue Aug 11 13:59:02 EDT 2020
 ##### Purpose: zsh script to parse words and expand words
-##### Notes:Usage for external service.  Must have BUFFER, LBUFFER, BUFFER set like in ZLE
-# parseWords; isLastWordLastCommand
+##### Notes:
+#
+# Usage for external service like fzf.  Must have BUFFER, LBUFFER, BUFFER set like ZLE does.
+#
+# parseWords
+# isLastWordLastCommand
+#
 # if $ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND] == true; then
 #   echo $ZPWR_VARS[ORIGINAL_LAST_COMMAND]
 # fi
+#
+#
 #}}}***********************************************************
 
 #{{{                    MARK:Global variables
