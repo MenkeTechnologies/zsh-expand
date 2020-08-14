@@ -21,7 +21,7 @@ if ! (( $+ZPWR_VARS )); then
     declare -A ZPWR_VARS
 fi
 
-ZPWR_VARS[EXPAND_API]=${0:h}/expand-api.sh
+ZPWR_VARS[EXPAND_API]=${0:h}/expand-api.zsh
 
 if ! source $ZPWR_VARS[EXPAND_API];then
     echo "failed source $ZPWR_VARS[EXPAND_API]" >&2
