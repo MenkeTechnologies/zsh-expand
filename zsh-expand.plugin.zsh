@@ -489,7 +489,12 @@ function parseWords(){
 
     ZPWR_VARS[firstword_partition]=${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION][1]}
     ZPWR_VARS[lastword_lbuffer]=${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION][-1]}
-    ZPWR_VARS[lastword_lbuffer]=${${(Az)${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]//\"/}}[-1]}
+
+    # to get rid of double quotes
+    loggDebug "last word lbuf before no dbl quotes and [-1] = ...$ZPWR_VARS[lastword_lbuffer]..."
+    ZPWR_VARS[lastword_lbuffer]=${${(Az)${ZPWR_VARS[lastword_lbuffer]//\"/}}[-1]}
+    loggDebug "last word lbuf after no dbl quotes and [-1] = ...$ZPWR_VARS[lastword_lbuffer]..."
+
     lastword_partition=${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_PARTITION][-1]}
 
     loggDebug "first word partition before spelling = ...$ZPWR_VARS[firstword_partition]..."
