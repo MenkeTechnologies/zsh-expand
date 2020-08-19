@@ -24,11 +24,11 @@ function parseWords(){
     local -a mywordsleft mywordsright mywordsall lbufAry lpartAry lastWordAry partitionAry
 
     # loop through words to get first and last words in partition
-    mywordsleft=(${(z)LBUFFER})
+    mywordsleft=(${(Az)${(z)LBUFFER:gs/<(/(}})
     loggDebug "my words left = $mywordsleft"
-    mywordsright=(${(z)RBUFFER})
+    mywordsright=(${(Az)${(z)RBUFFER:gs/<(/(}})
     loggDebug "my words right = $mywordsright"
-    mywordsall=(${(z)BUFFER})
+    mywordsall=(${(Az)${(z)BUFFER:gs/<(/(}})
 
     # we must find the first index of the partition
     firstIndex=0

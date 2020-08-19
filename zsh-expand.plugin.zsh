@@ -479,7 +479,9 @@ function supernatural-space() {
 
     parseWords
 
-    correctWord
+    if [[ $ZPWR_CORRECT == true ]]; then
+        correctWord
+    fi
 
     if [[ $ZPWR_VARS[foundIncorrect] = true && $ZPWR_CORRECT_EXPAND = true ]]; then
         loggDebug "RE-EXPAND after incorrect spelling"
