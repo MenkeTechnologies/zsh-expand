@@ -475,8 +475,6 @@ function supernatural-space() {
     fi
 
     local tempBuffer mywords badWords word nextWord i shouldStopExpansionDueToFailedRegex words ary
-    # tempBuffer="$(print -r -- $LBUFFER | tr -d "()[]{}\$,%'\"" )"
-    # mywords=("${(z)tempBuffer}")
     ZPWR_VARS[finished]=false
 
     parseWords

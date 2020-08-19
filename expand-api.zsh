@@ -20,8 +20,8 @@
 
 function parseWords(){
 
-    local i lastword_partition firstIndex lastIndex
-    local -a mywordsleft mywordsright mywordsall
+    local i lastword_partition firstIndex lastIndex finalWord
+    local -a mywordsleft mywordsright mywordsall lbufAry lpartAry lastWordAry partitionAry
 
     # loop through words to get first and last words in partition
     mywordsleft=(${(z)LBUFFER})
@@ -76,22 +76,31 @@ function parseWords(){
 
     loggDebug "partition = '${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]}'"
 
-    ZPWR_VARS[firstword_partition]=${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION][1]}
-    ZPWR_VARS[lastword_lbuffer]=${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION][-1]}
+    lpartAry=(${(z)${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]}})
+
+    ZPWR_VARS[firstword_partition]=${lpartAry[1]}
+
+    ZPWR_VARS[lastword_lbuffer]=${lpartAry[-1]}
 
     # to get rid of double quotes
+    loggDebug "first word partition = ...$ZPWR_VARS[firstword_partition]..."
     loggDebug "last word lbuf before no dbl quotes and [-1] = ...$ZPWR_VARS[lastword_lbuffer]..."
-    ZPWR_VARS[lastword_lbuffer]=${${(Az)${ZPWR_VARS[lastword_lbuffer]//\"/}}[-1]}
+
+    lbufAry=(${(z)${ZPWR_VARS[lastword_lbuffer]//\"/}})
+
+    ZPWR_VARS[lastword_lbuffer]=${lbufAry[-1]}
     loggDebug "last word lbuf after no dbl quotes and [-1] = ...$ZPWR_VARS[lastword_lbuffer]..."
 
-    lastword_partition=${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_PARTITION][-1]}
+    partitionAry=(${(z)${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_PARTITION]}})
+    lastword_partition=${partitionAry[-1]}
 
     loggDebug "first word partition before spelling = ...$ZPWR_VARS[firstword_partition]..."
     loggDebug "last word lbuf before spelling = ...$ZPWR_VARS[lastword_lbuffer]..."
     loggDebug "last word partition before spelling = ...$lastword_partition..."
 
-    lastword_partition=${${(Az)${ZPWR_VARS[lastword_lbuffer]//[\[\]\{\}\(\)\']/}}[-1]}
-    ZPWR_VARS[lastword_remove_special]=$lastword_partition
+    lastWordAry=(${(Az)${ZPWR_VARS[lastword_lbuffer]//[\[\]\{\}\(\)\']/}})
+    finalWord=${lastWordAry[-1]}
+    ZPWR_VARS[lastword_remove_special]=$finalWord
 
     loggDebug "last word no special chars...${ZPWR_VARS[lastword_remove_special]}..."
 }
