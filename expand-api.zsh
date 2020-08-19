@@ -40,7 +40,7 @@ function parseWords(){
         # we will split the commad line and get the partition of the caret
         # aliases are valid in the first position after these chars
         case $mywordsleft[$i] in
-            ';;' | \; | \| | '||' | '&&')
+            ';;' | \; | \| | '||' | '&&' | '<(' | '(' | '{')
                 firstIndex=$((i+1))
                 break
                 ;;
@@ -56,7 +56,7 @@ function parseWords(){
             # ;; ; | || && are partition separating chars
             # we will split the commad line and get the partition of the caret
             # aliases are valid in the first position after these chars
-            ';;' | \; | \| | '||' | '&&') lastIndex=$((i-1))
+            ';;' | \; | \| | '||' | '&&' | ')' | '}') lastIndex=$((i-1))
             break
             ;;
         *)
