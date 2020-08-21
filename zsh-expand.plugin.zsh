@@ -30,7 +30,7 @@ fi
 
 ZPWR_VARS[blacklistFirstPosRegex]='=.?(omz_history|grc|_z|zshz|cd|hub|_zsh_tmux_.*|_rails_.*|_rake_.*|mvn-or.*|gradle-or.*|noglob .*|rlwrap .*)'
 ZPWR_VARS[commonRegex]='sudo|zpwr|env|.*=.*|command|builtin'
-ZPWR_VARS[continueFirstPositionRegex]='\b('$ZPWR_VARS[commonRegex]')\b'
+ZPWR_VARS[continueFirstPositionRegex]='^('$ZPWR_VARS[commonRegex]')$'
 # skip options in second and onwards
 ZPWR_VARS[continueSecondAndOnwardsPositionRegex]='^('$ZPWR_VARS[commonRegex]'|-.*|--)$'
 ZPWR_VARS[continueOptionSpaceArgSecondAndOnwardsPositionRegex]='^(--?\S+\s+[^-]+)$'
@@ -382,7 +382,7 @@ function nonFileExpansion(){
 
 function correctWord(){
 
-    local word nextWord badWords misspelling key
+    local word nextWord badWords misspelling key res1
 
     if (( ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_PARTITION]} == 1)); then
         if type -a $ZPWR_VARS[firstword_partition] &>/dev/null; then
@@ -390,12 +390,12 @@ function correctWord(){
             return
         fi
     else
-        if printf -- "$ZPWR_VARS[firstword_partition]" | command grep -qsE $ZPWR_VARS[continueFirstPositionRegex];then
+        if [[ $ZPWR_VARS[firstword_partition] =~ $ZPWR_VARS[continueFirstPositionRegex] ]];then
             for (( i = 2; i <= ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_PARTITION]}; ++i )); do
                 word=${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_PARTITION][$i]}
                 nextWord=${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_PARTITION][$i+1]}
 
-                if printf -- "$word $nextWord" | command grep -qsE $ZPWR_VARS[continueOptionSpaceArgSecondAndOnwardsPositionRegex]; then
+                if [[ "$word $nextWord" =~ $ZPWR_VARS[continueOptionSpaceArgSecondAndOnwardsPositionRegex] ]]; then
                     loggDebug "matched grep -Eqv '$ZPWR_VARS[continueOptionSpaceArgSecondAndOnwardsPositionRegex]' for word:'$word $nextWord'"
                     if (( (i + 1) < ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_PARTITION]} )); then
                         ((++i))
@@ -410,7 +410,7 @@ function correctWord(){
                     else
                         break
                     fi
-                elif ! printf -- "$word" | command grep -qsE $ZPWR_VARS[continueSecondAndOnwardsPositionRegex]; then
+                elif ! [[ $word =~ $ZPWR_VARS[continueSecondAndOnwardsPositionRegex] ]]; then
                         break
                 fi
             done
@@ -425,8 +425,10 @@ function correctWord(){
             if [[ ${ZPWR_VARS[lastword_remove_special]} == $misspelling ]]; then
 
                 # expand
-                LBUFFER="$(print -r -- "$LBUFFER" | perl -pE \
-                    "s@\\b$misspelling\\b\$@${key:gs/_/ /}@g")"
+                [[ $LBUFFER == (#b)(*[[:space:]]#)($misspelling) ]];
+                res1=${match[1]}
+                # expand
+                LBUFFER="$res1${key:gs/_/ /}"
 
                 # ZPWR_VARS[finished]=true
                 ZPWR_VARS[foundIncorrect]=true
@@ -449,27 +451,29 @@ function commonParameterExpansion(){
     # deal with ansi quotes $'
     [[ $ZPWR_VARS[EXPANDED][1] == \$ ]] && ZPWR_VARS[EXPANDED]=${ZPWR_VARS[EXPANDED]:1}
     ZPWR_VARS[EXPANDED]=${(Q)ZPWR_VARS[EXPANDED]}
-    ZPWR_VARS[EXPANDED]=${ZPWR_VARS[EXPANDED]:gs@\\@\\\\@}
-    ZPWR_VARS[EXPANDED]=${ZPWR_VARS[EXPANDED]:gs@\\\\n@\\n@}
-    ZPWR_VARS[EXPANDED]=${ZPWR_VARS[EXPANDED]:gs@\$@\\\$@}
-    ZPWR_VARS[EXPANDED]=${ZPWR_VARS[EXPANDED]:gs|@|$(echo $ZPWR_VARS[subForAtSign])}
 }
 
+function zshExpandAlias(){
+
+    [[ $LBUFFER == (#b)(*[[:space:]]#)($ZPWR_VARS[lastword_lbuffer]) ]]
+    res1=${match[1]}
+    # expand
+    LBUFFER="$res1$ZPWR_VARS[EXPANDED]"
+
+}
+    
 function expandGlobalAliases() {
 
+    local res1
+
     ZPWR_VARS[lastword_lbuffer]="$1"
-    #expand alias and escaping backslash and double quotes
-    ZPWR_VARS[EXPANDED]=${(Q)${(qqq)galiases[$ZPWR_VARS[lastword_lbuffer]]:gs@\\@\\\\@}:gs@$@\\$@}
-    #substitute out @ because that is the substitution delimiter for perl
-    ZPWR_VARS[EXPANDED]=${ZPWR_VARS[EXPANDED]//@/$ZPWR_VARS[subForAtSign]}
-    #do the expansion with perl sub on the last word of left buffer
-    loggDebug print -r -- "$LBUFFER" "|" perl -pE "s@\\b$ZPWR_VARS[lastword_lbuffer]\$@$ZPWR_VARS[EXPANDED]@"
+    result=$galiases[$ZPWR_VARS[lastword_lbuffer]]
+    [[ $LBUFFER == (#b)(*[[:space:]]#)($ZPWR_VARS[lastword_lbuffer]) ]]
 
+    res1=${match[1]}
     # expand
-    LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$ZPWR_VARS[lastword_lbuffer]\$@$ZPWR_VARS[EXPANDED]@")"
+    LBUFFER="$res1$result"
 
-    LBUFFER=${LBUFFER//$ZPWR_VARS[subForAtSign]/@}
-    LBUFFER=${LBUFFER:gs|\\\\|\\|}
     goToTabStopOrEndOfLBuffer
 }
 
@@ -483,7 +487,7 @@ function supernatural-space() {
         set -x
     fi
 
-    local tempBuffer mywords badWords word nextWord i shouldStopExpansionDueToFailedRegex words ary
+    local tempBuffer mywords badWords word nextWord i shouldStopExpansionDueToFailedRegex words ary res1  aliasOut
     ZPWR_VARS[finished]=false
 
     parseWords
@@ -502,8 +506,8 @@ function supernatural-space() {
 
     #dont expand =word because that is zle expand-word
     if [[ ${ZPWR_VARS[lastword_lbuffer]:0:1} != '=' ]] && (( $#ZPWR_VARS[lastword_lbuffer] > 0 ));then
-        if alias -r -- $ZPWR_VARS[lastword_lbuffer] | \
-        command grep -Eqv $ZPWR_VARS[blacklistFirstPosRegex];then
+        aliasOut=$(alias -r -- $ZPWR_VARS[lastword_lbuffer])
+        if [[ -n $aliasOut ]] && ! [[ $aliasOut =~ $ZPWR_VARS[blacklistFirstPosRegex] ]];then
 
             loggDebug "regular=>'$ZPWR_VARS[lastword_lbuffer]'"
 
@@ -515,13 +519,13 @@ function supernatural-space() {
                 loggDebug "removing space menu select"
                 LBUFFER="${LBUFFER:0:-1}"
             fi
-            if echo "$ZPWR_VARS[lastword_lbuffer]" | command grep -Fq '"'; then
+            if [[ "$ZPWR_VARS[lastword_lbuffer]" =~ '"' ]]; then
                 # expand on last word of "string" for global aliases only
                     ZPWR_VARS[lastword_lbuffer]=${ZPWR_VARS[lastword_lbuffer]:gs/\"//}
                     ary=(${(z)ZPWR_VARS[lastword_lbuffer]})
                     ZPWR_VARS[lastword_lbuffer]=$ary[-1]
             fi
-            if alias -g -- $ZPWR_VARS[lastword_lbuffer] | command grep -q "." &>/dev/null;then
+            if [[ $(alias -g -- $ZPWR_VARS[lastword_lbuffer]) =~ "." ]]; then
                 # global alias expansion
                 if [[ ${LBUFFER: -1} == " " ]]; then
                     loggDebug "removing space global alias menu select"
