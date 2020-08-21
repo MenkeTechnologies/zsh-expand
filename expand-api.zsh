@@ -121,11 +121,15 @@ function isLastWordLastCommand(){
             commonParameterExpansion
             words=(${(z)ZPWR_VARS[EXPANDED]})
             if [[ ${words[1]} == "$ZPWR_VARS[lastword_lbuffer]" ]];then
+
                 # do the expansion with perl sub on the last word of left buffer
                 LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$ZPWR_VARS[lastword_lbuffer]\$@\\\\$ZPWR_VARS[EXPANDED]@")"
+
             else
+
                 # do the expansion with perl sub on the last word of left buffer
                 LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$ZPWR_VARS[lastword_lbuffer]\$@$ZPWR_VARS[EXPANDED]@")"
+
             fi
             LBUFFER=${LBUFFER//$ZPWR_VARS[subForAtSign]/@}
             if [[ $moveCursor == moveCursor ]]; then
@@ -142,8 +146,10 @@ function isLastWordLastCommand(){
                 loggDebug "matched $ZPWR_VARS[firstword_partition] with $ZPWR_VARS[continueFirstPositionRegex] with 2 == ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]}"
                 if [[ $expand == expand ]]; then
                     commonParameterExpansion
+
                     # do the expansion with perl sub on the last word of left buffer
                     LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$ZPWR_VARS[lastword_lbuffer]\$@$ZPWR_VARS[EXPANDED]@")"
+
                     LBUFFER=${LBUFFER:gs|$ZPWR_VARS[subForAtSign]|@|}
                     if [[ $moveCursor == moveCursor ]]; then
                         goToTabStopOrEndOfLBuffer
@@ -184,8 +190,10 @@ function isLastWordLastCommand(){
                 if [[ $shouldStopExpansionDueToFailedRegex == false ]]; then
                     if [[ $expand == expand ]]; then
                         commonParameterExpansion
+
                         # do the expansion with perl sub on the last word of left buffer
                         LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$ZPWR_VARS[lastword_lbuffer]\$@$ZPWR_VARS[EXPANDED]@")"
+
                         LBUFFER=${LBUFFER:gs|$ZPWR_VARS[subForAtSign]|@|}
                         if [[ $moveCursor == moveCursor ]]; then
                             goToTabStopOrEndOfLBuffer

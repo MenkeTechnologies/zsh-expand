@@ -423,8 +423,11 @@ function correctWord(){
         badWords=("${(z)ZPWR_CORRECT_WORDS[$key]}")
         for misspelling in $badWords[@];do
             if [[ ${ZPWR_VARS[lastword_remove_special]} == $misspelling ]]; then
+
+                # expand
                 LBUFFER="$(print -r -- "$LBUFFER" | perl -pE \
                     "s@\\b$misspelling\\b\$@${key:gs/_/ /}@g")"
+
                 # ZPWR_VARS[finished]=true
                 ZPWR_VARS[foundIncorrect]=true
                 CURSOR=$#LBUFFER
@@ -453,13 +456,18 @@ function commonParameterExpansion(){
 }
 
 function expandGlobalAliases() {
+
     ZPWR_VARS[lastword_lbuffer]="$1"
     #expand alias and escaping backslash and double quotes
     ZPWR_VARS[EXPANDED]=${(Q)${(qqq)galiases[$ZPWR_VARS[lastword_lbuffer]]:gs@\\@\\\\@}:gs@$@\\$@}
     #substitute out @ because that is the substitution delimiter for perl
     ZPWR_VARS[EXPANDED]=${ZPWR_VARS[EXPANDED]//@/$ZPWR_VARS[subForAtSign]}
     #do the expansion with perl sub on the last word of left buffer
+    loggDebug print -r -- "$LBUFFER" "|" perl -pE "s@\\b$ZPWR_VARS[lastword_lbuffer]\$@$ZPWR_VARS[EXPANDED]@"
+
+    # expand
     LBUFFER="$(print -r -- "$LBUFFER" | perl -pE "s@\\b$ZPWR_VARS[lastword_lbuffer]\$@$ZPWR_VARS[EXPANDED]@")"
+
     LBUFFER=${LBUFFER//$ZPWR_VARS[subForAtSign]/@}
     LBUFFER=${LBUFFER:gs|\\\\|\\|}
     goToTabStopOrEndOfLBuffer
