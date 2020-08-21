@@ -392,10 +392,12 @@ function correctWord(){
     else
         if [[ $ZPWR_VARS[firstword_partition] =~ $ZPWR_VARS[continueFirstPositionRegex] ]];then
             for (( i = 2; i <= ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_PARTITION]}; ++i )); do
+
                 word=${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_PARTITION][$i]}
                 nextWord=${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_PARTITION][$i+1]}
 
                 if [[ "$word $nextWord" =~ $ZPWR_VARS[continueOptionSpaceArgSecondAndOnwardsPositionRegex] ]]; then
+
                     loggDebug "matched grep -Eqv '$ZPWR_VARS[continueOptionSpaceArgSecondAndOnwardsPositionRegex]' for word:'$word $nextWord'"
                     if (( (i + 1) < ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_PARTITION]} )); then
                         ((++i))
@@ -404,6 +406,7 @@ function correctWord(){
                 fi
 
                 if ((i == ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_PARTITION]} )); then
+
                     if type -a $word &>/dev/null; then
                         loggDebug "No correction from >= 2 words => '"'$word'"'_____ = ""'$word'"
                         return
@@ -420,8 +423,10 @@ function correctWord(){
     loggDebug "______'"'attempt correction'"'_____ = ""'$ZPWR_VARS[lastword_remove_special]'"
 
     for key in ${(k)ZPWR_CORRECT_WORDS[@]}; do
+
         badWords=("${(z)ZPWR_CORRECT_WORDS[$key]}")
         for misspelling in $badWords[@];do
+
             if [[ ${ZPWR_VARS[lastword_remove_special]} == $misspelling ]]; then
 
                 # expand
@@ -443,8 +448,6 @@ function correctWord(){
     done
 }
 
-
-
 function commonParameterExpansion(){
 
     ZPWR_VARS[EXPANDED]="${$(alias -r $ZPWR_VARS[lastword_lbuffer])#*=}"
@@ -455,16 +458,18 @@ function commonParameterExpansion(){
 
 function zshExpandAlias(){
 
+    local res1 result
+
     [[ $LBUFFER == (#b)(*[[:space:]]#)($ZPWR_VARS[lastword_lbuffer]) ]]
     res1=${match[1]}
     # expand
     LBUFFER="$res1$ZPWR_VARS[EXPANDED]"
 
 }
-    
+
 function expandGlobalAliases() {
 
-    local res1
+    local res1 result
 
     ZPWR_VARS[lastword_lbuffer]="$1"
     result=$galiases[$ZPWR_VARS[lastword_lbuffer]]
@@ -574,6 +579,7 @@ function supernatural-space() {
 #{{{                    MARK:keybind
 #**************************************************************
 terminate-space(){
+
     LBUFFER+=" "
 }
 
