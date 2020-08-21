@@ -6,7 +6,7 @@
 ##### Date: Fri Aug 14 15:12:03 EDT 2020
 ##### Purpose: zsh script to hold expand lib fns
 ##### Notes: 
-# Usage for external service like fzf.  Must have BUFFER, LBUFFER, BUFFER set like ZLE does.
+# Usage for external service like fzf.  Must have BUFFER, LBUFFER, RBUFFER set like ZLE does.
 #
 # parseWords
 # isLastWordLastCommand

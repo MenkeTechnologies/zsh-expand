@@ -17,7 +17,7 @@
 0="${${(M)0:#/*}:-$PWD/$0}"
 
 if ! (( $+ZPWR_VARS )); then
-    # global contaner to hold globals
+    # global map to containerize global variables
     declare -A ZPWR_VARS
 fi
 
