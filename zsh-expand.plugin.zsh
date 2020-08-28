@@ -551,7 +551,9 @@ function supernatural-space() {
     fi
     if [[ $ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND] != true ]]; then
         # expand file globs, history expansions, command expansion, parameter expansion and =command
-        zle expand-word
+        if [[ $ZPWR_EXPAND_NATIVE == true ]]; then
+            zle expand-word
+        fi
     fi
 
     loggDebug "ZPWR_VARS[NEED_TO_ADD_SPACECHAR] = $ZPWR_VARS[NEED_TO_ADD_SPACECHAR]"
