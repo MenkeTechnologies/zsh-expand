@@ -120,7 +120,8 @@ function isLastWordLastCommand(){
             commonParameterExpansion
             words=(${(z)ZPWR_VARS[EXPANDED]})
             if [[ ${words[1]} == "$ZPWR_VARS[lastword_lbuffer]" ]];then
-                zshExpandAlias
+                # escape the expanded form because its first word is an alias itsef
+                zshExpandAliasEscape
                 goToTabStopOrEndOfLBuffer
             else
                 zshExpandAlias

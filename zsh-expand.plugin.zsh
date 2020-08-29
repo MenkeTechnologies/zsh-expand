@@ -457,6 +457,17 @@ function commonParameterExpansion(){
     ZPWR_VARS[EXPANDED]=${(Q)ZPWR_VARS[EXPANDED]}
 }
 
+function zshExpandAliasEscape(){
+
+    local res1 result
+
+    [[ $LBUFFER == (#b)(*[[:space:]]#)($ZPWR_VARS[lastword_lbuffer]) ]]
+    res1=${match[1]}
+    # expand
+    LBUFFER="$res1\\$ZPWR_VARS[EXPANDED]"
+
+}
+
 function zshExpandAlias(){
 
     local res1 result
