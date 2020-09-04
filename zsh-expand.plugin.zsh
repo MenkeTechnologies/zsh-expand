@@ -579,10 +579,6 @@ function supernatural-space() {
                 zle self-insert
             fi
         fi
-    else
-        # invoke syntax highlighting
-        zle self-insert
-        zle backward-delete-char
     fi
     if [[ $ZPWR_TRACE == true ]]; then
         set +x
