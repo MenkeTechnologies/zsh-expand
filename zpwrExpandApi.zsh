@@ -8,8 +8,8 @@
 ##### Notes: 
 # Usage for external service like fzf.  Must have BUFFER, LBUFFER, RBUFFER set like ZLE does.
 #
-# parseWords
-# isLastWordLastCommand
+# zpwrExpandParseWords
+# zpwrExpandIsLastWordLastCommand
 #
 # if $ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND] == true; then
 #   echo $ZPWR_VARS[ORIGINAL_LAST_COMMAND]
@@ -18,7 +18,7 @@
 #
 #}}}***********************************************************
 
-function parseWords(){
+function zpwrExpandParseWords(){
 
     local i lastword_partition firstIndex lastIndex finalWord
     local -a mywordsleft mywordsright mywordsall lbufAry lpartAry lastWordAry partitionAry
@@ -105,7 +105,7 @@ function parseWords(){
     loggDebug "last word no special chars...${ZPWR_VARS[lastword_remove_special]}..."
 }
 
-function isLastWordLastCommand(){
+function zpwrExpandIsLastWordLastCommand(){
 
     local moveCursor=$1
     local expand=$2
@@ -117,18 +117,17 @@ function isLastWordLastCommand(){
             LBUFFER="${LBUFFER:0:-1}"
         fi
         if [[ $expand == expand ]]; then
-            commonParameterExpansion
+            zpwrExpandCommonParameterExpansion
             words=(${(z)ZPWR_VARS[EXPANDED]})
             if [[ ${words[1]} == "$ZPWR_VARS[lastword_lbuffer]" ]];then
                 # escape the expanded form because its first word is an alias itsef
-                zshExpandAliasEscape
-                goToTabStopOrEndOfLBuffer
+                zpwrExpandAliasEscape
+                zpwrExpandGoToTabStopOrEndOfLBuffer
             else
-                zshExpandAlias
+                zpwrExpandAlias
             fi
-            LBUFFER=${LBUFFER//$ZPWR_VARS[subForAtSign]/@}
             if [[ $moveCursor == moveCursor ]]; then
-                goToTabStopOrEndOfLBuffer
+                zpwrExpandGoToTabStopOrEndOfLBuffer
             fi
         fi
         ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND]=true
@@ -140,10 +139,10 @@ function isLastWordLastCommand(){
             if [[ "$ZPWR_VARS[firstword_partition]" =~ $ZPWR_VARS[continueFirstPositionRegex] ]];then
                 loggDebug "matched $ZPWR_VARS[firstword_partition] with $ZPWR_VARS[continueFirstPositionRegex] with 2 == ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]}"
                 if [[ $expand == expand ]]; then
-                    commonParameterExpansion
-                    zshExpandAlias
+                    zpwrExpandCommonParameterExpansion
+                    zpwrExpandAlias
                     if [[ $moveCursor == moveCursor ]]; then
-                        goToTabStopOrEndOfLBuffer
+                        zpwrExpandGoToTabStopOrEndOfLBuffer
                     fi
                 fi
                 ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND]=true
@@ -180,11 +179,11 @@ function isLastWordLastCommand(){
                 done
                 if [[ $shouldStopExpansionDueToFailedRegex == false ]]; then
                     if [[ $expand == expand ]]; then
-                        commonParameterExpansion
-                        zshExpandAlias
+                        zpwrExpandCommonParameterExpansion
+                        zpwrExpandAlias
 
                         if [[ $moveCursor == moveCursor ]]; then
-                            goToTabStopOrEndOfLBuffer
+                            zpwrExpandGoToTabStopOrEndOfLBuffer
                         fi
                     fi
                     ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND]=true
