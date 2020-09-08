@@ -323,6 +323,7 @@ ZPWR_EXPAND_CORRECT_WORDS[work]="wrk werk owrk wokr"
 ZPWR_EXPAND_CORRECT_WORDS[XML]="xml"
 ZPWR_EXPAND_CORRECT_WORDS[YAML]="yaml"
 ZPWR_EXPAND_CORRECT_WORDS[your]="yuor ur"
+ZPWR_EXPAND_CORRECT_WORDS[zsh]="zhs zshh zzsh zssh"
 #}}}***********************************************************
 
 #{{{                    MARK:keybind
