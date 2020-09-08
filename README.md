@@ -8,6 +8,14 @@ Expansion of global aliases, incorrect spellings and phrases, globs, history exp
 ## Bypassing expansion
 Expansion can be temporarily bypassed with control-space.
 
+## Install for Zinit
+> `~/.zshrc`
+```sh
+source "$HOME/.zinit/bin/zinit.zsh"
+zinit ice lucid nocompile
+zinit load MenkeTechnologies/zsh-expand
+```
+
 ## Install for Oh My Zsh
 
 ```sh
