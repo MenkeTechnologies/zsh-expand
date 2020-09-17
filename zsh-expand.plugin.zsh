@@ -237,6 +237,7 @@ ZPWR_EXPAND_CORRECT_WORDS[punctuation]="punct"
 ZPWR_EXPAND_CORRECT_WORDS[radius]="radisu raduis"
 ZPWR_EXPAND_CORRECT_WORDS[range]="rnage arnge"
 ZPWR_EXPAND_CORRECT_WORDS[RGB]="rgb"
+ZPWR_EXPAND_CORRECT_WORDS[README]="eradme readme"
 ZPWR_EXPAND_CORRECT_WORDS[redo]="rdeo reod edro erdo redoo reddo"
 ZPWR_EXPAND_CORRECT_WORDS[remote]="remoet"
 ZPWR_EXPAND_CORRECT_WORDS[replace]='replaec relpace'
