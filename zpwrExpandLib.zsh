@@ -17,6 +17,12 @@ if ! type -- "loggDebug" &>/dev/null;then
     }
 fi
 
+if type -- "autopair-insert" &>/dev/null;then
+    ZPWR_VARS[AP_SPACE]=true
+else
+    ZPWR_VARS[AP_SPACE]=false
+fi
+
 function zpwrExpandGoToTabStopOrEndOfLBuffer(){
 
     local lenToFirstTS
@@ -260,10 +266,18 @@ function zpwrExpandSupernaturalSpace() {
     if [[ $ZPWR_VARS[NEED_TO_ADD_SPACECHAR] == true ]];then
         # insert the space char
         if [[ $LBUFFER[-1] != ' ' ]]; then
-            zle self-insert
+            if [[ $ZPWR_VARS[AP_SPACE] == true ]]; then
+                zle autopair-insert
+            else
+                zle self-insert
+            fi
         else
             if [[ $ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND] != true ]]; then
-                zle self-insert
+                if [[ $ZPWR_VARS[AP_SPACE] == true ]]; then
+                    zle autopair-insert
+                else
+                    zle self-insert
+                fi
             fi
         fi
     fi
