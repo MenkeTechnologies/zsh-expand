@@ -46,34 +46,6 @@ function zpwrExpandGoToTabStopOrEndOfLBuffer(){
     fi
 }
 
-function zpwrExpandNonFileExpansion(){
-    :
-    #DNS lookups
-    #type -a "$lastWord" &> /dev/null || {
-    #print -r -- $lastWord | command grep -qE \
-    #'^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}\.?$'\
-    #&& {
-    ##DNS lookup
-    #A_Record=$(host $lastWord) 2>/dev/null \
-    #&& {
-    #A_Record=$(print -r -- $A_Record | command grep ' address' | head -1 | awk '{print $4}')
-    #} || A_Record=bad
-    #[[ $A_Record != bad ]] && \
-    #LBUFFER="$(print -r -- "$LBUFFER" | sed -E "s@\\b$lastWord@$A_Record@g")"
-    #} || {
-    #print -r -- $lastWord | command grep -qE \
-    #'\b([0-9]{1,3}\.){3}[0-9]{1,3}\b' && {
-    ##reverse DNS lookup
-    #PTR_Record=$(nslookup $lastWord) 2>/dev/null && {
-    #PTR_Record=$(print -r -- $PTR_Record | command grep 'name = ' | tail -1 | awk '{print $4}')
-    #} || PTR_Record=bad
-    #[[ $PTR_Record != bad ]] && \
-    #LBUFFER="$(print -r -- "$LBUFFER" | sed -E "s@\\b$lastWord\\b@${PTR_Record:0:-1}@g")"
-    #}
-    #}
-    #}
-}
-
 function zpwrExpandCorrectWord(){
 
     local word nextWord badWords misspelling key res1
@@ -85,22 +57,22 @@ function zpwrExpandCorrectWord(){
         fi
     else
         if [[ $ZPWR_VARS[firstword_partition] =~ $ZPWR_VARS[continueFirstPositionRegex] ]];then
-            for (( i = 2; i <= ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_PARTITION]}; ++i )); do
+            for (( i = 2; i <= ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]}; ++i )); do
 
-                word=${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_PARTITION][$i]}
-                nextWord=${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_PARTITION][$i+1]}
+                word=${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION][$i]}
+                nextWord=${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION][$i+1]}
 
                 if [[ "$word $nextWord" =~ $ZPWR_VARS[continueOptionSpaceArgSecondAndOnwardsPositionRegex] ]]; then
 
                     loggDebug "matched grep -Eqv '$ZPWR_VARS[continueOptionSpaceArgSecondAndOnwardsPositionRegex]' for word:'$word $nextWord'"
-                    if (( (i + 1) < ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_PARTITION]} )); then
+                    if (( (i + 1) < ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]} )); then
                         ((++i))
                         continue
                     fi
                 fi
 
-                if ((i == ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_PARTITION]} )); then
-
+                if ((i == ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]} )); then
+                    # last word of lbuffer
                     if type -a $word &>/dev/null; then
                         loggDebug "No correction from >= 2 words => '"'$word'"'_____ = ""'$word'"
                         return
@@ -108,9 +80,21 @@ function zpwrExpandCorrectWord(){
                         break
                     fi
                 elif ! [[ $word =~ $ZPWR_VARS[continueSecondAndOnwardsPositionRegex] ]]; then
+                    if [[ $word =~ $ZPWR_VARS[blackSubcommandPositionRegex] ]]; then
+                        # stop git init expanding
+                        if [[ $nextWord == ${ZPWR_VARS[lastword_remove_special]} ]] && (( ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]} == (i+1) )); then
+                            return
+                        else
+                            break
+                        fi
+                    else
                         break
+                    fi
                 fi
             done
+        elif (( ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]} == 2 )) && [[ $ZPWR_VARS[firstword_partition] =~ $ZPWR_VARS[blackSubcommandPositionRegex] ]]  ; then
+            # stop git init expanding
+            return
         fi
     fi
 
@@ -289,5 +273,33 @@ function zpwrExpandSupernaturalSpace() {
 zpwrExpandTerminateSpace(){
 
     LBUFFER+=" "
+}
+
+function zpwrExpandNonFileExpansion(){
+    :
+    #DNS lookups
+    #type -a "$lastWord" &> /dev/null || {
+    #print -r -- $lastWord | command grep -qE \
+    #'^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}\.?$'\
+    #&& {
+    ##DNS lookup
+    #A_Record=$(host $lastWord) 2>/dev/null \
+    #&& {
+    #A_Record=$(print -r -- $A_Record | command grep ' address' | head -1 | awk '{print $4}')
+    #} || A_Record=bad
+    #[[ $A_Record != bad ]] && \
+    #LBUFFER="$(print -r -- "$LBUFFER" | sed -E "s@\\b$lastWord@$A_Record@g")"
+    #} || {
+    #print -r -- $lastWord | command grep -qE \
+    #'\b([0-9]{1,3}\.){3}[0-9]{1,3}\b' && {
+    ##reverse DNS lookup
+    #PTR_Record=$(nslookup $lastWord) 2>/dev/null && {
+    #PTR_Record=$(print -r -- $PTR_Record | command grep 'name = ' | tail -1 | awk '{print $4}')
+    #} || PTR_Record=bad
+    #[[ $PTR_Record != bad ]] && \
+    #LBUFFER="$(print -r -- "$LBUFFER" | sed -E "s@\\b$lastWord\\b@${PTR_Record:0:-1}@g")"
+    #}
+    #}
+    #}
 }
 #}}}*********************************************************** 
