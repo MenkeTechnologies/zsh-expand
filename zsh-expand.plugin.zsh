@@ -36,7 +36,7 @@ fi
 
 ZPWR_VARS[blacklistFirstPosRegex]='=.?(omz_history|grc|_z|zshz|cd|hub|_zsh_tmux_.*|_rails_.*|_rake_.*|mvn-or.*|gradle-or.*|noglob .*|rlwrap .*)'
 ZPWR_VARS[commonRegex]='sudo|zpwr|env|.*=.*|command|builtin'
-ZPWR_VARS[blackSubcommandPositionRegex]='git|npm|pip|rails|zpwr'
+ZPWR_VARS[blackSubcommandPositionRegex]='git|npm|pip|rails|zpwr|nmcli|brew|apt|dnf|yum|zypper'
 ZPWR_VARS[continueFirstPositionRegex]='^('$ZPWR_VARS[commonRegex]')$'
 # skip options in second and onwards
 ZPWR_VARS[continueSecondAndOnwardsPositionRegex]='^('$ZPWR_VARS[commonRegex]'|-.*|--)$'
