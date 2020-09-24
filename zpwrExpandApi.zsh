@@ -27,31 +27,15 @@ function zpwrExpandParseWords(){
     mywordsleft=(${(Az)${(z)LBUFFER:gs/<(/(}})
     loggDebug "my words left = $mywordsleft"
 
-    # we must find the first index of the partition
-    firstIndex=0
-    # we must find the last index of the partition
-    lastIndex=0
+    if [[ "$mywordsleft" =~ ^(.*)(\{|\<\\\(|\\\(|\;|\&\&|\\\|\\\|\\\|)(.*)$ ]]; then 
 
-    for (( i = $#mywordsleft; i >= 0; i-- )); do
-        # ;; ; | || && are partition separating chars
-        # we will split the commad line and get the partition of the caret
-        # aliases are valid in the first position after these chars
-        case $mywordsleft[$i] in
-            ';;' | \; | \| | '||' | '&&' | '<(' | '(' | '{')
-                firstIndex=$((i+1))
-                break
-                ;;
-            *)
-                ;;
-        esac
-    done
+        loggDebug "Initial Parse: match $ZPWR_EXPAND_WORDS_LPARTITION[@]"
+        ZPWR_EXPAND_WORDS_LPARTITION=("${(z)match[-1]}")
+    else
+        loggDebug "Initial Parse: NO match $ZPWR_EXPAND_WORDS_LPARTITION[@]"
+        ZPWR_EXPAND_WORDS_LPARTITION=("$mywordsleft[@]")
+    fi
 
-    loggDebug "first index = $firstIndex"
-
-    (( lastIndex += $#mywordsleft ))
-
-
-    ZPWR_EXPAND_WORDS_LPARTITION=($mywordsleft[$firstIndex,$#mywordsleft])
     ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]=ZPWR_EXPAND_WORDS_LPARTITION
 
     loggDebug "lpartition = '${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]}'"
@@ -79,6 +63,7 @@ function zpwrExpandParseWords(){
     ZPWR_VARS[lastword_remove_special]=$finalWord
 
     loggDebug "last word no special chars...${ZPWR_VARS[lastword_remove_special]}..."
+
 }
 
 function zpwrExpandIsLastWordLastCommand(){
