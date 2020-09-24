@@ -35,14 +35,18 @@ if ! source $ZPWR_VARS[EXPAND_LIB];then
 fi
 
 ZPWR_VARS[blacklistFirstPosRegex]='=.?(omz_history|grc|_z|zshz|cd|hub|_zsh_tmux_.*|_rails_.*|_rake_.*|mvn-or.*|gradle-or.*|noglob .*|rlwrap .*)'
-ZPWR_VARS[commonRegex]='sudo|zpwr|env|.*=.*|command|builtin'
 ZPWR_VARS[blackSubcommandPositionRegex]='git|npm|pip|rails|zpwr|nmcli|brew|apt|dnf|yum|zypper'
 
 # the main regex to match x=1 builtin* command* sudo* -* y=2 env* -* z=3 cmd arg1 arg2 etc
 ZPWR_VARS[continueFirstPositionRegex]="^([[:space:]]*)([[:graph:]]+=[[:graph:]]+[[:space:]]+)*(([\\\\\"\']*builtin[\\\\\"\']*[[:space:]]+)*[\\\\\"\']*command[\\\\\"\']*)?([[:space:]]*)(([\\\\\"\']*zpwr[\\\\\"\']*([[:space:]]+)(-[[:graph:]]+)*)*([\\\\\"\']*sudo[\\\\\"\']*([[:space:]]+)((-[ABbEHnPSis]+[[:space:]]*|-[CghpTu][[:space:]=]+[[:graph:]]+[[:space:]]+|--)*)*)*([[:graph:]]+=[[:graph:]]+[[:space:]]+)*([\\\\\"\']*env[\\\\\"\']*[[:space:]]+(-[iv]+[[:space:]]*|-[PSu][[:space:]=]+[[:graph:]]+[[:space:]]+|--)*)*([[:graph:]]+=[[:graph:]]+[[:space:]]+)*)*([[:space:]]*)(.*)$"
+
+#{{{                    MARK:OLD REGEX
+#**************************************************************
+#ZPWR_VARS[commonRegex]='sudo|zpwr|env|.*=.*|command|builtin'
 # skip options in second and onwards
 #ZPWR_VARS[continueSecondAndOnwardsPositionRegex]='^('$ZPWR_VARS[commonRegex]'|-.*|--)$'
 #ZPWR_VARS[continueOptionSpaceArgSecondAndOnwardsPositionRegex]='^(--?\S+\s+[^-]+)$'
+#}}}***********************************************************
 
 declare -Ag ZPWR_EXPAND_CORRECT_WORDS
 ZPWR_EXPAND_CORRECT_WORDS[about]="aobut abbout aabout"
