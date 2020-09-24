@@ -52,36 +52,36 @@ function zpwrExpandCorrectWord(){
 
     if (( ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_PARTITION]} == 1)); then
         if type -a $ZPWR_VARS[firstword_partition] &>/dev/null; then
-            loggDebug "No correction from 1 word => '"'$ZPWR_VARS[firstword_partition]'"'_____ = ""'$ZPWR_VARS[firstword_partition]'"
+            #loggDebug "No correction from 1 word => '"'$ZPWR_VARS[firstword_partition]'"'_____ = ""'$ZPWR_VARS[firstword_partition]'"
             return
         fi
     else
 
         if [[ "${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]}" =~ "$ZPWR_VARS[continueFirstPositionRegex]" ]];then
-            commandWords=("${(z)match[-1]}")
+            ZPWR_EXPAND_PRE_CORRECT=("${(z)match[-1]}")
 
             loggDebug "${match[@]}"
-            loggDebug "${commandWords[@]}"
+            loggDebug "${ZPWR_EXPAND_PRE_CORRECT[@]}"
 
-            word=${commandWords[1]}
-            if (( $#commandWords == 1)); then
+            word=${ZPWR_EXPAND_PRE_CORRECT[1]}
+            if (( $#ZPWR_EXPAND_PRE_CORRECT == 1)); then
                 if type -a $word &>/dev/null; then
-                    loggDebug "No correction from >= 2 words => '"'$word'"'_____ = ""'$word'"
+                    #loggDebug "No correction from >= 2 words => '"'$word'"'_____ = ""'$word'"
                     return
                 fi
-            elif (( $#commandWords == 2)); then
+            elif (( $#ZPWR_EXPAND_PRE_CORRECT == 2)); then
                 if [[ $word =~ $ZPWR_VARS[blackSubcommandPositionRegex] ]]; then
                     return
                 fi
             fi
 
         else
-            loggDebug "no match ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION] '$ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]'"
+            #loggDebug "no match ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION] '$ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]'"
             return
         fi
     fi
 
-    loggDebug "______'"'attempt correction'"'_____ = ""'$ZPWR_VARS[lastword_remove_special]'"
+    #loggDebug "______'"'attempt correction'"'_____ = ""'$ZPWR_VARS[lastword_remove_special]'"
 
     for key in ${(k)ZPWR_EXPAND_CORRECT_WORDS[@]}; do
 
@@ -95,6 +95,10 @@ function zpwrExpandCorrectWord(){
                 res1=${match[1]}
                 # expand
                 LBUFFER="$res1${key:gs/_/ /}"
+
+                [[ $ZPWR_EXPAND_PRE_CORRECT == (#b)(*[[:space:]]#)($misspelling) ]];
+                res1=${match[1]}
+                ZPWR_EXPAND_POST_CORRECT="${(z):-$res1${key:gs/_/ /}}"
 
                 # ZPWR_VARS[finished]=true
                 ZPWR_VARS[foundIncorrect]=true
@@ -160,6 +164,10 @@ function zpwrExpandGlobalAliases() {
 #**************************************************************
 function zpwrExpandSupernaturalSpace() {
 
+    ZPWR_EXPAND_PRE_CORRECT=""
+    ZPWR_EXPAND_POST_CORRECT=""
+    ZPWR_VARS[foundIncorrect]=false
+
     if [[ $ZPWR_TRACE == true ]]; then
         set -x
     fi
@@ -174,7 +182,8 @@ function zpwrExpandSupernaturalSpace() {
     fi
 
     if [[ $ZPWR_VARS[foundIncorrect] = true && $ZPWR_CORRECT_EXPAND = true ]]; then
-        loggDebug "RE-EXPAND after incorrect spelling"
+        #loggDebug "RE-EXPAND after incorrect spelling"
+        ZPWR_EXPAND_PRE_CORRECT=("${ZPWR_EXPAND_POST_CORRECT[@]}")
         zpwrExpandParseWords
     fi
 
@@ -186,14 +195,14 @@ function zpwrExpandSupernaturalSpace() {
         aliasOut=$(alias -r -- $ZPWR_VARS[lastword_lbuffer])
         if [[ -n $aliasOut ]] && ! [[ $aliasOut =~ $ZPWR_VARS[blacklistFirstPosRegex] ]];then
 
-            loggDebug "regular=>'$ZPWR_VARS[lastword_lbuffer]'"
+            #loggDebug "regular=>'$ZPWR_VARS[lastword_lbuffer]'"
 
             zpwrExpandIsLastWordLastCommand moveCursor expand
         else
-            loggDebug "NOT regular=>'$ZPWR_VARS[lastword_lbuffer]'"
+            #loggDebug "NOT regular=>'$ZPWR_VARS[lastword_lbuffer]'"
             # remove space from menuselect spacebar
             if [[ ${LBUFFER: -1} == " " && ZPWR_VARS[NEED_TO_ADD_SPACECHAR] == true ]]; then
-                loggDebug "removing space menu select"
+                #loggDebug "removing space menu select"
                 LBUFFER="${LBUFFER:0:-1}"
             fi
             if [[ "$ZPWR_VARS[lastword_lbuffer]" =~ '"' ]]; then
@@ -205,10 +214,10 @@ function zpwrExpandSupernaturalSpace() {
             if [[ $(alias -g -- $ZPWR_VARS[lastword_lbuffer]) =~ "." ]]; then
                 # global alias expansion
                 if [[ ${LBUFFER: -1} == " " ]]; then
-                    loggDebug "removing space global alias menu select"
+                    #loggDebug "removing space global alias menu select"
                     LBUFFER="${LBUFFER:0:-1}"
                 fi
-                loggDebug "global=>'$ZPWR_VARS[lastword_lbuffer]'"
+                #loggDebug "global=>'$ZPWR_VARS[lastword_lbuffer]'"
                 zpwrExpandGlobalAliases "$ZPWR_VARS[lastword_lbuffer]"
                 ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND]=true
                 ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
@@ -227,8 +236,8 @@ function zpwrExpandSupernaturalSpace() {
         fi
     fi
 
-    loggDebug "ZPWR_VARS[NEED_TO_ADD_SPACECHAR] = $ZPWR_VARS[NEED_TO_ADD_SPACECHAR]"
-    loggDebug "ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND] = $ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND]"
+    #loggDebug "ZPWR_VARS[NEED_TO_ADD_SPACECHAR] = $ZPWR_VARS[NEED_TO_ADD_SPACECHAR]"
+    #loggDebug "ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND] = $ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND]"
 
     if [[ $ZPWR_VARS[NEED_TO_ADD_SPACECHAR] == true ]];then
         # insert the space char

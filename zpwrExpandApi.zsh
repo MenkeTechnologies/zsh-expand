@@ -25,20 +25,20 @@ function zpwrExpandParseWords(){
 
     # loop through words to get first and last words in partition
     mywordsleft=(${(Az)${(z)LBUFFER:gs/<(/(}})
-    loggDebug "my words left = $mywordsleft"
+    #loggDebug "my words left = $mywordsleft"
 
     if [[ "$mywordsleft" =~ ^(.*)(\{|\<\\\(|\\\(|\;|\&\&|\\\|\\\|\\\|)(.*)$ ]]; then 
 
-        loggDebug "Initial Parse: match $ZPWR_EXPAND_WORDS_LPARTITION[@]"
+        #loggDebug "Initial Parse: match $ZPWR_EXPAND_WORDS_LPARTITION[@]"
         ZPWR_EXPAND_WORDS_LPARTITION=("${(z)match[-1]}")
     else
-        loggDebug "Initial Parse: NO match $ZPWR_EXPAND_WORDS_LPARTITION[@]"
+        #loggDebug "Initial Parse: NO match $ZPWR_EXPAND_WORDS_LPARTITION[@]"
         ZPWR_EXPAND_WORDS_LPARTITION=("$mywordsleft[@]")
     fi
 
     ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]=ZPWR_EXPAND_WORDS_LPARTITION
 
-    loggDebug "lpartition = '${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]}'"
+    #loggDebug "lpartition = '${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]}'"
 
     lpartAry=(${(z)${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]}})
 
@@ -47,22 +47,22 @@ function zpwrExpandParseWords(){
     ZPWR_VARS[lastword_lbuffer]=${lpartAry[-1]}
 
     # to get rid of double quotes
-    loggDebug "first word partition = ...$ZPWR_VARS[firstword_partition]..."
-    loggDebug "last word lbuf before no dbl quotes and [-1] = ...$ZPWR_VARS[lastword_lbuffer]..."
+    #loggDebug "first word partition = ...$ZPWR_VARS[firstword_partition]..."
+    #loggDebug "last word lbuf before no dbl quotes and [-1] = ...$ZPWR_VARS[lastword_lbuffer]..."
 
     lbufAry=(${(z)${ZPWR_VARS[lastword_lbuffer]//\"/}})
 
     ZPWR_VARS[lastword_lbuffer]=${lbufAry[-1]}
-    loggDebug "last word lbuf after no dbl quotes and [-1] = ...$ZPWR_VARS[lastword_lbuffer]..."
+    #loggDebug "last word lbuf after no dbl quotes and [-1] = ...$ZPWR_VARS[lastword_lbuffer]..."
 
-    loggDebug "first word partition before spelling = ...$ZPWR_VARS[firstword_partition]..."
-    loggDebug "last word lbuf before spelling = ...$ZPWR_VARS[lastword_lbuffer]..."
+    #loggDebug "first word partition before spelling = ...$ZPWR_VARS[firstword_partition]..."
+    #loggDebug "last word lbuf before spelling = ...$ZPWR_VARS[lastword_lbuffer]..."
 
     lastWordAry=(${(Az)${ZPWR_VARS[lastword_lbuffer]//[\[\]\{\}\(\)\']/}})
     finalWord=${lastWordAry[-1]}
     ZPWR_VARS[lastword_remove_special]=$finalWord
 
-    loggDebug "last word no special chars...${ZPWR_VARS[lastword_remove_special]}..."
+    #loggDebug "last word no special chars...${ZPWR_VARS[lastword_remove_special]}..."
 
 }
 
@@ -70,7 +70,6 @@ function zpwrExpandIsLastWordLastCommand(){
 
     local moveCursor=$1
     local expand=$2
-    local commandWords
 
     if (( ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]} == 1 )); then
         # regular alias expansion
@@ -100,12 +99,10 @@ function zpwrExpandIsLastWordLastCommand(){
         if [[ $ZPWR_EXPAND_SECOND_POSITION == true ]]; then
 
 
-            if [[ "${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]}" =~ "$ZPWR_VARS[continueFirstPositionRegex]" ]];then
-                commandWords=("${(z)match[-1]}")
-                loggDebug "${match[@]}"
-                loggDebug "${commandWords[@]}"
+            if [[ -n "$ZPWR_EXPAND_PRE_CORRECT" ]]; then
+                #loggDebug "${ZPWR_EXPAND_PRE_CORRECT[@]}"
 
-                if (( $#commandWords == 1)); then
+                if (( $#ZPWR_EXPAND_PRE_CORRECT == 1)); then
                     if [[ $expand == expand ]]; then
                         zpwrExpandCommonParameterExpansion
                         zpwrExpandAlias
