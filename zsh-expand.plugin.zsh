@@ -21,8 +21,8 @@ if ! (( $+ZPWR_VARS )); then
     declare -A ZPWR_VARS
 fi
 
-ZPWR_VARS[EXPAND_API]=${0:h}/zpwrExpandApi.zsh
-ZPWR_VARS[EXPAND_LIB]=${0:h}/zpwrExpandLib.zsh
+ZPWR_VARS[EXPAND_API]=${0:A:h}/zpwrExpandApi.zsh
+ZPWR_VARS[EXPAND_LIB]=${0:A:h}/zpwrExpandLib.zsh
 
 if ! source $ZPWR_VARS[EXPAND_API];then
     echo "failed source ZPWR_VARS[EXPAND_API] $ZPWR_VARS[EXPAND_API]" >&2
@@ -37,15 +37,12 @@ fi
 ZPWR_VARS[blacklistFirstPosRegex]='=.?(omz_history|grc|_z|zshz|cd|hub|_zsh_tmux_.*|_rails_.*|_rake_.*|mvn-or.*|gradle-or.*|noglob .*|rlwrap .*)'
 ZPWR_VARS[commonRegex]='sudo|zpwr|env|.*=.*|command|builtin'
 ZPWR_VARS[blackSubcommandPositionRegex]='git|npm|pip|rails|zpwr|nmcli|brew|apt|dnf|yum|zypper'
+
+# the main regex to match x=1 builtin* command* sudo* -* y=2 env* -* z=3 cmd arg1 arg2 etc
 ZPWR_VARS[continueFirstPositionRegex]="^([[:space:]]*)([[:graph:]]+=[[:graph:]]+[[:space:]]+)*(([\\\\\"\']*builtin[\\\\\"\']*[[:space:]]+)*[\\\\\"\']*command[\\\\\"\']*)?([[:space:]]*)(([\\\\\"\']*zpwr[\\\\\"\']*([[:space:]]+)(-[[:graph:]]+)*)*([\\\\\"\']*sudo[\\\\\"\']*([[:space:]]+)((-[ABbEHnPSis]+[[:space:]]*|-[CghpTu][[:space:]=]+[[:graph:]]+[[:space:]]+|--)*)*)*([[:graph:]]+=[[:graph:]]+[[:space:]]+)*([\\\\\"\']*env[\\\\\"\']*[[:space:]]+(-[iv]+[[:space:]]*|-[PSu][[:space:]=]+[[:graph:]]+[[:space:]]+|--)*)*([[:graph:]]+=[[:graph:]]+[[:space:]]+)*)*([[:space:]]*)(.*)$"
 # skip options in second and onwards
-ZPWR_VARS[continueSecondAndOnwardsPositionRegex]='^('$ZPWR_VARS[commonRegex]'|-.*|--)$'
-ZPWR_VARS[continueOptionSpaceArgSecondAndOnwardsPositionRegex]='^(--?\S+\s+[^-]+)$'
-ZPWR_VARS[foundIncorrect]=false
-
-# globals
-ZPWR_EXPAND_WORDS_LPARTITION=()
-ZPWR_EXPAND_WORDS_PARTITION=()
+#ZPWR_VARS[continueSecondAndOnwardsPositionRegex]='^('$ZPWR_VARS[commonRegex]'|-.*|--)$'
+#ZPWR_VARS[continueOptionSpaceArgSecondAndOnwardsPositionRegex]='^(--?\S+\s+[^-]+)$'
 
 declare -Ag ZPWR_EXPAND_CORRECT_WORDS
 ZPWR_EXPAND_CORRECT_WORDS[about]="aobut abbout aabout"

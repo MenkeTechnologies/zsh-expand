@@ -164,6 +164,9 @@ function zpwrExpandGlobalAliases() {
 #**************************************************************
 function zpwrExpandSupernaturalSpace() {
 
+    # globals
+    ZPWR_EXPAND_WORDS_LPARTITION=()
+    ZPWR_EXPAND_WORDS_PARTITION=()
     ZPWR_EXPAND_PRE_CORRECT=()
     ZPWR_EXPAND_POST_CORRECT=()
     ZPWR_EXPAND_PRE_EXPAND=()
