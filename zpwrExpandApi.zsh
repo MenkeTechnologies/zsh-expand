@@ -120,7 +120,7 @@ function zpwrExpandIsLastWordLastCommand(){
             zpwrExpandCommonParameterExpansion
             words=(${(z)ZPWR_VARS[EXPANDED]})
             if [[ ${words[1]} == "$ZPWR_VARS[lastword_lbuffer]" ]];then
-                # escape the expanded form because its first word is an alias itsef
+                # escape the expanded form because its first word is an alias itself
                 zpwrExpandAliasEscape
                 zpwrExpandGoToTabStopOrEndOfLBuffer
             else
