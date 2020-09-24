@@ -37,8 +37,7 @@ fi
 ZPWR_VARS[blacklistFirstPosRegex]='=.?(omz_history|grc|_z|zshz|cd|hub|_zsh_tmux_.*|_rails_.*|_rake_.*|mvn-or.*|gradle-or.*|noglob .*|rlwrap .*)'
 ZPWR_VARS[commonRegex]='sudo|zpwr|env|.*=.*|command|builtin'
 ZPWR_VARS[blackSubcommandPositionRegex]='git|npm|pip|rails|zpwr|nmcli|brew|apt|dnf|yum|zypper'
-ZPWR_VARS[continueFirstPositionRegex]='^('$ZPWR_VARS[commonRegex]')$'
-#ZPWR_VARS[continueFirstPositionRegex]="^([[:space:]]*)([[:graph:]]+=[[:graph:]]+[[:space:]]+)*(([\\\\\"\']*builtin[\\\\\"\']*[[:space:]]+)*[\\\\\"\']*command[\\\\\"\']*)?([[:space:]]*)(([\\\\\"\']*zpwr[\\\\\"\']*([[:space:]]+)(-[[:graph:]]+)*)*([\\\\\"\']*sudo[\\\\\"\']*([[:space:]]+)((-[ABbEHnPSis]+[[:space:]]*|-[CghpTu][[:space:]=]+[[:graph:]]+[[:space:]]+|--)*)*)*([[:graph:]]+=[[:graph:]]+[[:space:]]+)*([\\\\\"\']*env[\\\\\"\']*[[:space:]]+(-[iv]+[[:space:]]*|-[PSu][[:space:]=]+[[:graph:]]+[[:space:]]+|--)*)*([[:graph:]]+=[[:graph:]]+[[:space:]]+)*)*([[:space:]]*)(.*)$"
+ZPWR_VARS[continueFirstPositionRegex]="^([[:space:]]*)([[:graph:]]+=[[:graph:]]+[[:space:]]+)*(([\\\\\"\']*builtin[\\\\\"\']*[[:space:]]+)*[\\\\\"\']*command[\\\\\"\']*)?([[:space:]]*)(([\\\\\"\']*zpwr[\\\\\"\']*([[:space:]]+)(-[[:graph:]]+)*)*([\\\\\"\']*sudo[\\\\\"\']*([[:space:]]+)((-[ABbEHnPSis]+[[:space:]]*|-[CghpTu][[:space:]=]+[[:graph:]]+[[:space:]]+|--)*)*)*([[:graph:]]+=[[:graph:]]+[[:space:]]+)*([\\\\\"\']*env[\\\\\"\']*[[:space:]]+(-[iv]+[[:space:]]*|-[PSu][[:space:]=]+[[:graph:]]+[[:space:]]+|--)*)*([[:graph:]]+=[[:graph:]]+[[:space:]]+)*)*([[:space:]]*)(.*)$"
 # skip options in second and onwards
 ZPWR_VARS[continueSecondAndOnwardsPositionRegex]='^('$ZPWR_VARS[commonRegex]'|-.*|--)$'
 ZPWR_VARS[continueOptionSpaceArgSecondAndOnwardsPositionRegex]='^(--?\S+\s+[^-]+)$'

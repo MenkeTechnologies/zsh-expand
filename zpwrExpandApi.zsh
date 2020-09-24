@@ -109,6 +109,7 @@ function zpwrExpandIsLastWordLastCommand(){
 
     local moveCursor=$1
     local expand=$2
+    local commandWords
 
     if (( ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]} == 1 )); then
         # regular alias expansion
@@ -133,55 +134,18 @@ function zpwrExpandIsLastWordLastCommand(){
         ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND]=true
         ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
 
-    elif (( ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]} == 2 )); then
+    elif (( ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]} >= 2 )); then
         # regular alias expansion after sudo
         if [[ $ZPWR_EXPAND_SECOND_POSITION == true ]]; then
-            if [[ "$ZPWR_VARS[firstword_partition]" =~ $ZPWR_VARS[continueFirstPositionRegex] ]];then
-                loggDebug "matched $ZPWR_VARS[firstword_partition] with $ZPWR_VARS[continueFirstPositionRegex] with 2 == ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]}"
-                if [[ $expand == expand ]]; then
-                    zpwrExpandCommonParameterExpansion
-                    zpwrExpandAlias
-                    if [[ $moveCursor == moveCursor ]]; then
-                        zpwrExpandGoToTabStopOrEndOfLBuffer
-                    fi
-                fi
-                ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND]=true
-                ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
-            fi
-        fi
 
-    elif (( ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]} > 2 )); then
-        # regular alias expansion after sudo -E or sudo env or sudo env -e or sudo -E env -e -a -f etc
-        if [[ $ZPWR_EXPAND_SECOND_POSITION == true ]]; then
-            if [[ "$ZPWR_VARS[firstword_partition]" =~ $ZPWR_VARS[continueFirstPositionRegex] ]];then
-                loggDebug "matched $ZPWR_VARS[firstword_partition] with $ZPWR_VARS[continueFirstPositionRegex] with $#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION] > 2"
-                for (( i = 2; i < ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_PARTITION]}; ++i )); do
-                    # zsh only supports nested arrays with indirection
-                    word=${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_PARTITION][$i]}
-                    # zsh only supports nested arrays with indirection
-                    nextWord=${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_PARTITION][$i+1]}
-                    shouldStopExpansionDueToFailedRegex=false
 
-                    if (( (i + 1) < ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_PARTITION]} )); then
-                        if [[ "$word $nextWord" =~ $ZPWR_VARS[continueOptionSpaceArgSecondAndOnwardsPositionRegex] ]]; then
-                            loggDebug "matched grep -Eqv '$ZPWR_VARS[continueOptionSpaceArgSecondAndOnwardsPositionRegex]' for word:'$word $nextWord'"
-                            ((++i))
-                            continue
-                        fi
-                    fi
-
-                    if ! [[ "$word" =~ $ZPWR_VARS[continueSecondAndOnwardsPositionRegex] ]]; then
-                        shouldStopExpansionDueToFailedRegex=true
-                        ZPWR_VARS[NEED_TO_ADD_SPACECHAR]=true
-                        loggDebug "failed grep -Eqv '$ZPWR_VARS[continueSecondAndOnwardsPositionRegex]' for word:'$word'"
-                        break
-                    fi
-                done
-                if [[ $shouldStopExpansionDueToFailedRegex == false ]]; then
+            if [[ "$ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]" =~ "$ZPWR_VARS[continueFirstPositionRegex]" ]];then
+                commandWords="${(z)match[-1]}"
+                loggDebug "matched: $match[@]"
+                if (( $#commandWords == 1)); then
                     if [[ $expand == expand ]]; then
                         zpwrExpandCommonParameterExpansion
                         zpwrExpandAlias
-
                         if [[ $moveCursor == moveCursor ]]; then
                             zpwrExpandGoToTabStopOrEndOfLBuffer
                         fi
@@ -189,11 +153,13 @@ function zpwrExpandIsLastWordLastCommand(){
                     ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND]=true
                     ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
                 else
-                    loggDebug "not expanding $ZPWR_VARS[lastword_lbuffer] with 1st pos:$ZPWR_VARS[continueFirstPositionRegex] and 2nd pos:$ZPWR_VARS[continueSecondAndOnwardsPositionRegex]"
+                    ZPWR_VARS[NEED_TO_ADD_SPACECHAR]=true
                 fi
             else
-                loggDebug "failed regex $ZPWR_VARS[firstword_partition] =~ $ZPWR_VARS[continueFirstPositionRegex]"
+                ZPWR_VARS[NEED_TO_ADD_SPACECHAR]=true
+                loggDebug "no match$ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]"
             fi
         fi
+
     fi
 }

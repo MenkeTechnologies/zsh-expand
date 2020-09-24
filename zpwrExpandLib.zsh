@@ -56,44 +56,27 @@ function zpwrExpandCorrectWord(){
             return
         fi
     else
-        if [[ $ZPWR_VARS[firstword_partition] =~ $ZPWR_VARS[continueFirstPositionRegex] ]];then
-            for (( i = 2; i <= ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]}; ++i )); do
+        if [[ "$ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]" =~ "$ZPWR_VARS[continueFirstPositionRegex]" ]];then
+            commandWords="${(z)match[-1]}"
+            loggDebug "matched: $match[@]"
 
-                word=${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION][$i]}
-                nextWord=${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION][$i+1]}
-
-                if [[ "$word $nextWord" =~ $ZPWR_VARS[continueOptionSpaceArgSecondAndOnwardsPositionRegex] ]]; then
-
-                    loggDebug "matched grep -Eqv '$ZPWR_VARS[continueOptionSpaceArgSecondAndOnwardsPositionRegex]' for word:'$word $nextWord'"
-                    if (( (i + 1) < ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]} )); then
-                        ((++i))
-                        continue
-                    fi
+            if (( $#commandWords == 1)); then
+                word=${commandWords[1]}
+                if type -a $word &>/dev/null; then
+                    loggDebug "No correction from >= 2 words => '"'$word'"'_____ = ""'$word'"
+                    return
+                else
+                    break
                 fi
+            elif (( $#commandWords == 2)); then
 
-                if ((i == ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]} )); then
-                    # last word of lbuffer
-                    if type -a $word &>/dev/null; then
-                        loggDebug "No correction from >= 2 words => '"'$word'"'_____ = ""'$word'"
-                        return
-                    else
-                        break
-                    fi
-                elif ! [[ $word =~ $ZPWR_VARS[continueSecondAndOnwardsPositionRegex] ]]; then
-                    if [[ $word =~ $ZPWR_VARS[blackSubcommandPositionRegex] ]]; then
-                        # stop git init expanding
-                        if [[ $nextWord == ${ZPWR_VARS[lastword_remove_special]} ]] && (( ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]} == (i+1) )); then
-                            return
-                        else
-                            break
-                        fi
-                    else
-                        break
-                    fi
+                if [[ $ZPWR_VARS[firstword_partition] =~ $ZPWR_VARS[blackSubcommandPositionRegex] ]]; then
+                    return
                 fi
-            done
-        elif (( ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]} == 2 )) && [[ $ZPWR_VARS[firstword_partition] =~ $ZPWR_VARS[blackSubcommandPositionRegex] ]]  ; then
-            # stop git init expanding
+            fi
+
+        else
+            loggDebug "no match$ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]"
             return
         fi
     fi
