@@ -27,7 +27,7 @@ function zpwrExpandParseWords(){
     mywordsleft=(${(Az)${(z)LBUFFER:gs/<(/(}})
     #loggDebug "my words left = $mywordsleft"
 
-    if [[ "$mywordsleft" =~ ^(.*)(\{|\<\\\(|\\\(|\;|\&\&|\\\|\\\|\\\|)(.*)$ ]]; then 
+    if [[ "$mywordsleft" =~ ^(.*)(\\\{|\\\<\\\(|\\\(|\\\;|\\\&\\\&|\\\||\\\|\\\|)(.*)$ ]]; then 
 
         #loggDebug "Initial Parse: match $ZPWR_EXPAND_WORDS_LPARTITION[@]"
         ZPWR_EXPAND_WORDS_LPARTITION=("${(z)match[-1]}")
