@@ -99,10 +99,10 @@ function zpwrExpandIsLastWordLastCommand(){
         if [[ $ZPWR_EXPAND_SECOND_POSITION == true ]]; then
 
 
-            if [[ -n "$ZPWR_EXPAND_PRE_CORRECT" ]]; then
-                #loggDebug "${ZPWR_EXPAND_PRE_CORRECT[@]}"
+            if [[ -n "$ZPWR_EXPAND_PRE_EXPAND" ]]; then
+                #loggDebug "${ZPWR_EXPAND_PRE_EXPAND[@]}"
 
-                if (( $#ZPWR_EXPAND_PRE_CORRECT == 1)); then
+                if (( $#ZPWR_EXPAND_PRE_EXPAND == 1)); then
                     if [[ $expand == expand ]]; then
                         zpwrExpandCommonParameterExpansion
                         zpwrExpandAlias
@@ -116,8 +116,28 @@ function zpwrExpandIsLastWordLastCommand(){
                     ZPWR_VARS[NEED_TO_ADD_SPACECHAR]=true
                 fi
             else
-                ZPWR_VARS[NEED_TO_ADD_SPACECHAR]=true
-                loggDebug "no match ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION] '$ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]'"
+                if [[ "${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]}" =~ "$ZPWR_VARS[continueFirstPositionRegex]" ]];then
+                    ZPWR_EXPAND_PRE_EXPAND=("${(z)match[-1]}")
+
+                    if (( $#ZPWR_EXPAND_PRE_EXPAND == 1)); then
+                        if [[ $expand == expand ]]; then
+                            zpwrExpandCommonParameterExpansion
+                            zpwrExpandAlias
+                            if [[ $moveCursor == moveCursor ]]; then
+                                zpwrExpandGoToTabStopOrEndOfLBuffer
+                            fi
+                        fi
+                        ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND]=true
+                        ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
+                    else
+                        ZPWR_VARS[NEED_TO_ADD_SPACECHAR]=true
+                    fi
+                else
+                    ZPWR_VARS[NEED_TO_ADD_SPACECHAR]=true
+                    #loggDebug "no match ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION] '$ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]'"
+                    return
+                fi
+
             fi
         fi
 

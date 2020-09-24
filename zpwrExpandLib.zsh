@@ -30,7 +30,7 @@ function zpwrExpandGoToTabStopOrEndOfLBuffer(){
     lenToFirstTS=${#LBUFFER%%$ZPWR_TABSTOP*}
 
     if (( $lenToFirstTS < ${#LBUFFER} )); then
-        loggDebug "this is a tabstop"
+        #loggDebug "this is a tabstop"
         # check if numbered tabstop
         # if num tabstop then set flag in ZPWR_VARS with value to all indexes
         # sub out all num tabstops
@@ -60,8 +60,8 @@ function zpwrExpandCorrectWord(){
         if [[ "${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]}" =~ "$ZPWR_VARS[continueFirstPositionRegex]" ]];then
             ZPWR_EXPAND_PRE_CORRECT=("${(z)match[-1]}")
 
-            loggDebug "${match[@]}"
-            loggDebug "${ZPWR_EXPAND_PRE_CORRECT[@]}"
+            #loggDebug "${match[@]}"
+            #loggDebug "${ZPWR_EXPAND_PRE_CORRECT[@]}"
 
             word=${ZPWR_EXPAND_PRE_CORRECT[1]}
             if (( $#ZPWR_EXPAND_PRE_CORRECT == 1)); then
@@ -98,7 +98,7 @@ function zpwrExpandCorrectWord(){
 
                 [[ $ZPWR_EXPAND_PRE_CORRECT == (#b)(*[[:space:]]#)($misspelling) ]];
                 res1=${match[1]}
-                ZPWR_EXPAND_POST_CORRECT="${(z):-$res1${key:gs/_/ /}}"
+                ZPWR_EXPAND_POST_CORRECT=("${(z):-$res1${key:gs/_/ /}}")
 
                 # ZPWR_VARS[finished]=true
                 ZPWR_VARS[foundIncorrect]=true
@@ -164,8 +164,9 @@ function zpwrExpandGlobalAliases() {
 #**************************************************************
 function zpwrExpandSupernaturalSpace() {
 
-    ZPWR_EXPAND_PRE_CORRECT=""
-    ZPWR_EXPAND_POST_CORRECT=""
+    ZPWR_EXPAND_PRE_CORRECT=()
+    ZPWR_EXPAND_POST_CORRECT=()
+    ZPWR_EXPAND_PRE_EXPAND=()
     ZPWR_VARS[foundIncorrect]=false
 
     if [[ $ZPWR_TRACE == true ]]; then
@@ -183,8 +184,10 @@ function zpwrExpandSupernaturalSpace() {
 
     if [[ $ZPWR_VARS[foundIncorrect] = true && $ZPWR_CORRECT_EXPAND = true ]]; then
         #loggDebug "RE-EXPAND after incorrect spelling"
-        ZPWR_EXPAND_PRE_CORRECT=("${ZPWR_EXPAND_POST_CORRECT[@]}")
+        ZPWR_EXPAND_PRE_EXPAND=("${ZPWR_EXPAND_POST_CORRECT[@]}")
         zpwrExpandParseWords
+    else
+        ZPWR_EXPAND_PRE_EXPAND=("${ZPWR_EXPAND_PRE_CORRECT[@]}")
     fi
 
     ZPWR_VARS[NEED_TO_ADD_SPACECHAR]=true
