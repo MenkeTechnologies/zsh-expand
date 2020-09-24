@@ -69,7 +69,7 @@ function zpwrExpandCorrectWord(){
                     loggDebug "No correction from >= 2 words => '"'$word'"'_____ = ""'$word'"
                     return
                 fi
-            elif (( $#commandWords >= 2)); then
+            elif (( $#commandWords == 2)); then
                 if [[ $word =~ $ZPWR_VARS[blackSubcommandPositionRegex] ]]; then
                     return
                 fi
