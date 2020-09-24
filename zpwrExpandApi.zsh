@@ -157,7 +157,7 @@ function zpwrExpandIsLastWordLastCommand(){
                 fi
             else
                 ZPWR_VARS[NEED_TO_ADD_SPACECHAR]=true
-                loggDebug "no match$ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]"
+                loggDebug "no match ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION] '$ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]'"
             fi
         fi
 

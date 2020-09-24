@@ -76,7 +76,7 @@ function zpwrExpandCorrectWord(){
             fi
 
         else
-            loggDebug "no match$ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]"
+            loggDebug "no match ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION] '$ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]'"
             return
         fi
     fi
