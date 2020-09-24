@@ -63,15 +63,14 @@ function zpwrExpandCorrectWord(){
             loggDebug "${match[@]}"
             loggDebug "${commandWords[@]}"
 
+            word=${commandWords[1]}
             if (( $#commandWords == 1)); then
-                word=${commandWords[1]}
                 if type -a $word &>/dev/null; then
                     loggDebug "No correction from >= 2 words => '"'$word'"'_____ = ""'$word'"
                     return
                 fi
-            elif (( $#commandWords == 2)); then
-
-                if [[ $ZPWR_VARS[firstword_partition] =~ $ZPWR_VARS[blackSubcommandPositionRegex] ]]; then
+            elif (( $#commandWords >= 2)); then
+                if [[ $word =~ $ZPWR_VARS[blackSubcommandPositionRegex] ]]; then
                     return
                 fi
             fi
