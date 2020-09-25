@@ -217,7 +217,7 @@ function zpwrExpandSupernaturalSpace() {
                     ary=(${(z)ZPWR_VARS[lastword_lbuffer]})
                     ZPWR_VARS[lastword_lbuffer]=$ary[-1]
             fi
-            if [[ $(alias -g -- $ZPWR_VARS[lastword_lbuffer]) =~ "." ]]; then
+            if alias -g -- $ZPWR_VARS[lastword_lbuffer] &>/dev/null; then
                 # global alias expansion
                 if [[ ${LBUFFER: -1} == " " ]]; then
                     #loggDebug "removing space global alias menu select"
