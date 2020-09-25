@@ -199,7 +199,7 @@ function zpwrExpandSupernaturalSpace() {
     #dont expand =word because that is zle expand-word
     if [[ ${ZPWR_VARS[lastword_lbuffer]:0:1} != '=' ]] && (( $#ZPWR_VARS[lastword_lbuffer] > 0 ));then
         aliasOut=$(alias -r -- $ZPWR_VARS[lastword_lbuffer])
-        if [[ -n $aliasOut ]] && ! [[ $aliasOut =~ $ZPWR_VARS[blacklistFirstPosRegex] ]];then
+        if (( ${+aliases[${ZPWR_VARS[lastword_lbuffer]}]} )) && ! [[ ${aliases[${ZPWR_VARS[lastword_lbuffer]}]} =~ $ZPWR_VARS[blacklistFirstPosRegex] ]];then
 
             #loggDebug "regular=>'$ZPWR_VARS[lastword_lbuffer]'"
 
@@ -217,7 +217,7 @@ function zpwrExpandSupernaturalSpace() {
                     ary=(${(z)ZPWR_VARS[lastword_lbuffer]})
                     ZPWR_VARS[lastword_lbuffer]=$ary[-1]
             fi
-            if alias -g -- $ZPWR_VARS[lastword_lbuffer] &>/dev/null; then
+            if (( ${+galiases[${ZPWR_VARS[lastword_lbuffer]}]} )); then
                 # global alias expansion
                 if [[ ${LBUFFER: -1} == " " ]]; then
                     #loggDebug "removing space global alias menu select"
