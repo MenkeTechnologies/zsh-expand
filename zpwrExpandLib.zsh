@@ -198,7 +198,6 @@ function zpwrExpandSupernaturalSpace() {
 
     #dont expand =word because that is zle expand-word
     if [[ ${ZPWR_VARS[lastword_lbuffer]:0:1} != '=' ]] && (( $#ZPWR_VARS[lastword_lbuffer] > 0 ));then
-        aliasOut=$(alias -r -- $ZPWR_VARS[lastword_lbuffer])
         if (( ${+aliases[${ZPWR_VARS[lastword_lbuffer]}]} )) && ! [[ ${aliases[${ZPWR_VARS[lastword_lbuffer]}]} =~ $ZPWR_VARS[blacklistFirstPosRegex] ]];then
 
             #loggDebug "regular=>'$ZPWR_VARS[lastword_lbuffer]'"

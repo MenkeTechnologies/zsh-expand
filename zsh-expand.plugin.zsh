@@ -34,7 +34,7 @@ if ! source $ZPWR_VARS[EXPAND_LIB];then
     return 1
 fi
 
-ZPWR_VARS[blacklistFirstPosRegex]='(omz_history|grc|_z|zshz|cd|hub|_zsh_tmux_.*|_rails_.*|_rake_.*|mvn-or.*|gradle-or.*|noglob .*|rlwrap .*)'
+ZPWR_VARS[blacklistFirstPosRegex]='^(omz_history|grc|_z|zshz|cd|hub|_zsh_tmux_.*|_rails_.*|_rake_.*|mvn-or.*|gradle-or.*|noglob .*|rlwrap .*)$'
 ZPWR_VARS[blackSubcommandPositionRegex]='git|npm|pip|rails|zpwr|nmcli|brew|apt|dnf|yum|zypper'
 
 # the main regex to match x=1 builtin* command* sudo* -* y=2 env* -* z=3 cmd arg1 arg2 etc
