@@ -164,6 +164,11 @@ function zpwrExpandGlobalAliases() {
 #**************************************************************
 function zpwrExpandSupernaturalSpace() {
 
+    local tempBuffer mywords badWords word nextWord i shouldStopExpansionDueToFailedRegex words ary res1  aliasOut
+
+    if [[ $ZPWR_TRACE == true ]]; then
+        set -x
+    fi
     # globals
     ZPWR_EXPAND_WORDS_LPARTITION=()
     ZPWR_EXPAND_WORDS_PARTITION=()
@@ -171,12 +176,8 @@ function zpwrExpandSupernaturalSpace() {
     ZPWR_EXPAND_POST_CORRECT=()
     ZPWR_EXPAND_PRE_EXPAND=()
     ZPWR_VARS[foundIncorrect]=false
-
-    if [[ $ZPWR_TRACE == true ]]; then
-        set -x
-    fi
-
-    local tempBuffer mywords badWords word nextWord i shouldStopExpansionDueToFailedRegex words ary res1  aliasOut
+    ZPWR_VARS[NEED_TO_ADD_SPACECHAR]=true
+    ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND]=false
     ZPWR_VARS[finished]=false
 
     zpwrExpandParseWords
@@ -192,9 +193,6 @@ function zpwrExpandSupernaturalSpace() {
     else
         ZPWR_EXPAND_PRE_EXPAND=("${ZPWR_EXPAND_PRE_CORRECT[@]}")
     fi
-
-    ZPWR_VARS[NEED_TO_ADD_SPACECHAR]=true
-    ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND]=false
 
     #dont expand =word because that is zle expand-word
     if [[ ${ZPWR_VARS[lastword_lbuffer]:0:1} != '=' ]] && (( $#ZPWR_VARS[lastword_lbuffer] > 0 ));then
