@@ -50,6 +50,10 @@ function zpwrExpandCorrectWord(){
 
     local word nextWord badWords misspelling key res1
 
+    if (( ${+galiases[${ZPWR_VARS[lastword_lbuffer]}]} )); then
+        return
+    fi
+
     if (( ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_PARTITION]} == 1)); then
         if type -a $ZPWR_VARS[firstword_partition] &>/dev/null; then
             #loggDebug "No correction from 1 word => '"'$ZPWR_VARS[firstword_partition]'"'_____ = ""'$ZPWR_VARS[firstword_partition]'"
