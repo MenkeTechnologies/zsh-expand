@@ -30,6 +30,26 @@
     assert $LBUFFER same_as 'ls'
 }
 
+@test 'no expand alias pwd="pwd "' {
+    LBUFFER="pwd "
+    ZPWR_VARS[lastword_lbuffer]=pwd
+    ZPWR_VARS[EXPANDED]='ls'
+    zpwrExpandAlias || :
+
+    printLBUFFER
+    assert $LBUFFER same_as 'pwd '
+}
+
+@test 'no expand alias pwd="ls' {
+    LBUFFER="sudo pwd "
+    ZPWR_VARS[lastword_lbuffer]=pwd
+    ZPWR_VARS[EXPANDED]='ls'
+    zpwrExpandAlias || :
+
+    printLBUFFER
+    assert $LBUFFER same_as 'sudo pwd '
+}
+
 @test 'expand alias pwd="ls" keep space' {
     declare -A ZPWR_VARS
     LBUFFER=" ls"

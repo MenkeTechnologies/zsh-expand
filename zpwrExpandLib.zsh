@@ -129,10 +129,13 @@ function zpwrExpandAliasEscape(){
 
     local res1 result
 
-    [[ $LBUFFER == (#b)(*[[:space:]]#)($ZPWR_VARS[lastword_lbuffer]) ]]
-    res1=${match[1]}
-    # expand
-    LBUFFER="$res1\\$ZPWR_VARS[EXPANDED]"
+    if [[ $LBUFFER == (#b)(*[[:space:]]#)($ZPWR_VARS[lastword_lbuffer]) ]]; then
+        res1=${match[1]}
+        # expand
+        LBUFFER="$res1\\$ZPWR_VARS[EXPANDED]"
+        ZPWR_VARS[WAS_EXPANDED]=true
+    fi
+
 
 }
 
@@ -140,10 +143,12 @@ function zpwrExpandAlias(){
 
     local res1 result
 
-    [[ $LBUFFER == (#b)(*[[:space:]]#)($ZPWR_VARS[lastword_lbuffer]) ]]
-    res1=${match[1]}
-    # expand
-    LBUFFER="$res1$ZPWR_VARS[EXPANDED]"
+    if [[ $LBUFFER == (#b)(*[[:space:]]#)($ZPWR_VARS[lastword_lbuffer]) ]]; then
+        res1=${match[1]}
+        # expand
+        LBUFFER="$res1$ZPWR_VARS[EXPANDED]"
+        ZPWR_VARS[WAS_EXPANDED]=true
+    fi
 
 }
 
@@ -153,13 +158,25 @@ function zpwrExpandGlobalAliases() {
 
     ZPWR_VARS[lastword_lbuffer]="$1"
     result=$galiases[$ZPWR_VARS[lastword_lbuffer]]
-    [[ $LBUFFER == (#b)(*[[:space:]]#)($ZPWR_VARS[lastword_lbuffer]) ]]
+    if [[ $LBUFFER == (#b)(*[[:space:]]#)($ZPWR_VARS[lastword_lbuffer]) ]]; then
 
-    res1=${match[1]}
-    # expand
-    LBUFFER="$res1$result"
+        res1=${match[1]}
+        # expand
+        LBUFFER="$res1$result"
+        ZPWR_VARS[WAS_EXPANDED]=true
 
-    zpwrExpandGoToTabStopOrEndOfLBuffer
+        zpwrExpandGoToTabStopOrEndOfLBuffer
+    fi
+}
+
+function zpwrExpandRightTrim() {
+    # regular alias expansion
+    # remove space from menuselect spacebar
+    if [[ ${LBUFFER: -1} == " "  && ${LBUFFER: -2:-1} != " " ]]; then
+        #loggDebug "removing space menu select"
+        LBUFFER="${LBUFFER:0:-1}"
+    fi
+
 }
 
 #}}}***********************************************************
@@ -183,6 +200,7 @@ function zpwrExpandSupernaturalSpace() {
     ZPWR_VARS[NEED_TO_ADD_SPACECHAR]=true
     ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND]=false
     ZPWR_VARS[finished]=false
+    ZPWR_VARS[WAS_EXPANDED]=false
 
     zpwrExpandParseWords
 
@@ -203,27 +221,21 @@ function zpwrExpandSupernaturalSpace() {
         if (( ${+aliases[${ZPWR_VARS[lastword_lbuffer]}]} )) && ! [[ ${aliases[${ZPWR_VARS[lastword_lbuffer]}]} =~ $ZPWR_VARS[blacklistFirstPosRegex] ]];then
 
             #loggDebug "regular=>'$ZPWR_VARS[lastword_lbuffer]'"
-
+            zpwrExpandRightTrim
             zpwrExpandIsLastWordLastCommand moveCursor expand
         else
             #loggDebug "NOT regular=>'$ZPWR_VARS[lastword_lbuffer]'"
-            # remove space from menuselect spacebar
-            if [[ ${LBUFFER: -1} == " " && ZPWR_VARS[NEED_TO_ADD_SPACECHAR] == true ]]; then
-                #loggDebug "removing space menu select"
-                LBUFFER="${LBUFFER:0:-1}"
-            fi
-            if [[ "$ZPWR_VARS[lastword_lbuffer]" =~ '"' ]]; then
-                # expand on last word of "string" for global aliases only
-                    ZPWR_VARS[lastword_lbuffer]=${ZPWR_VARS[lastword_lbuffer]:gs/\"//}
-                    ary=(${(z)ZPWR_VARS[lastword_lbuffer]})
-                    ZPWR_VARS[lastword_lbuffer]=$ary[-1]
-            fi
             if (( ${+galiases[${ZPWR_VARS[lastword_lbuffer]}]} )); then
-                # global alias expansion
-                if [[ ${LBUFFER: -1} == " " ]]; then
-                    #loggDebug "removing space global alias menu select"
-                    LBUFFER="${LBUFFER:0:-1}"
+
+                if [[ "$ZPWR_VARS[lastword_lbuffer]" =~ '"' ]]; then
+                    # expand on last word of "string" for global aliases only
+                        ZPWR_VARS[lastword_lbuffer]=${ZPWR_VARS[lastword_lbuffer]:gs/\"//}
+                        ary=(${(z)ZPWR_VARS[lastword_lbuffer]})
+                        ZPWR_VARS[lastword_lbuffer]=$ary[-1]
                 fi
+
+                zpwrExpandRightTrim
+                # global alias expansion
                 #loggDebug "global=>'$ZPWR_VARS[lastword_lbuffer]'"
                 zpwrExpandGlobalAliases "$ZPWR_VARS[lastword_lbuffer]"
                 ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND]=true
@@ -247,15 +259,17 @@ function zpwrExpandSupernaturalSpace() {
     #loggDebug "ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND] = $ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND]"
 
     if [[ $ZPWR_VARS[NEED_TO_ADD_SPACECHAR] == true ]];then
-        # insert the space char
-        if [[ $LBUFFER[-1] != ' ' ]]; then
+        if [[ $ZPWR_VARS[WAS_EXPANDED] == false ]]; then
+            # no expansion occurred
             if [[ $ZPWR_VARS[AP_SPACE] == true ]]; then
                 zle autopair-insert
             else
                 zle self-insert
             fi
         else
-            if [[ $ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND] != true ]]; then
+            # expansion occurred
+            if [[ $LBUFFER[-1] != ' ' ]]; then
+                # stop duplicate space
                 if [[ $ZPWR_VARS[AP_SPACE] == true ]]; then
                     zle autopair-insert
                 else

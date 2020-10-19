@@ -82,11 +82,6 @@ function zpwrExpandIsLastWordLastCommand(){
     local expand=$2
 
     if (( ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]} == 1 )); then
-        # regular alias expansion
-        # remove space from menuselect spacebar
-        if [[ ${LBUFFER: -1} == " " ]]; then
-            LBUFFER="${LBUFFER:0:-1}"
-        fi
         if [[ $expand == expand ]]; then
             zpwrExpandCommonParameterExpansion
             words=(${(z)ZPWR_VARS[EXPANDED]})
@@ -96,7 +91,7 @@ function zpwrExpandIsLastWordLastCommand(){
             else
                 zpwrExpandAlias
             fi
-            if [[ $moveCursor == moveCursor ]]; then
+            if [[ $ZPWR_VARS[WAS_EXPANDED] == true && $moveCursor == moveCursor ]]; then
                 zpwrExpandGoToTabStopOrEndOfLBuffer
             fi
         fi
@@ -115,7 +110,7 @@ function zpwrExpandIsLastWordLastCommand(){
                     if [[ $expand == expand ]]; then
                         zpwrExpandCommonParameterExpansion
                         zpwrExpandAlias
-                        if [[ $moveCursor == moveCursor ]]; then
+                        if [[ $ZPWR_VARS[WAS_EXPANDED] == true && $moveCursor == moveCursor ]]; then
                             zpwrExpandGoToTabStopOrEndOfLBuffer
                         fi
                     fi
@@ -132,7 +127,7 @@ function zpwrExpandIsLastWordLastCommand(){
                         if [[ $expand == expand ]]; then
                             zpwrExpandCommonParameterExpansion
                             zpwrExpandAlias
-                            if [[ $moveCursor == moveCursor ]]; then
+                            if [[ $ZPWR_VARS[WAS_EXPANDED] == true && $moveCursor == moveCursor ]]; then
                                 zpwrExpandGoToTabStopOrEndOfLBuffer
                             fi
                         fi
