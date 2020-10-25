@@ -256,7 +256,9 @@ function zpwrExpandSupernaturalSpace() {
     if [[ $ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND] != true ]]; then
         # expand file globs, history expansions, command expansion, parameter expansion and =command
         if [[ $ZPWR_EXPAND_NATIVE == true ]]; then
-            zle expand-word
+            if [[ $LBUFFER[-1] != ' ' ]]; then
+                zle expand-word
+            fi
         fi
     fi
 
