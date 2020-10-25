@@ -144,6 +144,22 @@ function zpwrExpandAliasEscape(){
 
 }
 
+function zpwrExpandStopHistoryExpansion(){
+    #escapes all previous history !pwd etc before last word because zle expand-word always expands them
+
+    local res1 result
+
+    if [[ $LBUFFER == (#b)(*[[:space:]]#)($ZPWR_VARS[lastword_lbuffer]) ]]; then
+        res1=${match[1]}
+        # expand
+        regexp-replace res1 '(^|[ ])!([[:graph:]]+ )' '$match[1]\!$match[2]'
+        LBUFFER="$res1$ZPWR_VARS[lastword_lbuffer]"
+        ZPWR_VARS[WAS_EXPANDED]=true
+        zle expand-word
+    fi
+
+}
+
 function zpwrExpandAlias(){
 
     local res1 result
@@ -191,6 +207,8 @@ function zpwrExpandRightTrim() {
 function zpwrExpandSupernaturalSpace() {
 
     local tempBuffer mywords badWords word nextWord i shouldStopExpansionDueToFailedRegex words ary res1  aliasOut
+
+    autoload regexp-replace
 
     if [[ $ZPWR_TRACE == true ]]; then
         set -x
@@ -257,7 +275,8 @@ function zpwrExpandSupernaturalSpace() {
         # expand file globs, history expansions, command expansion, parameter expansion and =command
         if [[ $ZPWR_EXPAND_NATIVE == true ]]; then
             if [[ $LBUFFER[-1] != ' ' ]]; then
-                zle expand-word
+                zpwrExpandStopHistoryExpansion
+                #zle expand-word
             fi
         fi
     fi
