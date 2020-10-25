@@ -94,20 +94,25 @@ function zpwrExpandCorrectWord(){
 
             if [[ ${ZPWR_VARS[lastword_remove_special]} == $misspelling ]]; then
 
-                # expand
-                [[ $LBUFFER == (#b)(*[[:space:]]#)($misspelling) ]];
-                res1=${match[1]}
-                # expand
-                LBUFFER="$res1${key:gs/_/ /}"
+                # expand only when cursor is right of misspelled word
+                if [[ $LBUFFER == (#b)(*[[:space:]]#)($misspelling) ]]; then
+                    res1=${match[1]}
+                    # expand
+                    LBUFFER="$res1${key:gs/_/ /}"
+                    ZPWR_VARS[foundIncorrect]=true
+                    # ZPWR_VARS[finished]=true
+                fi
 
-                [[ $ZPWR_EXPAND_PRE_CORRECT == (#b)(*[[:space:]]#)($misspelling) ]];
-                res1=${match[1]}
-                ZPWR_EXPAND_POST_CORRECT=("${(z):-$res1${key:gs/_/ /}}")
+                # expand only when cursor is right of misspelled word
+                if [[ $ZPWR_EXPAND_PRE_CORRECT == (#b)(*[[:space:]]#)($misspelling) ]]; then
+                    res1=${match[1]}
+                    ZPWR_EXPAND_POST_CORRECT=("${(z):-$res1${key:gs/_/ /}}")
+                    ZPWR_VARS[foundIncorrect]=true
+                    # ZPWR_VARS[finished]=true
+                fi
 
-                # ZPWR_VARS[finished]=true
-                ZPWR_VARS[foundIncorrect]=true
-                CURSOR=$#LBUFFER
-                break
+                # break to outer for loop
+                break 2
             fi
         done
         if [[ $ZPWR_VARS[finished] == true ]];then
