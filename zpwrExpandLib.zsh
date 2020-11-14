@@ -62,7 +62,7 @@ function zpwrExpandCorrectWord(){
         fi
     else
 
-        if [[ "${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]}" =~ "$ZPWR_VARS[continueFirstPositionRegex]" ]];then
+        if [[ "${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]}" =~ "$ZPWR_VARS[continueFirstPositionRegexNoZpwr]" ]];then
             ZPWR_EXPAND_PRE_CORRECT=("${(z)match[-1]}")
 
             #loggDebug "${match[@]}"
@@ -76,10 +76,6 @@ function zpwrExpandCorrectWord(){
                     return
                 fi
 
-                if [[ $match[6] =~ 'zpwr' ]]; then
-                    # zpwr init<space>
-                    return
-                fi
             elif (( $#ZPWR_EXPAND_PRE_CORRECT == 2)); then
                 if [[ $word =~ $ZPWR_VARS[blackSubcommandPositionRegex] ]]; then
                     # sudo/env git init<space>
