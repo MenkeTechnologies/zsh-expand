@@ -57,6 +57,7 @@ function zpwrExpandCorrectWord(){
     if (( ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_PARTITION]} == 1)); then
         if type -a $ZPWR_VARS[firstword_partition] &>/dev/null; then
             #loggDebug "No correction from 1 word => '"'$ZPWR_VARS[firstword_partition]'"'_____ = ""'$ZPWR_VARS[firstword_partition]'"
+            # git<space>
             return
         fi
     else
@@ -71,16 +72,24 @@ function zpwrExpandCorrectWord(){
             if (( $#ZPWR_EXPAND_PRE_CORRECT == 1)); then
                 if type -a $word &>/dev/null; then
                     #loggDebug "No correction from >= 2 words => '"'$word'"'_____ = ""'$word'"
+                    # sudo/env pwd<space>
+                    return
+                fi
+
+                if [[ $match[6] =~ $ZPWR_VARS[blacklistPrefixRegex] ]]; then
+                    # sudo/env init<space>
                     return
                 fi
             elif (( $#ZPWR_EXPAND_PRE_CORRECT == 2)); then
                 if [[ $word =~ $ZPWR_VARS[blackSubcommandPositionRegex] ]]; then
+                    # sudo/env git init<space>
                     return
                 fi
             fi
 
         else
             #loggDebug "no match ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION] '$ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]'"
+            logg zpwr expand should not reach here
             return
         fi
     fi
