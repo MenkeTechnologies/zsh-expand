@@ -76,8 +76,8 @@ function zpwrExpandCorrectWord(){
                     return
                 fi
 
-                if [[ $match[6] =~ $ZPWR_VARS[blacklistPrefixRegex] ]]; then
-                    # sudo/env init<space>
+                if [[ $match[6] =~ 'zpwr' ]]; then
+                    # zpwr init<space>
                     return
                 fi
             elif (( $#ZPWR_EXPAND_PRE_CORRECT == 2)); then

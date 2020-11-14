@@ -36,7 +36,7 @@ fi
 
 ZPWR_VARS[blacklistFirstPosRegex]='^(omz_history|grc|_z|zshz|cd|hub|_zsh_tmux_|_rails_|_rake_|mvn-or|gradle-or|noglob |rlwrap ).*$'
 ZPWR_VARS[blackSubcommandPositionRegex]='svn|git|ng|pod|docker|kubectl|rndc|yarn|npm|pip[0-9\.]*|bundle|rails|gem|nmcli|brew|apt|dnf|yum|zypper|pacman|proxychains[0-9\.]*|zpwr|zinit'
-ZPWR_VARS[blacklistPrefixRegex]='builtin|command|zpwr|sudo|env'
+ZPWR_VARS[blacklistPrefixRegex]='builtin|command|sudo|env'
 
 # the main regex to match x=1 builtin* command* sudo* -* y=2 env* -* z=3 cmd arg1 arg2 etc
 ZPWR_VARS[continueFirstPositionRegex]="^([[:space:]]*)([[:graph:]]+=[[:graph:]]+[[:space:]]+)*(([\\\\\"\']*builtin[\\\\\"\']*[[:space:]]+)*[\\\\\"\']*command[\\\\\"\']*)?([[:space:]]*)(([\\\\\"\']*zpwr[\\\\\"\']*([[:space:]]+)(-[[:graph:]]+)*)*([\\\\\"\']*sudo[\\\\\"\']*([[:space:]]+)((-[ABbEHnPSis]+[[:space:]]*|-[CghpTu][[:space:]=]+[[:graph:]]+[[:space:]]+|--)*)*)*([[:graph:]]+=[[:graph:]]+[[:space:]]+)*([\\\\\"\']*env[\\\\\"\']*[[:space:]]+(-[iv]+[[:space:]]*|-[PSu][[:space:]=]+[[:graph:]]+[[:space:]]+|--)*)*([[:graph:]]+=[[:graph:]]+[[:space:]]+)*)*([[:space:]]*)(.*)$"
