@@ -9,6 +9,28 @@ Expansion on aliases and global aliases occurs when cursor is on position right 
 
 Expansion on history, globs, parameters and mispellings occurs when cursor is on position right of expansion candidate.  A space after expansion candidate will prevent expansion on spacebar.
 
+## Comparison to other expanding abbrevation libraries 
+### [zsh-abbr](https://github.com/olets/zsh-abbr)
+#### Features that zsh-abbr has but zsh-expand does not
+- separate abbr command
+#### Features that zsh-expand has but zsh-abbr does not
+- zsh-expand uses aliases with no need of separate abbr command
+- zsh-expand expands global aliases
+- zsh-expand expands aliases after builtin/command/sudo/env and linear combinations of these with and without options
+    - `sudo gco<space> => sudo git checkout`
+    - `\builtin \command \sudo -u root -E \env gco<space> => \builtin \command \sudo -u root -E \env git checkout`
+- zsh-expand expands incorrect spellings and phrases, globs, command/process substitution, =command expansion, history expansion and $parameters
+
+### [zsh-abbrev-alias](https://github.com/momo-lab/zsh-abbrev-alias)
+#### Features that zsh-abbrev-alias has but zsh-expand does not
+- separate abbrev-alias command
+#### Features that zsh-expand has but zsh-abbr does not
+- zsh-expand uses aliases and global aliases with no need of separate abbrev-alias command
+- zsh-expand expands aliases after builtin/command/sudo/env and linear combinations of these with and without options 
+    - `sudo gco<space> => sudo git checkout`
+    - `\builtin \command \sudo -u root -E \env gco<space> => \builtin \command \sudo -u root -E \env git checkout`
+- zsh-expand expands incorrect spellings and phrases, globs, command/process substitution, =command expansion, history expansion and $parameters
+
 ## Bypassing expansion
 Expansion can be temporarily bypassed with control-space.
 
