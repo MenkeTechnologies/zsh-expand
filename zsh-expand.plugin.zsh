@@ -35,7 +35,7 @@ if ! source $ZPWR_VARS[EXPAND_LIB];then
 fi
 
 ZPWR_VARS[blacklistFirstPosRegex]='^(omz_history|grc|_z|zshz|cd|hub|_zsh_tmux_|_rails_|_rake_|mvn-or|gradle-or|noglob |rlwrap ).*$'
-ZPWR_VARS[blackSubcommandPositionRegex]='^(svn|git|ng|pod|docker|kubectl|rndc|yarn|npm|pip[0-9\.]*|bundle|rails|gem|nmcli|brew|apt|dnf|yum|zypper|pacman|proxychains[0-9\.]*|zpwr|zinit)$'
+ZPWR_VARS[blackSubcommandPositionRegex]='^(svn|git|ng|pod|docker|kubectl|rndc|yarn|npm|pip[0-9\.]*|bundle|rails|gem|nmcli|brew|apt|dnf|yum|zypper|pacman|proxychains[0-9\.]*|zpwr|zm|zd|zg|zinit)$'
 
 ZPWR_VARS[continueFirstPositionRegexNoZpwr]="^([[:space:]]*)([[:graph:]]+=[[:graph:]]+[[:space:]]+)*(([\\\\\"\']*builtin[\\\\\"\']*[[:space:]]+)*[\\\\\"\']*command[\\\\\"\']*)?([[:space:]]*)(([\\\\\"\']*sudo[\\\\\"\']*([[:space:]]+)((-[ABbEHnPSis]+[[:space:]]*|-[CghpTu][[:space:]=]+[[:graph:]]+[[:space:]]+|--)*)*)*([[:graph:]]+=[[:graph:]]+[[:space:]]+)*([\\\\\"\']*env[\\\\\"\']*[[:space:]]+(-[iv]+[[:space:]]*|-[PSu][[:space:]=]+[[:graph:]]+[[:space:]]+|--)*)*([[:graph:]]+=[[:graph:]]+[[:space:]]+)*)*([[:space:]]*)(.*)$"
 # the main regex to match x=1 builtin* command* sudo* -* y=2 env* -* z=3 cmd arg1 arg2 etc
@@ -107,7 +107,7 @@ ZPWR_EXPAND_CORRECT_WORDS[default]="defalut deafult"
 ZPWR_EXPAND_CORRECT_WORDS[dependencies]="deps dependenceis"
 ZPWR_EXPAND_CORRECT_WORDS[dependency]="dep dependenc"
 ZPWR_EXPAND_CORRECT_WORDS[destination]="dest"
-ZPWR_EXPAND_CORRECT_WORDS[developer]="dev"
+ZPWR_EXPAND_CORRECT_WORDS[developer]="deve"
 ZPWR_EXPAND_CORRECT_WORDS[developers]="devs"
 ZPWR_EXPAND_CORRECT_WORDS[did_not]="didt didnt"
 ZPWR_EXPAND_CORRECT_WORDS[directory]="dir ddir idr direcotry direcorty directroy"
