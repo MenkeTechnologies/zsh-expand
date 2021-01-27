@@ -20,11 +20,18 @@
 
 function zpwrExpandParseWords(){
 
-    local i lastword_partition firstIndex lastIndex finalWord
+    local i lastword_partition firstIndex lastIndex finalWord tmp
     local -a mywordsleft mywordsright mywordsall lbufAry lpartAry lastWordAry partitionAry
 
     # loop through words to get first and last words in partition
-    mywordsleft=(${(Az)${(z)LBUFFER:gs/<(/(}})
+    tmp=${LBUFFER}
+    tmp=( ${(z)tmp} )
+
+    # $(, <(, ` to ( for word splitting
+    tmp[-1]=${tmp[-1]:gs/\<\(/;/}
+    tmp[-1]=${tmp[-1]:gs/\$\(/;/}
+    tmp[-1]=${tmp[-1]:gs/\`/;/}
+    mywordsleft=(${(Az)tmp})
     #loggDebug "my words left = $mywordsleft"
 
     # we must find the first index of the partition
@@ -35,7 +42,7 @@ function zpwrExpandParseWords(){
         # we will split the commad line and get the partition of the caret
         # aliases are valid in the first position after these chars
         case $mywordsleft[$i] in
-            ';;' | \; | \| | '||' | '&&' | '<(' | '(' | '{')
+            ';;' | \; | \| | '||' | '&&' | '(' | '{')
                 firstIndex=$((i+1))
                 break
                 ;;
@@ -56,7 +63,7 @@ function zpwrExpandParseWords(){
 
     ZPWR_VARS[lastword_lbuffer]=${lpartAry[-1]}
 
-    # to get rid of double quotes
+    # to expand inside double quotes
     #loggDebug "first word partition = ...$ZPWR_VARS[firstword_partition]..."
     #loggDebug "last word lbuf before no dbl quotes and [-1] = ...$ZPWR_VARS[lastword_lbuffer]..."
 
