@@ -9,6 +9,9 @@ Expansion on aliases and global aliases occurs when cursor is on position right 
 
 Expansion on history, globs, parameters and mispellings occurs when cursor is on position right of expansion candidate.  A space after expansion candidate will prevent expansion on spacebar.
 
+## Demo
+[![asciicast](https://asciinema.org/a/FteYBtHg5F9oOT7vNkbGlZfjT.svg)](https://asciinema.org/a/FteYBtHg5F9oOT7vNkbGlZfjT)
+
 ## Comparison to other expanding abbrevation libraries 
 ### [zsh-abbr](https://github.com/olets/zsh-abbr)
 #### Features that zsh-abbr has but zsh-expand does not
