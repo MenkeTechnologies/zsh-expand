@@ -107,6 +107,9 @@ function zpwrExpandIsLastWordLastCommand(){
                 # escape the expanded form because its first word is an alias itself
                 zpwrExpandAliasEscape
             else
+    if [[ $ZPWR_TRACE == true ]]; then
+        set -x
+    fi
                 zpwrExpandAlias
             fi
             if [[ $ZPWR_VARS[WAS_EXPANDED] == true && $moveCursor == moveCursor ]]; then
