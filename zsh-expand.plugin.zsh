@@ -21,6 +21,10 @@ if ! (( $+ZPWR_VARS )); then
     declare -A ZPWR_VARS
 fi
 
+if ! (( $+ZPWR_TABSTOP )); then
+    export ZPWR_TABSTOP=__________
+fi
+
 setopt extendedglob
 
 ZPWR_VARS[EXPAND_API]=${0:A:h}/zpwrExpandApi.zsh
@@ -354,6 +358,9 @@ zle -N zpwrExpandTerminateSpace
 if [[ $ZPWR_EXPAND != false ]]; then
     bindkey -M viins " " zpwrExpandSupernaturalSpace
     bindkey -M viins "^@" zpwrExpandTerminateSpace
+
+    bindkey -M emacs " " zpwrExpandSupernaturalSpace
+    bindkey -M emacs "^@" zpwrExpandTerminateSpace
 fi
 
 
