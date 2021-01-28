@@ -219,8 +219,6 @@ function zpwrExpandSupernaturalSpace() {
 
     local tempBuffer mywords badWords word nextWord i shouldStopExpansionDueToFailedRegex words ary res1  aliasOut
 
-    autoload regexp-replace
-
     if [[ $ZPWR_TRACE == true ]]; then
         set -x
     fi
