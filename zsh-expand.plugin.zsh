@@ -18,13 +18,14 @@
 
 if ! (( $+ZPWR_VARS )); then
     # global map to containerize global variables
-    declare -A ZPWR_VARS
+    declare -gA ZPWR_VARS
 fi
 
 if ! (( $+ZPWR_TABSTOP )); then
     export ZPWR_TABSTOP=__________
 fi
 
+autoload regexp-replace
 setopt extendedglob
 
 ZPWR_VARS[EXPAND_API]=${0:A:h}/zpwrExpandApi.zsh
