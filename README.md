@@ -46,6 +46,10 @@ export ZPWR_EXPAND_NATIVE=true
 export ZPWR_CORRECT=true
 # aliases expand after spelling correction
 export ZPWR_CORRECT_EXPAND=true
+# expand inside "
+export ZPWR_EXPAND_QUOTE_DOUBLE=true
+# expand inside '
+export ZPWR_EXPAND_QUOTE_SINGLE=false
 ```
 
 ## Install for Zinit

@@ -27,10 +27,19 @@ function zpwrExpandParseWords(){
     tmp=${LBUFFER}
     tmp=( ${(z)tmp} )
 
-    # $(, <(, ` to ( for word splitting
+    # $(, <(, ` to ; for word splitting
     tmp[-1]=${tmp[-1]:gs/\<\(/;/}
     tmp[-1]=${tmp[-1]:gs/\$\(/;/}
     tmp[-1]=${tmp[-1]:gs/\`/;/}
+    # allow expansion in ""
+    if [[ $ZPWR_EXPAND_QUOTE_DOUBLE == true ]]; then
+        tmp[-1]=${tmp[-1]:gs/\"//}
+    fi
+
+    # allow expansion in ''
+    if [[ $ZPWR_EXPAND_QUOTE_SINGLE == true ]]; then
+        tmp[-1]=${tmp[-1]:gs/\'//}
+    fi
     mywordsleft=(${(Az)tmp})
     #loggDebug "my words left = $mywordsleft"
 
@@ -63,11 +72,10 @@ function zpwrExpandParseWords(){
 
     ZPWR_VARS[lastword_lbuffer]=${lpartAry[-1]}
 
-    # to expand inside double quotes
     #loggDebug "first word partition = ...$ZPWR_VARS[firstword_partition]..."
     #loggDebug "last word lbuf before no dbl quotes and [-1] = ...$ZPWR_VARS[lastword_lbuffer]..."
 
-    lbufAry=(${(z)${ZPWR_VARS[lastword_lbuffer]//\"/}})
+    lbufAry=(${(z)${ZPWR_VARS[lastword_lbuffer]}})
 
     ZPWR_VARS[lastword_lbuffer]=${lbufAry[-1]}
     #loggDebug "last word lbuf after no dbl quotes and [-1] = ...$ZPWR_VARS[lastword_lbuffer]..."
