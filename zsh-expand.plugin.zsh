@@ -21,6 +21,8 @@ if ! (( $+ZPWR_VARS )); then
     declare -A ZPWR_VARS
 fi
 
+setopt extendedglob
+
 ZPWR_VARS[EXPAND_API]=${0:A:h}/zpwrExpandApi.zsh
 ZPWR_VARS[EXPAND_LIB]=${0:A:h}/zpwrExpandLib.zsh
 

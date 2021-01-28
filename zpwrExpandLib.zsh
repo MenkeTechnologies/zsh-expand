@@ -92,6 +92,9 @@ function zpwrExpandCorrectWord(){
 
     #loggDebug "______'"'attempt correction'"'_____ = ""'$ZPWR_VARS[lastword_remove_special]'"
 
+    if [[ $ZPWR_TRACE == true ]]; then
+        set +x
+    fi
     for key in ${(k)ZPWR_EXPAND_CORRECT_WORDS[@]}; do
 
         badWords=("${(z)ZPWR_EXPAND_CORRECT_WORDS[$key]}")
@@ -125,6 +128,9 @@ function zpwrExpandCorrectWord(){
             return 0
         fi
     done
+    if [[ $ZPWR_TRACE == true ]]; then
+        set -x
+    fi
 }
 
 function zpwrExpandCommonParameterExpansion(){
