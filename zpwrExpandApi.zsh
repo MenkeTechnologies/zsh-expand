@@ -27,9 +27,11 @@ function zpwrExpandParseWords(){
     tmp=${LBUFFER}
     tmp=( ${(z)tmp} )
 
-    # $(, <(, ` to ; for word splitting
+    # change <( to ; for word splitting
     tmp[-1]=${tmp[-1]:gs/\<\(/;/}
+    # change $( to ; for word splitting
     tmp[-1]=${tmp[-1]:gs/\$\(/;/}
+    # change ` to ; for word splitting
     tmp[-1]=${tmp[-1]:gs/\`/;/}
     # allow expansion in ""
     if [[ $ZPWR_EXPAND_QUOTE_DOUBLE == true ]]; then
@@ -40,6 +42,7 @@ function zpwrExpandParseWords(){
     if [[ $ZPWR_EXPAND_QUOTE_SINGLE == true ]]; then
         tmp[-1]=${tmp[-1]:gs/\'//}
     fi
+
     mywordsleft=(${(Az)tmp})
     #loggDebug "my words left = $mywordsleft"
 
