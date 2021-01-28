@@ -255,13 +255,6 @@ function zpwrExpandSupernaturalSpace() {
             #loggDebug "NOT regular=>'$ZPWR_VARS[lastword_lbuffer]'"
             if (( ${+galiases[${ZPWR_VARS[lastword_lbuffer]}]} )); then
 
-                if [[ "$ZPWR_VARS[lastword_lbuffer]" =~ '"' ]]; then
-                    # expand on last word of "string" for global aliases only
-                        ZPWR_VARS[lastword_lbuffer]=${ZPWR_VARS[lastword_lbuffer]:gs/\"//}
-                        ary=(${(z)ZPWR_VARS[lastword_lbuffer]})
-                        ZPWR_VARS[lastword_lbuffer]=$ary[-1]
-                fi
-
                 zpwrExpandRightTrim
                 # global alias expansion
                 #loggDebug "global=>'$ZPWR_VARS[lastword_lbuffer]'"
