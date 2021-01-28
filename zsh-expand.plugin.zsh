@@ -16,12 +16,12 @@
 0="${${0:#$ZSH_ARGZERO}:-${(%):-%N}}"
 0="${${(M)0:#/*}:-$PWD/$0}"
 
-if ! (( $+ZPWR_VARS )); then
+if ! (( $+ZPWR_VARS )) || [[ ${parameters[ZPWR_VARS]} != association ]]; then
     # global map to containerize global variables
     declare -gA ZPWR_VARS
 fi
 
-if ! (( $+ZPWR_TABSTOP )); then
+if ! (( $+ZPWR_TABSTOP )) || [[ ${parameters[ZPWR_TABSTOP]} != scalar-export ]]; ; then
     export ZPWR_TABSTOP=__________
 fi
 
