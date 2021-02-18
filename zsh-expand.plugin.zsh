@@ -51,7 +51,7 @@ ZPWR_VARS[continueFirstPositionRegexNoZpwr]="^([[:space:]]*)([[:graph:]]+=[[:gra
 
 # the main regex to match x=1 builtin* command* sudo* -* y=2 env* -* z=3 cmd arg1 arg2 etc
 
-ZPWR_VARS[continueFirstPositionRegex]="^([[:space:]]*)([[:graph:]]+=[[:graph:]]+[[:space:]]+)*(([\\\"\']*builtin[\\\"\']*[[:space:]]+)*[\\\"\']*${ZPWR_VARS[builtinSkips]}[\\\"\']*)?([[:space:]]*)(([\\\"\']*zpwr[\\\"\']*([[:space:]]+)(-[[:graph:]]+)*)*([\\\"\']*sudo[\\\"\']*([[:space:]]+)((-[ABbEHnPSis]+[[:space:]]*|-[CghpTu][[:space:]=]+[[:graph:]]+[[:space:]]+|--)*)*)*([[:graph:]]+=[[:graph:]]+[[:space:]]+)*([\\\"\']*env[\\\"\']*[[:space:]]+(-[iv]+[[:space:]]*|-[PSu][[:space:]=]+[[:graph:]]+[[:space:]]+|--)*)*([[:graph:]]+=[[:graph:]]+[[:space:]]+)*)*([[:space:]]*)(.*)$"
+ZPWR_VARS[continueFirstPositionRegex]="^([[:space:]]*)([[:graph:]]+=[[:graph:]]+[[:space:]]+)*(([\\\"\']*builtin[\\\"\']*[[:space:]]+)*[\\\"\']*${ZPWR_VARS[builtinSkips]}[\\\"\']*)?([[:space:]]*)(([\\\"\']*zpwr[\\\"\']*([[:space:]]+)(-[[:graph:]]+)*)*([\\\"\']*sudo[\\\"\']*([[:space:]]+)((-[ABbEHnPSis]+[[:space:]]*|-[CghpTu][[:space:]=]+[[:graph:]]+[[:space:]]+|--)*)*)*([[:graph:]]+=[[:graph:]]+[[:space:]]+)*([\\\"\']*env[\\\"\']*[[:space:]]+(-[iv]+[[:space:]]*|-[PSu][[:space:]=]+[[:graph:]]+[[:space:]]+|--)*)*([[:graph:]]+=[[:graph:]]+[[:space:]]+)*)*([[:space:]]*)([[:graph:]]+)$"
 
 #{{{                    MARK:OLD REGEX
 #**************************************************************
