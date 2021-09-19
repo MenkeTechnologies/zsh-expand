@@ -9,6 +9,8 @@ Expansion on aliases and global aliases occurs when cursor is on position right 
 
 Expansion on history, globs, parameters and mispellings occurs when cursor is on position right of expansion candidate.  A space after expansion candidate will prevent expansion on spacebar.
 
+There is optional expansion of unexpanded line into history on accepting current line.  See [below](#optional-expansion-of-unexpanded-line-into-history-on-enter).
+
 ## Demo
 [![asciicast](https://asciinema.org/a/FteYBtHg5F9oOT7vNkbGlZfjT.svg)](https://asciinema.org/a/FteYBtHg5F9oOT7vNkbGlZfjT)
 
@@ -53,7 +55,14 @@ export ZPWR_CORRECT_EXPAND=true
 export ZPWR_EXPAND_QUOTE_DOUBLE=true
 # expand inside '
 export ZPWR_EXPAND_QUOTE_SINGLE=false
+# expand into history any unexpanded
+export ZPWR_EXPAND_TO_HISTORY=false
 ```
+
+## Optional expansion of unexpanded line into history on enter
+If `ZPWR_EXPAND_TO_HISTORY=true` then after running a command line with an unexpanded alias or aliases, the line with the expanded alias or aliases will be in history up 2 lines with the unexpanded line up 1 line. After running another command the unexpanded line will be gone. The unexpanded line is never written to `$HISTFILE`. This is the way zshaddhistory hook functions work when returning 1.
+
+This uses the exact same rules as expand on spacebar so `sudo gco` will expand to `sudo git checkout` into history if you have `alias gco=git checkout` etc...
 
 ## Install for Zinit
 > `~/.zshrc`
