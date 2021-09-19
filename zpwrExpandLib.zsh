@@ -133,7 +133,7 @@ function zpwrExpandCorrectWord(){
     fi
 }
 
-function zpwrExpandCommonParameterExpansion(){
+function zpwrExpandGetAliasValue(){
 
     ZPWR_VARS[EXPANDED]="${$(alias -r $ZPWR_VARS[lastword_lbuffer])#*=}"
     # deal with ansi quotes $'
@@ -155,7 +155,7 @@ function zpwrExpandAliasEscape(){
 
 }
 
-function zpwrExpandStopHistoryExpansion(){
+function zpwrExpandWordStopHistoryExpansion(){
     #escapes all previous history !pwd etc before last word because zle expand-word always expands them
 
     local res1 result
@@ -232,7 +232,7 @@ function zpwrExpandSupernaturalSpace() {
     ZPWR_EXPAND_PRE_EXPAND=()
     ZPWR_VARS[foundIncorrect]=false
     ZPWR_VARS[NEED_TO_ADD_SPACECHAR]=true
-    ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND]=false
+    ZPWR_VARS[LAST_WORD_WAS_AT_COMMAND]=false
     ZPWR_VARS[finished]=false
     ZPWR_VARS[WAS_EXPANDED]=false
 
@@ -256,7 +256,7 @@ function zpwrExpandSupernaturalSpace() {
 
             #zpwrLogDebug "regular=>'$ZPWR_VARS[lastword_lbuffer]'"
             zpwrExpandRightTrim
-            zpwrExpandIsLastWordLastCommand moveCursor expand
+            zpwrExpandLastWordAtCommandPosAndExpand moveCursor zle
         else
             #zpwrLogDebug "NOT regular=>'$ZPWR_VARS[lastword_lbuffer]'"
             if (( ${+galiases[${ZPWR_VARS[lastword_lbuffer]}]} )); then
@@ -265,7 +265,7 @@ function zpwrExpandSupernaturalSpace() {
                 # global alias expansion
                 #zpwrLogDebug "global=>'$ZPWR_VARS[lastword_lbuffer]'"
                 zpwrExpandGlobalAliases "$ZPWR_VARS[lastword_lbuffer]"
-                ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND]=true
+                ZPWR_VARS[LAST_WORD_WAS_AT_COMMAND]=true
                 ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
             fi
         fi
@@ -275,16 +275,16 @@ function zpwrExpandSupernaturalSpace() {
             :
        fi
     fi
-    if [[ $ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND] != true ]]; then
+    if [[ $ZPWR_VARS[LAST_WORD_WAS_AT_COMMAND] != true ]]; then
         # expand file globs, history expansions, command expansion, parameter expansion and =command
         if [[ $ZPWR_EXPAND_NATIVE == true ]]; then
             if [[ $LBUFFER[-1] != ' ' ]]; then
                 if [[ $key == $enter ]]; then
                     if [[ $ZPWR_EXPAND_PRE_EXEC_GLOB == true ]]; then
-                        zpwrExpandStopHistoryExpansion
+                        zpwrExpandWordStopHistoryExpansion
                     fi
                 else
-                    zpwrExpandStopHistoryExpansion
+                    zpwrExpandWordStopHistoryExpansion
                 fi
                 #zle expand-word
             fi
@@ -292,7 +292,7 @@ function zpwrExpandSupernaturalSpace() {
     fi
 
     #zpwrLogDebug "ZPWR_VARS[NEED_TO_ADD_SPACECHAR] = $ZPWR_VARS[NEED_TO_ADD_SPACECHAR]"
-    #zpwrLogDebug "ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND] = $ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND]"
+    #zpwrLogDebug "ZPWR_VARS[LAST_WORD_WAS_AT_COMMAND] = $ZPWR_VARS[LAST_WORD_WAS_AT_COMMAND]"
 
     if [[ $ZPWR_VARS[NEED_TO_ADD_SPACECHAR] == true ]];then
         if [[ $ZPWR_VARS[WAS_EXPANDED] == false ]]; then
