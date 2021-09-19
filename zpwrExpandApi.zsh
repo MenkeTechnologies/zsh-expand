@@ -24,7 +24,7 @@ function zpwrExpandParseWords(){
     local -a mywordsleft mywordsright mywordsall lbufAry lpartAry lastWordAry partitionAry
 
     # loop through words to get first and last words in partition
-    tmp=${LBUFFER}
+    tmp=${1}
     tmp=( ${(z)tmp} )
 
     # change <( to ; for word splitting
