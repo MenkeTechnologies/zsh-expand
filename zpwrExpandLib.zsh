@@ -234,7 +234,7 @@ function zpwrExpandSupernaturalSpace() {
     ZPWR_VARS[finished]=false
     ZPWR_VARS[WAS_EXPANDED]=false
 
-    zpwrExpandParseWords
+    zpwrExpandParseWords "$LBUFFER"
 
     if [[ $ZPWR_CORRECT == true ]]; then
         zpwrExpandCorrectWord
@@ -243,7 +243,7 @@ function zpwrExpandSupernaturalSpace() {
     if [[ $ZPWR_VARS[foundIncorrect] = true && $ZPWR_CORRECT_EXPAND = true ]]; then
         #zpwrLogDebug "RE-EXPAND after incorrect spelling"
         ZPWR_EXPAND_PRE_EXPAND=("${ZPWR_EXPAND_POST_CORRECT[@]}")
-        zpwrExpandParseWords
+        zpwrExpandParseWords "$LBUFFER"
     else
         ZPWR_EXPAND_PRE_EXPAND=("${ZPWR_EXPAND_PRE_CORRECT[@]}")
     fi
