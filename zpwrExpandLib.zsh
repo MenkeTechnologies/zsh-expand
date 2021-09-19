@@ -223,7 +223,7 @@ function zpwrExpandSupernaturalSpace() {
         set -x
     fi
 
-    local key="$1" enter="${ZPWR_VARS[ENTER_KEY]}"
+    local triggerKey="$1"
     # globals
     ZPWR_EXPAND_WORDS_LPARTITION=()
     ZPWR_EXPAND_WORDS_PARTITION=()
@@ -256,7 +256,7 @@ function zpwrExpandSupernaturalSpace() {
 
             #zpwrLogDebug "regular=>'$ZPWR_VARS[lastword_lbuffer]'"
             zpwrExpandRightTrim
-            zpwrExpandLastWordAtCommandPosAndExpand moveCursor zle
+            zpwrExpandLastWordAtCommandPosAndExpand moveCursor zle "$triggerKey"
         else
             #zpwrLogDebug "NOT regular=>'$ZPWR_VARS[lastword_lbuffer]'"
             if (( ${+galiases[${ZPWR_VARS[lastword_lbuffer]}]} )); then
@@ -279,7 +279,7 @@ function zpwrExpandSupernaturalSpace() {
         # expand file globs, history expansions, command expansion, parameter expansion and =command
         if [[ $ZPWR_EXPAND_NATIVE == true ]]; then
             if [[ $LBUFFER[-1] != ' ' ]]; then
-                if [[ $key == $enter ]]; then
+                if [[ $triggerKey == "${ZPWR_VARS[ENTER_KEY]}" ]]; then
                     if [[ $ZPWR_EXPAND_PRE_EXEC_GLOB == true ]]; then
                         zpwrExpandWordStopHistoryExpansion
                     fi
@@ -294,21 +294,19 @@ function zpwrExpandSupernaturalSpace() {
     #zpwrLogDebug "ZPWR_VARS[NEED_TO_ADD_SPACECHAR] = $ZPWR_VARS[NEED_TO_ADD_SPACECHAR]"
     #zpwrLogDebug "ZPWR_VARS[LAST_WORD_WAS_AT_COMMAND] = $ZPWR_VARS[LAST_WORD_WAS_AT_COMMAND]"
 
-    if [[ $ZPWR_VARS[NEED_TO_ADD_SPACECHAR] == true ]];then
-        if [[ $ZPWR_VARS[WAS_EXPANDED] == false ]]; then
-            # no expansion occurred
-                if [[ -z $key ]] || [[ $key != $enter ]]; then
-                    if [[ $ZPWR_VARS[AP_SPACE] == true ]]; then
-                        zle autopair-insert
-                    else
-                        zle self-insert
-                    fi
+    if [[ $triggerKey != "${ZPWR_VARS[ENTER_KEY]}" ]]; then
+        if [[ $ZPWR_VARS[NEED_TO_ADD_SPACECHAR] == true ]];then
+            if [[ $ZPWR_VARS[WAS_EXPANDED] == false ]]; then
+                # no expansion occurred
+                if [[ $ZPWR_VARS[AP_SPACE] == true ]]; then
+                    zle autopair-insert
+                else
+                    zle self-insert
                 fi
-        else
-            # expansion occurred
-            if [[ $LBUFFER[-1] != ' ' ]]; then
-                # stop duplicate space
-                if [[ -z $key ]] || [[ $key != $enter ]]; then
+            else
+                # expansion occurred
+                if [[ $LBUFFER[-1] != ' ' ]]; then
+                    # stop duplicate space
                     if [[ $ZPWR_VARS[AP_SPACE] == true ]]; then
                         zle autopair-insert
                     else
