@@ -279,7 +279,13 @@ function zpwrExpandSupernaturalSpace() {
         # expand file globs, history expansions, command expansion, parameter expansion and =command
         if [[ $ZPWR_EXPAND_NATIVE == true ]]; then
             if [[ $LBUFFER[-1] != ' ' ]]; then
-                zpwrExpandStopHistoryExpansion
+                if [[ $key == $enter ]]; then
+                    if [[ $ZPWR_EXPAND_PRE_EXEC_GLOB == true ]]; then
+                        zpwrExpandStopHistoryExpansion
+                    fi
+                else
+                    zpwrExpandStopHistoryExpansion
+                fi
                 #zle expand-word
             fi
         fi
