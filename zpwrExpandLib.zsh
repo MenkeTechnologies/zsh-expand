@@ -222,6 +222,8 @@ function zpwrExpandSupernaturalSpace() {
     if [[ $ZPWR_TRACE == true ]]; then
         set -x
     fi
+
+    local key="$1" enter="${ZPWR_VARS[ENTER_KEY]}"
     # globals
     ZPWR_EXPAND_WORDS_LPARTITION=()
     ZPWR_EXPAND_WORDS_PARTITION=()
@@ -289,19 +291,23 @@ function zpwrExpandSupernaturalSpace() {
     if [[ $ZPWR_VARS[NEED_TO_ADD_SPACECHAR] == true ]];then
         if [[ $ZPWR_VARS[WAS_EXPANDED] == false ]]; then
             # no expansion occurred
-            if [[ $ZPWR_VARS[AP_SPACE] == true ]]; then
-                zle autopair-insert
-            else
-                zle self-insert
-            fi
+                if [[ -z $key ]] || [[ $key != $enter ]]; then
+                    if [[ $ZPWR_VARS[AP_SPACE] == true ]]; then
+                        zle autopair-insert
+                    else
+                        zle self-insert
+                    fi
+                fi
         else
             # expansion occurred
             if [[ $LBUFFER[-1] != ' ' ]]; then
                 # stop duplicate space
-                if [[ $ZPWR_VARS[AP_SPACE] == true ]]; then
-                    zle autopair-insert
-                else
-                    zle self-insert
+                if [[ -z $key ]] || [[ $key != $enter ]]; then
+                    if [[ $ZPWR_VARS[AP_SPACE] == true ]]; then
+                        zle autopair-insert
+                    else
+                        zle self-insert
+                    fi
                 fi
             fi
         fi
