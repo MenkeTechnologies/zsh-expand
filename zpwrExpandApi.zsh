@@ -98,6 +98,7 @@ function zpwrExpandLastWordAtCommandPosAndExpand(){
 
     local moveCursor=$1
     local caller=$2
+    local triggerKey=$3
 
     if (( ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]} == 1 )); then
         if [[ $caller == zle ]]; then
@@ -126,12 +127,15 @@ function zpwrExpandLastWordAtCommandPosAndExpand(){
 
             if [[ -n "$ZPWR_EXPAND_PRE_EXPAND" ]]; then
                 #zpwrLogDebug "${ZPWR_EXPAND_PRE_EXPAND[@]}"
+                if [[ $triggerKey == "${ZPWR_VARS[ENTER_KEY]}" && $ZPWR_EXPAND_PRE_EXEC_SECOND_POSITION != true ]]; then
+                    return
+                fi
 
                 if (( $#ZPWR_EXPAND_PRE_EXPAND == 1)); then
                     if [[ $caller == zle ]]; then
                         zpwrExpandGetAliasValue
                         zpwrExpandAlias
-                        if [[ $ZPWR_VARS[WAS_EXPANDED] == true && $moveCursor == moveCursor ]]; then
+                        if [[ $ZPWR_VARS[WAS_EXPANDED] == true && $moveCursor == moveCursor && $triggerKey != "${ZPWR_VARS[ENTER_KEY]}" ]]; then
                             zpwrExpandGoToTabStopOrEndOfLBuffer
                         fi
                     fi
@@ -148,10 +152,6 @@ function zpwrExpandLastWordAtCommandPosAndExpand(){
                     if (( $#ZPWR_EXPAND_PRE_EXPAND == 1)); then
                         if [[ $caller == zle ]]; then
                             zpwrExpandGetAliasValue
-                            zpwrExpandAlias
-                            if [[ $ZPWR_VARS[WAS_EXPANDED] == true && $moveCursor == moveCursor ]]; then
-                                zpwrExpandGoToTabStopOrEndOfLBuffer
-                            fi
                         fi
                         ZPWR_VARS[LAST_WORD_WAS_AT_COMMAND]=true
                         ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]

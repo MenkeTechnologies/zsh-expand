@@ -21,6 +21,9 @@ if ! (( $+ZPWR_VARS )) || [[ ${parameters[ZPWR_VARS]} != association ]]; then
     declare -gA ZPWR_VARS
 fi
 
+ZPWR_VARS[ENTER_KEY]='ENTER'
+ZPWR_VARS[SPACEBAR_KEY]='SPACE'
+
 if ! (( $+ZPWR_TABSTOP )) || [[ ${parameters[ZPWR_TABSTOP]} != scalar-export ]]; ; then
     export ZPWR_TABSTOP=__________
 fi
