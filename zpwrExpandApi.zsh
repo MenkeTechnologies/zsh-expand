@@ -9,9 +9,9 @@
 # Usage for external service like fzf.  Must have BUFFER, LBUFFER, RBUFFER set like ZLE does.
 #
 # zpwrExpandParseWords
-# zpwrExpandIsLastWordLastCommand
+# zpwrExpandLastWordAtCommandPosAndExpand
 #
-# if $ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND] == true; then
+# if $ZPWR_VARS[LAST_WORD_WAS_AT_COMMAND] == true; then
 #   echo $ZPWR_VARS[ORIGINAL_LAST_COMMAND]
 # fi
 #
@@ -94,29 +94,29 @@ function zpwrExpandParseWords(){
 
 }
 
-function zpwrExpandIsLastWordLastCommand(){
+function zpwrExpandLastWordAtCommandPosAndExpand(){
 
     local moveCursor=$1
-    local expand=$2
+    local caller=$2
 
     if (( ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]} == 1 )); then
-        if [[ $expand == expand ]]; then
-            zpwrExpandCommonParameterExpansion
+        if [[ $caller == zle ]]; then
+            zpwrExpandGetAliasValue
             words=(${(z)ZPWR_VARS[EXPANDED]})
             if [[ ${words[1]} == "$ZPWR_VARS[lastword_lbuffer]" ]];then
                 # escape the expanded form because its first word is an alias itself
                 zpwrExpandAliasEscape
             else
-    if [[ $ZPWR_TRACE == true ]]; then
-        set -x
-    fi
+                if [[ $ZPWR_TRACE == true ]]; then
+                    set -x
+                fi
                 zpwrExpandAlias
             fi
             if [[ $ZPWR_VARS[WAS_EXPANDED] == true && $moveCursor == moveCursor ]]; then
                 zpwrExpandGoToTabStopOrEndOfLBuffer
             fi
         fi
-        ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND]=true
+        ZPWR_VARS[LAST_WORD_WAS_AT_COMMAND]=true
         ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
 
     elif (( ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]} >= 2 )); then
@@ -128,31 +128,32 @@ function zpwrExpandIsLastWordLastCommand(){
                 #zpwrLogDebug "${ZPWR_EXPAND_PRE_EXPAND[@]}"
 
                 if (( $#ZPWR_EXPAND_PRE_EXPAND == 1)); then
-                    if [[ $expand == expand ]]; then
-                        zpwrExpandCommonParameterExpansion
+                    if [[ $caller == zle ]]; then
+                        zpwrExpandGetAliasValue
                         zpwrExpandAlias
                         if [[ $ZPWR_VARS[WAS_EXPANDED] == true && $moveCursor == moveCursor ]]; then
                             zpwrExpandGoToTabStopOrEndOfLBuffer
                         fi
                     fi
-                    ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND]=true
+                    ZPWR_VARS[LAST_WORD_WAS_AT_COMMAND]=true
                     ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
                 else
                     ZPWR_VARS[NEED_TO_ADD_SPACECHAR]=true
                 fi
             else
+                # here if not called by supernatural space fn
                 if [[ "${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]}" =~ "$ZPWR_VARS[continueFirstPositionRegex]" ]];then
                     ZPWR_EXPAND_PRE_EXPAND=("${(z)match[-1]}")
 
                     if (( $#ZPWR_EXPAND_PRE_EXPAND == 1)); then
-                        if [[ $expand == expand ]]; then
-                            zpwrExpandCommonParameterExpansion
+                        if [[ $caller == zle ]]; then
+                            zpwrExpandGetAliasValue
                             zpwrExpandAlias
                             if [[ $ZPWR_VARS[WAS_EXPANDED] == true && $moveCursor == moveCursor ]]; then
                                 zpwrExpandGoToTabStopOrEndOfLBuffer
                             fi
                         fi
-                        ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND]=true
+                        ZPWR_VARS[LAST_WORD_WAS_AT_COMMAND]=true
                         ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
                     else
                         ZPWR_VARS[NEED_TO_ADD_SPACECHAR]=true
