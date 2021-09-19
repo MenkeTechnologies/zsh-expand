@@ -368,6 +368,18 @@ if [[ $ZPWR_EXPAND != false ]]; then
     bindkey -M emacs "^@" zpwrExpandTerminateSpace
 fi
 
+if [[ $ZPWR_EXPAND_TO_HISTORY == true ]]; then
+    function zpwrExpandHistory() {
+
+        local LBUFFER="${*%$'\n'}"
+        zpwrExpandSupernaturalSpace 2>/dev/null
+
+        print -sr -- "$LBUFFER"
+        return 1
+    }
+    zshaddhistory_functions+=(zpwrExpandHistory)
+fi
+
 
 zle -N zpwrExpandGlobalAliases
 
