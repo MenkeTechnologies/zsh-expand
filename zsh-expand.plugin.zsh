@@ -48,7 +48,7 @@ ZPWR_VARS[builtinSkips]='(command|time|exec|eval|nocorrect|noglob)'
 
 ZPWR_VARS[blacklistFirstPosRegex]='^(omz_history|grc|_z|zshz|cd|hub|_zsh_tmux_|_rails_|_rake_|mvn-or|gradle-or|noglob |rlwrap ).*$'
 
-ZPWR_VARS[blackSubcommandPositionRegex]='^(cargo|svn|git|ng|pod|docker|kubectl|rndc|yarn|npm|pip[0-9\.]*|bundle|rails|gem|nmcli|brew|apt|dnf|yum|zypper|pacman|service|proxychains[0-9\.]*|zpwr|zm|zd|zg|zinit)$'
+ZPWR_VARS[blackSubcommandPositionRegex]='^(cargo|jenv|svn|git|ng|pod|docker|kubectl|rndc|yarn|npm|pip[0-9\.]*|bundle|rails|gem|nmcli|brew|apt|dnf|yum|zypper|pacman|service|proxychains[0-9\.]*|zpwr|zm|zd|zg|zinit)$'
 
 ZPWR_VARS[continueFirstPositionRegexNoZpwr]="^([[:space:]]*)([[:graph:]]+=[[:graph:]]+[[:space:]]+)*(([\\\"\']*builtin[\\\"\']*[[:space:]]+)*[\\\"\']*${ZPWR_VARS[builtinSkips]}[\\\"\']*)?([[:space:]]*)(([\\\"\']*sudo[\\\"\']*([[:space:]]+)((-[ABbEHnPSis]+[[:space:]]*|-[CghpTu][[:space:]=]+[[:graph:]]+[[:space:]]+|--)*)*)*([[:graph:]]+=[[:graph:]]+[[:space:]]+)*([\\\"\']*env[\\\"\']*[[:space:]]+(-[iv]+[[:space:]]*|-[PSu][[:space:]=]+[[:graph:]]+[[:space:]]+|--)*)*([[:graph:]]+=[[:graph:]]+[[:space:]]+)*)*([[:space:]]*)(.*)$"
 
