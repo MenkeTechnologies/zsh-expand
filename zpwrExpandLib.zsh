@@ -11,8 +11,8 @@
 #{{{                    MARK:accessory functions
 #**************************************************************
 # dummy function if plugin used outside of zpwr
-if ! type -- "loggDebug" &>/dev/null;then
-    function loggDebug(){
+if ! type -- "zpwrLogDebug" &>/dev/null;then
+    function zpwrLogDebug(){
         :
     }
 fi
@@ -30,7 +30,7 @@ function zpwrExpandGoToTabStopOrEndOfLBuffer(){
     lenToFirstTS=${#LBUFFER%%$ZPWR_TABSTOP*}
 
     if (( $lenToFirstTS < ${#LBUFFER} )); then
-        #loggDebug "this is a tabstop"
+        #zpwrLogDebug "this is a tabstop"
         # check if numbered tabstop
         # if num tabstop then set flag in ZPWR_VARS with value to all indexes
         # sub out all num tabstops
@@ -56,7 +56,7 @@ function zpwrExpandCorrectWord(){
 
     if (( ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_PARTITION]} == 1)); then
         if type -a $ZPWR_VARS[firstword_partition] &>/dev/null; then
-            #loggDebug "No correction from 1 word => '"'$ZPWR_VARS[firstword_partition]'"'_____ = ""'$ZPWR_VARS[firstword_partition]'"
+            #zpwrLogDebug "No correction from 1 word => '"'$ZPWR_VARS[firstword_partition]'"'_____ = ""'$ZPWR_VARS[firstword_partition]'"
             # git<space>
             return
         fi
@@ -65,13 +65,13 @@ function zpwrExpandCorrectWord(){
         if [[ "${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]}" =~ "$ZPWR_VARS[continueFirstPositionRegexNoZpwr]" ]];then
             ZPWR_EXPAND_PRE_CORRECT=("${(z)match[-1]}")
 
-            #loggDebug "${match[@]}"
-            #loggDebug "${ZPWR_EXPAND_PRE_CORRECT[@]}"
+            #zpwrLogDebug "${match[@]}"
+            #zpwrLogDebug "${ZPWR_EXPAND_PRE_CORRECT[@]}"
 
             word=${ZPWR_EXPAND_PRE_CORRECT[1]}
             if (( $#ZPWR_EXPAND_PRE_CORRECT == 1)); then
                 if type -a $word &>/dev/null; then
-                    #loggDebug "No correction from >= 2 words => '"'$word'"'_____ = ""'$word'"
+                    #zpwrLogDebug "No correction from >= 2 words => '"'$word'"'_____ = ""'$word'"
                     # sudo/env pwd<space>
                     return
                 fi
@@ -84,13 +84,13 @@ function zpwrExpandCorrectWord(){
             fi
 
         else
-            #loggDebug "no match ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION] '$ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]'"
-            logg zpwr expand should not reach here
+            #zpwrLogDebug "no match ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION] '$ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]'"
+            zpwrLogConsoleErr zpwr expand should not reach here
             return
         fi
     fi
 
-    #loggDebug "______'"'attempt correction'"'_____ = ""'$ZPWR_VARS[lastword_remove_special]'"
+    #zpwrLogDebug "______'"'attempt correction'"'_____ = ""'$ZPWR_VARS[lastword_remove_special]'"
 
     if [[ $ZPWR_TRACE == true ]]; then
         set +x
@@ -205,7 +205,7 @@ function zpwrExpandRightTrim() {
     # regular alias expansion
     # remove space from menuselect spacebar
     if [[ ${LBUFFER: -1} == " "  && ${LBUFFER: -2:-1} != " " ]]; then
-        #loggDebug "removing space menu select"
+        #zpwrLogDebug "removing space menu select"
         LBUFFER="${LBUFFER:0:-1}"
     fi
 
@@ -241,7 +241,7 @@ function zpwrExpandSupernaturalSpace() {
     fi
 
     if [[ $ZPWR_VARS[foundIncorrect] = true && $ZPWR_CORRECT_EXPAND = true ]]; then
-        #loggDebug "RE-EXPAND after incorrect spelling"
+        #zpwrLogDebug "RE-EXPAND after incorrect spelling"
         ZPWR_EXPAND_PRE_EXPAND=("${ZPWR_EXPAND_POST_CORRECT[@]}")
         zpwrExpandParseWords
     else
@@ -252,16 +252,16 @@ function zpwrExpandSupernaturalSpace() {
     if [[ ${ZPWR_VARS[lastword_lbuffer]:0:1} != '=' ]] && (( $#ZPWR_VARS[lastword_lbuffer] > 0 ));then
         if (( ${+aliases[${ZPWR_VARS[lastword_lbuffer]}]} )) && ! [[ ${aliases[${ZPWR_VARS[lastword_lbuffer]}]} =~ $ZPWR_VARS[blacklistFirstPosRegex] ]];then
 
-            #loggDebug "regular=>'$ZPWR_VARS[lastword_lbuffer]'"
+            #zpwrLogDebug "regular=>'$ZPWR_VARS[lastword_lbuffer]'"
             zpwrExpandRightTrim
             zpwrExpandIsLastWordLastCommand moveCursor expand
         else
-            #loggDebug "NOT regular=>'$ZPWR_VARS[lastword_lbuffer]'"
+            #zpwrLogDebug "NOT regular=>'$ZPWR_VARS[lastword_lbuffer]'"
             if (( ${+galiases[${ZPWR_VARS[lastword_lbuffer]}]} )); then
 
                 zpwrExpandRightTrim
                 # global alias expansion
-                #loggDebug "global=>'$ZPWR_VARS[lastword_lbuffer]'"
+                #zpwrLogDebug "global=>'$ZPWR_VARS[lastword_lbuffer]'"
                 zpwrExpandGlobalAliases "$ZPWR_VARS[lastword_lbuffer]"
                 ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND]=true
                 ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
@@ -283,8 +283,8 @@ function zpwrExpandSupernaturalSpace() {
         fi
     fi
 
-    #loggDebug "ZPWR_VARS[NEED_TO_ADD_SPACECHAR] = $ZPWR_VARS[NEED_TO_ADD_SPACECHAR]"
-    #loggDebug "ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND] = $ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND]"
+    #zpwrLogDebug "ZPWR_VARS[NEED_TO_ADD_SPACECHAR] = $ZPWR_VARS[NEED_TO_ADD_SPACECHAR]"
+    #zpwrLogDebug "ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND] = $ZPWR_VARS[LAST_WORD_WAS_LAST_COMMAND]"
 
     if [[ $ZPWR_VARS[NEED_TO_ADD_SPACECHAR] == true ]];then
         if [[ $ZPWR_VARS[WAS_EXPANDED] == false ]]; then

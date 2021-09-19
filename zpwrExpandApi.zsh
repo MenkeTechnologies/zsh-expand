@@ -44,7 +44,7 @@ function zpwrExpandParseWords(){
     fi
 
     mywordsleft=(${(Az)tmp})
-    #loggDebug "my words left = $mywordsleft"
+    #zpwrLogDebug "my words left = $mywordsleft"
 
     # we must find the first index of the partition
     firstIndex=0
@@ -67,7 +67,7 @@ function zpwrExpandParseWords(){
 
     ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]=ZPWR_EXPAND_WORDS_LPARTITION
 
-    #loggDebug "lpartition = '${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]}'"
+    #zpwrLogDebug "lpartition = '${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]}'"
 
     lpartAry=(${(z)${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]}})
 
@@ -75,22 +75,22 @@ function zpwrExpandParseWords(){
 
     ZPWR_VARS[lastword_lbuffer]=${lpartAry[-1]}
 
-    #loggDebug "first word partition = ...$ZPWR_VARS[firstword_partition]..."
-    #loggDebug "last word lbuf before no dbl quotes and [-1] = ...$ZPWR_VARS[lastword_lbuffer]..."
+    #zpwrLogDebug "first word partition = ...$ZPWR_VARS[firstword_partition]..."
+    #zpwrLogDebug "last word lbuf before no dbl quotes and [-1] = ...$ZPWR_VARS[lastword_lbuffer]..."
 
     lbufAry=(${(z)${ZPWR_VARS[lastword_lbuffer]}})
 
     ZPWR_VARS[lastword_lbuffer]=${lbufAry[-1]}
-    #loggDebug "last word lbuf after no dbl quotes and [-1] = ...$ZPWR_VARS[lastword_lbuffer]..."
+    #zpwrLogDebug "last word lbuf after no dbl quotes and [-1] = ...$ZPWR_VARS[lastword_lbuffer]..."
 
-    #loggDebug "first word partition before spelling = ...$ZPWR_VARS[firstword_partition]..."
-    #loggDebug "last word lbuf before spelling = ...$ZPWR_VARS[lastword_lbuffer]..."
+    #zpwrLogDebug "first word partition before spelling = ...$ZPWR_VARS[firstword_partition]..."
+    #zpwrLogDebug "last word lbuf before spelling = ...$ZPWR_VARS[lastword_lbuffer]..."
 
     lastWordAry=(${(Az)${ZPWR_VARS[lastword_lbuffer]//[\[\]\{\}\(\)\']/}})
     finalWord=${lastWordAry[-1]}
     ZPWR_VARS[lastword_remove_special]=$finalWord
 
-    #loggDebug "last word no special chars...${ZPWR_VARS[lastword_remove_special]}..."
+    #zpwrLogDebug "last word no special chars...${ZPWR_VARS[lastword_remove_special]}..."
 
 }
 
@@ -125,7 +125,7 @@ function zpwrExpandIsLastWordLastCommand(){
 
 
             if [[ -n "$ZPWR_EXPAND_PRE_EXPAND" ]]; then
-                #loggDebug "${ZPWR_EXPAND_PRE_EXPAND[@]}"
+                #zpwrLogDebug "${ZPWR_EXPAND_PRE_EXPAND[@]}"
 
                 if (( $#ZPWR_EXPAND_PRE_EXPAND == 1)); then
                     if [[ $expand == expand ]]; then
@@ -159,7 +159,7 @@ function zpwrExpandIsLastWordLastCommand(){
                     fi
                 else
                     ZPWR_VARS[NEED_TO_ADD_SPACECHAR]=true
-                    #loggDebug "no match ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION] '$ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]'"
+                    #zpwrLogDebug "no match ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION] '$ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]'"
                     return
                 fi
 
