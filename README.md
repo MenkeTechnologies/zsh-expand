@@ -1,5 +1,5 @@
 # zsh-expand
-This plugin expands regular aliases, global aliases, incorrect spellings and phrases, globs, command/process substitution, =command expansion, history expansion and $parameters with the spacebar key 
+This plugin expands regular aliases, global aliases, incorrect spellings and phrases, globs, command/process substitution, =command expansion, history expansion and $parameters with the spacebar key.  The plugin uses only zsh with no pipes nor external commands for maximum speed.
 
 Expansion of regular aliases is done in the command/first position of a statement and after certain commands (sudo, env, zpwr) when in other positions in a statement 
 
