@@ -284,7 +284,7 @@ function zpwrExpandSupernaturalSpace() {
         if [[ $ZPWR_EXPAND_NATIVE == true ]]; then
             if [[ $LBUFFER[-1] != ' ' ]]; then
                 if [[ $triggerKey == "${ZPWR_VARS[ENTER_KEY]}" ]]; then
-                    if [[ $ZPWR_EXPAND_PRE_EXEC_GLOB == true ]]; then
+                    if [[ $ZPWR_EXPAND_PRE_EXEC_NATIVE == true ]]; then
                         zpwrExpandWordStopHistoryExpansion
                     fi
                 else

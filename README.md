@@ -1,5 +1,5 @@
 # zsh-expand
-This plugin expands regular aliases, global aliases, incorrect spellings and phrases, globs, command/process substitution, =command expansion, history expansion and $parameters with the spacebar key.  The plugin uses only zsh with no pipes nor external commands for maximum speed.
+This plugin expands regular aliases, global aliases and incorrect spellings and phrases with the spacebar key.  Native expansions such as globs, command/process substitution, =command expansion, history expansion and $parameters are also expanded by default but can be turned off.  The plugin uses only zsh with no pipes nor external commands for maximum speed.
 
 Expansion of regular aliases is done in the command/first position of a statement and after certain commands (sudo, env, zpwr) when in other positions in a statement 
 
@@ -9,7 +9,7 @@ Expansion on aliases and global aliases occurs when cursor is on position right 
 
 Expansion on history, globs, parameters and mispellings occurs when cursor is on position right of expansion candidate.  A space after expansion candidate will prevent expansion on spacebar.
 
-There is optional expansion of unexpanded line into history on accepting current line.  See [below](#optional-expansion-of-unexpanded-line-into-history-on-enter).
+There is optional expansion of unexpanded line into history on accepting current line with enter key.  Expansion occurs for aliases not spelling correction.  Globs and other expansions can be optionally enabled on accepting line. See [below](#optional-expansion-of-unexpanded-line-into-history-on-enter).
 
 ## Demo
 [![asciicast](https://asciinema.org/a/FteYBtHg5F9oOT7vNkbGlZfjT.svg)](https://asciinema.org/a/FteYBtHg5F9oOT7vNkbGlZfjT)
@@ -63,6 +63,12 @@ export ZPWR_EXPAND_TO_HISTORY=false
 If `ZPWR_EXPAND_TO_HISTORY=true` then after running a command line with an unexpanded alias or aliases, the line with the expanded alias or aliases will be in history up 2 lines with the unexpanded line up 1 line. After running another command the unexpanded line will be gone. The unexpanded line is never written to `$HISTFILE`. This is the way zshaddhistory hook functions work when returning 1.
 
 This uses the exact same rules as expand on spacebar so `sudo gco` will expand to `sudo git checkout` into history if you have `alias gco=git checkout` etc...
+
+Globs and the other native expansions are expanded on accept line with:
+```sh
+# globs etc expand before command line is accepted
+export ZPWR_EXPAND_PRE_EXEC_NATIVE=true
+```
 
 ## Install for Zinit
 > `~/.zshrc`
