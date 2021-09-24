@@ -238,14 +238,18 @@ function zpwrExpandSupernaturalSpace() {
 
     zpwrExpandParseWords "$LBUFFER"
 
-    if [[ $ZPWR_CORRECT == true ]]; then
-        zpwrExpandCorrectWord
-    fi
+    if [[ $triggerKey == "${ZPWR_VARS[SPACE_KEY]}" ]]; then
+        if [[ $ZPWR_CORRECT == true ]]; then
+            zpwrExpandCorrectWord
+        fi
 
-    if [[ $ZPWR_VARS[foundIncorrect] = true && $ZPWR_CORRECT_EXPAND = true ]]; then
-        #zpwrLogDebug "RE-EXPAND after incorrect spelling"
-        ZPWR_EXPAND_PRE_EXPAND=("${ZPWR_EXPAND_POST_CORRECT[@]}")
-        zpwrExpandParseWords "$LBUFFER"
+        if [[ $ZPWR_VARS[foundIncorrect] = true && $ZPWR_CORRECT_EXPAND = true ]]; then
+            #zpwrLogDebug "RE-EXPAND after incorrect spelling"
+            ZPWR_EXPAND_PRE_EXPAND=("${ZPWR_EXPAND_POST_CORRECT[@]}")
+            zpwrExpandParseWords "$LBUFFER"
+        else
+            ZPWR_EXPAND_PRE_EXPAND=("${ZPWR_EXPAND_PRE_CORRECT[@]}")
+        fi
     else
         ZPWR_EXPAND_PRE_EXPAND=("${ZPWR_EXPAND_PRE_CORRECT[@]}")
     fi
