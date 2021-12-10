@@ -37,10 +37,12 @@ There is optional expansion of unexpanded line into history on accepting current
 - zsh-expand expands incorrect spellings and phrases, globs, command/process substitution, =command expansion, history expansion and $parameters
 
 ## Bypassing expansion
-Expansion can be temporarily bypassed with control-space.
+Expansion can be temporarily bypassed with control-space.  The variable `ZPWR_EXPAND_BLACKLIST` which should be an array of blacklisted items will blacklist items permanently.
 
 You can override the following environment variables to control expansion.
 ```sh
+# ignore expansion of these regular/global aliases
+export ZPWR_EXPAND_BLACKLIST=(g gco)
 # aliases expand in first position
 export ZPWR_EXPAND=true
 # aliases expand in second position after sudo
