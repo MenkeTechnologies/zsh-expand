@@ -27,10 +27,8 @@ function zpwrExpandParseWords(){
     tmp=${1}
     tmp=( ${(z)tmp} )
 
-    # change <( to ; for word splitting
-    tmp[-1]=${tmp[-1]:gs/\<\(/;/}
-    # change $( to ; for word splitting
-    tmp[-1]=${tmp[-1]:gs/\$\(/;/}
+    # change <(, =(, $( to ; for word splitting
+    tmp[-1]=${tmp[-1]//[\<\=\$]\(/;}
     # change ` to ; for word splitting
     tmp[-1]=${tmp[-1]:gs/\`/;/}
     # allow expansion in ""
