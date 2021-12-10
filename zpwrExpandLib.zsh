@@ -97,7 +97,7 @@ function zpwrExpandCorrectWord(){
     fi
     for key in ${(k)ZPWR_EXPAND_CORRECT_WORDS[@]}; do
 
-        badWords=("${(z)ZPWR_EXPAND_CORRECT_WORDS[$key]}")
+        badWords=( "${(z)ZPWR_EXPAND_CORRECT_WORDS[$key]}" )
         for misspelling in $badWords[@];do
 
             if [[ ${ZPWR_VARS[lastword_remove_special]} == $misspelling ]]; then
@@ -114,7 +114,7 @@ function zpwrExpandCorrectWord(){
                 # expand only when cursor is right of misspelled word
                 if [[ $ZPWR_EXPAND_PRE_CORRECT == (#b)(*[[:space:]]#)($misspelling) ]]; then
                     res1=${match[1]}
-                    ZPWR_EXPAND_POST_CORRECT=("${(z):-$res1${key:gs/_/ /}}")
+                    ZPWR_EXPAND_POST_CORRECT=( "${(z):-$res1${key:gs/_/ /}}" )
                     ZPWR_VARS[foundIncorrect]=true
                     # ZPWR_VARS[finished]=true
                 fi

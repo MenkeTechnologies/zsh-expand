@@ -47,7 +47,7 @@ fi
 ZPWR_VARS[builtinSkips]='(command|time|exec|eval|nocorrect|noglob)'
 
 ZPWR_VARS[userBlacklist]=""
-if (( $#ZPWR_EXPAND_BLACKLIST)); then
+if (( $#ZPWR_EXPAND_BLACKLIST )); then
     ZPWR_VARS[userBlacklist]="^(${(j:|:)ZPWR_EXPAND_BLACKLIST})$"
 fi
 
