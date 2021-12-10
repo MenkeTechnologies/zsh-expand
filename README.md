@@ -12,7 +12,7 @@ Expansion on history, globs, parameters and mispellings occurs when cursor is on
 There is optional expansion of unexpanded line into history on accepting current line with enter key.  Expansion occurs for aliases not spelling correction.  Globs and other expansions can be optionally enabled on accepting line. See [below](#optional-expansion-of-unexpanded-line-into-history-on-enter).
 
 ## Demo
-[![asciicast](https://asciinema.org/a/FteYBtHg5F9oOT7vNkbGlZfjT.svg)](https://asciinema.org/a/FteYBtHg5F9oOT7vNkbGlZfjT)
+[![asciicast](https://asciinema.org/a/wRe4hwlGNdEbeHk7gZ25sRq5U.svg)](https://asciinema.org/a/wRe4hwlGNdEbeHk7gZ25sRq5U)
 
 ## Comparison to other expanding abbrevation libraries 
 ### [zsh-abbr](https://github.com/olets/zsh-abbr)
