@@ -12,7 +12,7 @@ Expansion on history, globs, parameters and mispellings occurs when cursor is on
 There is optional expansion of unexpanded line into history on accepting current line with enter key.  Expansion occurs for aliases not spelling correction.  Globs and other expansions can be optionally enabled on accepting line. See [below](#optional-expansion-of-unexpanded-line-into-history-on-enter).
 
 ## Demo
-[![asciicast](https://asciinema.org/a/wRe4hwlGNdEbeHk7gZ25sRq5U.svg)](https://asciinema.org/a/wRe4hwlGNdEbeHk7gZ25sRq5U)
+[![asciicast](https://asciinema.org/a/FbFsuMCSLtooqkB5ZZbBZeiEg.svg)](https://asciinema.org/a/FbFsuMCSLtooqkB5ZZbBZeiEg)
 
 ## Comparison to other expanding abbrevation libraries 
 ### [zsh-abbr](https://github.com/olets/zsh-abbr)
@@ -37,9 +37,9 @@ There is optional expansion of unexpanded line into history on accepting current
 - zsh-expand expands incorrect spellings and phrases, globs, command/process substitution, =command expansion, history expansion and $parameters
 
 ## Bypassing expansion
-Expansion can be temporarily bypassed with control-space.  The variable `ZPWR_EXPAND_BLACKLIST` which should be an array of blacklisted items will blacklist items permanently.
+Expansion can be temporarily bypassed with control-space.  The variable `ZPWR_EXPAND_BLACKLIST` can be set to an array of regular or global aliases which will not be expanded.
 
-You can override the following environment variables to control expansion.
+You can override the following variables to control expansion.
 ```sh
 # ignore expansion of these regular/global aliases
 export ZPWR_EXPAND_BLACKLIST=(g gco)
