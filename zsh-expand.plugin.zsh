@@ -46,6 +46,11 @@ fi
 
 ZPWR_VARS[builtinSkips]='(command|time|exec|eval|nocorrect|noglob)'
 
+ZPWR_VARS[userBlacklist]=""
+if (( $#ZPWR_EXPAND_BLACKLIST)); then
+    ZPWR_VARS[userBlacklist]="^(${(j:|:)ZPWR_EXPAND_BLACKLIST})$"
+fi
+
 ZPWR_VARS[blacklistFirstPosRegex]='^(omz_history|grc|_z|zshz|cd|hub|_zsh_tmux_|_rails_|_rake_|mvn-or|gradle-or|noglob |rlwrap ).*$'
 
 ZPWR_VARS[blackSubcommandPositionRegex]='^(cargo|jenv|svn|git|ng|pod|docker|kubectl|rndc|yarn|npm|pip[0-9\.]*|bundle|rails|gem|nmcli|brew|apt|dnf|yum|zypper|pacman|service|proxychains[0-9\.]*|zpwr|zm|zd|zg|zinit)$'

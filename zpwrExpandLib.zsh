@@ -256,29 +256,30 @@ function zpwrExpandSupernaturalSpace() {
 
     #dont expand =word because that is zle expand-word
     if [[ ${ZPWR_VARS[lastword_lbuffer]:0:1} != '=' ]] && (( $#ZPWR_VARS[lastword_lbuffer] > 0 ));then
-        if (( ${+aliases[${ZPWR_VARS[lastword_lbuffer]}]} )) && ! [[ ${aliases[${ZPWR_VARS[lastword_lbuffer]}]} =~ $ZPWR_VARS[blacklistFirstPosRegex] ]];then
+        if [[ -z $ZPWR_VARS[userBlacklist] ]] || ! [[ $ZPWR_VARS[lastword_lbuffer] =~ $ZPWR_VARS[userBlacklist] ]]; then
+            if (( ${+aliases[${ZPWR_VARS[lastword_lbuffer]}]} )) && ! [[ ${aliases[${ZPWR_VARS[lastword_lbuffer]}]} =~ $ZPWR_VARS[blacklistFirstPosRegex] ]];then
 
-            #zpwrLogDebug "regular=>'$ZPWR_VARS[lastword_lbuffer]'"
-            zpwrExpandRightTrim
-            zpwrExpandLastWordAtCommandPosAndExpand moveCursor zle "$triggerKey"
-        else
-            #zpwrLogDebug "NOT regular=>'$ZPWR_VARS[lastword_lbuffer]'"
-            if (( ${+galiases[${ZPWR_VARS[lastword_lbuffer]}]} )); then
-
+                #zpwrLogDebug "regular=>'$ZPWR_VARS[lastword_lbuffer]'"
                 zpwrExpandRightTrim
-                # global alias expansion
-                #zpwrLogDebug "global=>'$ZPWR_VARS[lastword_lbuffer]'"
-                zpwrExpandGlobalAliases "$ZPWR_VARS[lastword_lbuffer]"
-                ZPWR_VARS[LAST_WORD_WAS_AT_COMMAND]=true
-                ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
+                zpwrExpandLastWordAtCommandPosAndExpand moveCursor zle "$triggerKey"
+            else
+                #zpwrLogDebug "NOT regular=>'$ZPWR_VARS[lastword_lbuffer]'"
+                if (( ${+galiases[${ZPWR_VARS[lastword_lbuffer]}]} )); then
+
+                    zpwrExpandRightTrim
+                    # global alias expansion
+                    #zpwrLogDebug "global=>'$ZPWR_VARS[lastword_lbuffer]'"
+                    zpwrExpandGlobalAliases "$ZPWR_VARS[lastword_lbuffer]"
+                    ZPWR_VARS[LAST_WORD_WAS_AT_COMMAND]=true
+                    ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
+                fi
+            fi
+            if [[ ! -f "$ZPWR_VARS[lastword_lbuffer]" ]]; then
+                zpwrExpandNonFileExpansion
             fi
         fi
-        if [[ ! -f "$ZPWR_VARS[lastword_lbuffer]" ]]; then
-            zpwrExpandNonFileExpansion
-        else
-            :
-       fi
     fi
+
     if [[ $ZPWR_VARS[LAST_WORD_WAS_AT_COMMAND] != true ]]; then
         # expand file globs, history expansions, command expansion, parameter expansion and =command
         if [[ $ZPWR_EXPAND_NATIVE == true ]]; then
