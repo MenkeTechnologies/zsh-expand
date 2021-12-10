@@ -44,6 +44,9 @@ if ! source $ZPWR_VARS[EXPAND_LIB];then
     return 1
 fi
 
+
+#{{{                    MARK:regex
+#**************************************************************
 ZPWR_VARS[builtinSkips]='(command|time|exec|eval|nocorrect|noglob)'
 
 ZPWR_VARS[userBlacklist]=""
@@ -57,16 +60,9 @@ ZPWR_VARS[blackSubcommandPositionRegex]='^(cargo|jenv|svn|git|ng|pod|docker|kube
 
 ZPWR_VARS[continueFirstPositionRegexNoZpwr]="^([[:space:]]*)([[:graph:]]+=[[:graph:]]+[[:space:]]+)*(([\\\"\']*builtin[\\\"\']*[[:space:]]+)*[\\\"\']*${ZPWR_VARS[builtinSkips]}[\\\"\']*)?([[:space:]]*)(([\\\"\']*sudo[\\\"\']*([[:space:]]+)((-[ABbEHnPSis]+[[:space:]]*|-[CghpTu][[:space:]=]+[[:graph:]]+[[:space:]]+|--)*)*)*([[:graph:]]+=[[:graph:]]+[[:space:]]+)*([\\\"\']*env[\\\"\']*[[:space:]]+(-[iv]+[[:space:]]*|-[PSu][[:space:]=]+[[:graph:]]+[[:space:]]+|--)*)*([[:graph:]]+=[[:graph:]]+[[:space:]]+)*)*([[:space:]]*)(.*)$"
 
-# the main regex to match x=1 builtin* command* sudo* -* y=2 env* -* z=3 cmd arg1 arg2 etc
+# the main regex to match x=1 \builtin* 'command'* '"sudo"' -* y=2 \env* -* z=3 cmd arg1 arg2 etc
 
 ZPWR_VARS[continueFirstPositionRegex]="^([[:space:]]*)([[:graph:]]+=[[:graph:]]+[[:space:]]+)*(([\\\"\']*builtin[\\\"\']*[[:space:]]+)*[\\\"\']*${ZPWR_VARS[builtinSkips]}[\\\"\']*)?([[:space:]]*)(([\\\"\']*zpwr[\\\"\']*([[:space:]]+)(-[[:graph:]]+)*)*([\\\"\']*sudo[\\\"\']*([[:space:]]+)((-[ABbEHnPSis]+[[:space:]]*|-[CghpTu][[:space:]=]+[[:graph:]]+[[:space:]]+|--)*)*)*([[:graph:]]+=[[:graph:]]+[[:space:]]+)*([\\\"\']*env[\\\"\']*[[:space:]]+(-[iv]+[[:space:]]*|-[PSu][[:space:]=]+[[:graph:]]+[[:space:]]+|--)*)*([[:graph:]]+=[[:graph:]]+[[:space:]]+)*)*([[:space:]]*)([[:graph:]]+)$"
-
-#{{{                    MARK:OLD REGEX
-#**************************************************************
-#ZPWR_VARS[commonRegex]='sudo|zpwr|env|.*=.*|command|builtin'
-# skip options in second and onwards
-#ZPWR_VARS[continueSecondAndOnwardsPositionRegex]='^('$ZPWR_VARS[commonRegex]'|-.*|--)$'
-#ZPWR_VARS[continueOptionSpaceArgSecondAndOnwardsPositionRegex]='^(--?\S+\s+[^-]+)$'
 #}}}***********************************************************
 
 declare -Ag ZPWR_EXPAND_CORRECT_WORDS
