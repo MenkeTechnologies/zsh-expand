@@ -41,16 +41,16 @@ function zpwrExpandParseWords(){
         tmp[-1]=${tmp[-1]:gs/\'//}
     fi
 
-    mywordsleft=(${(Az)tmp})
+    mywordsleft=( ${(Az)tmp} )
     #zpwrLogDebug "my words left = $mywordsleft"
 
     # we must find the first index of the partition
     firstIndex=0
 
     for (( i = $#mywordsleft; i >= 0; i-- )); do
-        # ;; ; | || && are partition separating chars
-        # we will split the command line and get the partition of the cursor
-        # regular aliases are valid in the first position of this partition
+        # ;; ; | || && are statement separating chars
+        # we will split the command line and get the statement of the cursor
+        # regular aliases are valid in the first position of this statement
         case $mywordsleft[$i] in
             ';;' | \; | \| | '||' | '&&' | '(' | '{')
                 firstIndex=$((i+1))
@@ -61,13 +61,13 @@ function zpwrExpandParseWords(){
         esac
     done
 
-    ZPWR_EXPAND_WORDS_LPARTITION=($mywordsleft[$firstIndex,$#mywordsleft])
+    ZPWR_EXPAND_WORDS_LPARTITION=( $mywordsleft[$firstIndex,$#mywordsleft] )
 
     ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]=ZPWR_EXPAND_WORDS_LPARTITION
 
     #zpwrLogDebug "lpartition = '${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]}'"
 
-    lpartAry=(${(z)${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]}})
+    lpartAry=( ${(z)${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]}} )
 
     ZPWR_VARS[firstword_partition]=${lpartAry[1]}
 
@@ -76,7 +76,7 @@ function zpwrExpandParseWords(){
     #zpwrLogDebug "first word partition = ...$ZPWR_VARS[firstword_partition]..."
     #zpwrLogDebug "last word lbuf before no dbl quotes and [-1] = ...$ZPWR_VARS[lastword_lbuffer]..."
 
-    lbufAry=(${(z)${ZPWR_VARS[lastword_lbuffer]}})
+    lbufAry=( ${(z)${ZPWR_VARS[lastword_lbuffer]}} )
 
     ZPWR_VARS[lastword_lbuffer]=${lbufAry[-1]}
     #zpwrLogDebug "last word lbuf after no dbl quotes and [-1] = ...$ZPWR_VARS[lastword_lbuffer]..."
@@ -84,7 +84,7 @@ function zpwrExpandParseWords(){
     #zpwrLogDebug "first word partition before spelling = ...$ZPWR_VARS[firstword_partition]..."
     #zpwrLogDebug "last word lbuf before spelling = ...$ZPWR_VARS[lastword_lbuffer]..."
 
-    lastWordAry=(${(Az)${ZPWR_VARS[lastword_lbuffer]//[\[\]\{\}\(\)\']/}})
+    lastWordAry=( ${(Az)${ZPWR_VARS[lastword_lbuffer]//[\[\]\{\}\(\)\']/}} )
     finalWord=${lastWordAry[-1]}
     ZPWR_VARS[lastword_remove_special]=$finalWord
 
