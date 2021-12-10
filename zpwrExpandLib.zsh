@@ -54,7 +54,7 @@ function zpwrExpandCorrectWord(){
         return
     fi
 
-    if (( ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_PARTITION]} == 1)); then
+    if (( $#ZPWR_EXPAND_WORDS_PARTITION == 1)); then
         if type -a $ZPWR_VARS[firstword_partition] &>/dev/null; then
             #zpwrLogDebug "No correction from 1 word => '"'$ZPWR_VARS[firstword_partition]'"'_____ = ""'$ZPWR_VARS[firstword_partition]'"
             # git<space>
@@ -62,7 +62,7 @@ function zpwrExpandCorrectWord(){
         fi
     else
 
-        if [[ "${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]}" =~ "$ZPWR_VARS[continueFirstPositionRegexNoZpwr]" ]];then
+        if [[ "$ZPWR_EXPAND_WORDS_LPARTITION" =~ "$ZPWR_VARS[continueFirstPositionRegexNoZpwr]" ]];then
             ZPWR_EXPAND_PRE_CORRECT=("${(z)match[-1]}")
 
             #zpwrLogDebug "${match[@]}"
@@ -84,7 +84,7 @@ function zpwrExpandCorrectWord(){
             fi
 
         else
-            #zpwrLogDebug "no match ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION] '$ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]'"
+            #zpwrLogDebug "no match ZPWR_EXPAND_WORDS_LPARTITION '$ZPWR_EXPAND_WORDS_LPARTITION'"
             zpwrLogConsoleErr zpwr expand should not reach here
             return
         fi
@@ -245,13 +245,13 @@ function zpwrExpandSupernaturalSpace() {
 
         if [[ $ZPWR_VARS[foundIncorrect] = true && $ZPWR_CORRECT_EXPAND = true ]]; then
             #zpwrLogDebug "RE-EXPAND after incorrect spelling"
-            ZPWR_EXPAND_PRE_EXPAND=("${ZPWR_EXPAND_POST_CORRECT[@]}")
+            ZPWR_EXPAND_PRE_EXPAND=( "${ZPWR_EXPAND_POST_CORRECT[@]}" )
             zpwrExpandParseWords "$LBUFFER"
         else
-            ZPWR_EXPAND_PRE_EXPAND=("${ZPWR_EXPAND_PRE_CORRECT[@]}")
+            ZPWR_EXPAND_PRE_EXPAND=( "${ZPWR_EXPAND_PRE_CORRECT[@]}" )
         fi
     else
-        ZPWR_EXPAND_PRE_EXPAND=("${ZPWR_EXPAND_PRE_CORRECT[@]}")
+        ZPWR_EXPAND_PRE_EXPAND=( "${ZPWR_EXPAND_PRE_CORRECT[@]}" )
     fi
 
     #dont expand =word because that is zle expand-word

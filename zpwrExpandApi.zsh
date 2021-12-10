@@ -63,11 +63,9 @@ function zpwrExpandParseWords(){
 
     ZPWR_EXPAND_WORDS_LPARTITION=( $mywordsleft[$firstIndex,$#mywordsleft] )
 
-    ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]=ZPWR_EXPAND_WORDS_LPARTITION
+    #zpwrLogDebug "lpartition = '$ZPWR_EXPAND_WORDS_LPARTITION'"
 
-    #zpwrLogDebug "lpartition = '${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]}'"
-
-    lpartAry=( ${(z)${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]}} )
+    lpartAry=( ${(z)${ZPWR_EXPAND_WORDS_LPARTITION}} )
 
     ZPWR_VARS[firstword_partition]=${lpartAry[1]}
 
@@ -98,7 +96,7 @@ function zpwrExpandLastWordAtCommandPosAndExpand(){
     local caller=$2
     local triggerKey=$3
 
-    if (( ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]} == 1 )); then
+    if (( $#ZPWR_EXPAND_WORDS_LPARTITION == 1 )); then
         if [[ $caller == zle ]]; then
             zpwrExpandGetAliasValue
             words=(${(z)ZPWR_VARS[EXPANDED]})
@@ -118,7 +116,7 @@ function zpwrExpandLastWordAtCommandPosAndExpand(){
         ZPWR_VARS[LAST_WORD_WAS_AT_COMMAND]=true
         ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
 
-    elif (( ${(P)#ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]} >= 2 )); then
+    elif (( $#ZPWR_EXPAND_WORDS_LPARTITION >= 2 )); then
         # regular alias expansion after sudo
         if [[ $ZPWR_EXPAND_SECOND_POSITION == true ]]; then
 
@@ -144,7 +142,7 @@ function zpwrExpandLastWordAtCommandPosAndExpand(){
                 fi
             else
                 # here if not called by supernatural space fn
-                if [[ "${(P)ZPWR_VARS[ZPWR_EXPAND_WORDS_LPARTITION]}" =~ "$ZPWR_VARS[continueFirstPositionRegex]" ]];then
+                if [[ "$ZPWR_EXPAND_WORDS_LPARTITION" =~ "$ZPWR_VARS[continueFirstPositionRegex]" ]];then
                     ZPWR_EXPAND_PRE_EXPAND=("${(z)match[-1]}")
 
                     if (( $#ZPWR_EXPAND_PRE_EXPAND == 1)); then
