@@ -27,6 +27,8 @@ function zpwrExpandParseWords(){
     tmp=${1}
     tmp=( ${(z)tmp} )
 
+    # arithmetic expansion $(()) is not a a command position so replace with junk value
+    tmp[-1]=${tmp[-1]//[\$]\(\(/no_cmd_$RANDOM}
     # change <(, =(, $( to ; for word splitting
     tmp[-1]=${tmp[-1]//[\<\=\$]\(/;}
     # change ` to ; for word splitting
@@ -92,7 +94,7 @@ function zpwrExpandParseWords(){
 
 function zpwrExpandLastWordAtCommandPosAndExpand(){
 
-    local moveCursor=$1
+    local cursorAction=$1
     local caller=$2
     local triggerKey=$3
 
@@ -109,7 +111,7 @@ function zpwrExpandLastWordAtCommandPosAndExpand(){
                 fi
                 zpwrExpandAlias
             fi
-            if [[ $ZPWR_VARS[WAS_EXPANDED] == true && $moveCursor == moveCursor ]]; then
+            if [[ $ZPWR_VARS[WAS_EXPANDED] == true && $cursorAction == moveCursor ]]; then
                 zpwrExpandGoToTabStopOrEndOfLBuffer
             fi
         fi
@@ -131,7 +133,7 @@ function zpwrExpandLastWordAtCommandPosAndExpand(){
                     if [[ $caller == zle ]]; then
                         zpwrExpandGetAliasValue
                         zpwrExpandAlias
-                        if [[ $ZPWR_VARS[WAS_EXPANDED] == true && $moveCursor == moveCursor && $triggerKey != "${ZPWR_VARS[ENTER_KEY]}" ]]; then
+                        if [[ $ZPWR_VARS[WAS_EXPANDED] == true && $cursorAction == moveCursor && $triggerKey != "${ZPWR_VARS[ENTER_KEY]}" ]]; then
                             zpwrExpandGoToTabStopOrEndOfLBuffer
                         fi
                     fi
