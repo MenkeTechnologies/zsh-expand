@@ -77,7 +77,7 @@ function zpwrExpandCorrectWord(){
                 fi
 
             elif (( $#ZPWR_EXPAND_PRE_CORRECT == 2)); then
-                if [[ $word =~ $ZPWR_VARS[blackSubcommandPositionRegex] ]]; then
+                if [[ $word =~ $ZPWR_VARS[blacklistSubcommandPositionRegex] ]]; then
                     # sudo/env git init<space>
                     return
                 fi
@@ -256,7 +256,7 @@ function zpwrExpandSupernaturalSpace() {
 
     #dont expand =word because that is zle expand-word
     if [[ ${ZPWR_VARS[lastword_lbuffer]:0:1} != '=' ]] && (( $#ZPWR_VARS[lastword_lbuffer] > 0 ));then
-        if [[ -z $ZPWR_VARS[userBlacklist] ]] || ! [[ $ZPWR_VARS[lastword_lbuffer] =~ $ZPWR_VARS[userBlacklist] ]]; then
+        if [[ -z $ZPWR_VARS[blacklistUser] ]] || ! [[ $ZPWR_VARS[lastword_lbuffer] =~ $ZPWR_VARS[blacklistUser] ]]; then
             if (( ${+aliases[${ZPWR_VARS[lastword_lbuffer]}]} )) && ! [[ ${aliases[${ZPWR_VARS[lastword_lbuffer]}]} =~ $ZPWR_VARS[blacklistFirstPosRegex] ]];then
 
                 #zpwrLogDebug "regular=>'$ZPWR_VARS[lastword_lbuffer]'"
