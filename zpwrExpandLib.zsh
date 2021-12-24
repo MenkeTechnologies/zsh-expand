@@ -62,8 +62,7 @@ function zpwrExpandCorrectWord(){
         fi
     else
 
-        if [[ "$ZPWR_EXPAND_WORDS_LPARTITION" =~ "$ZPWR_VARS[continueFirstPositionRegexNoZpwr]" ]];then
-            ZPWR_EXPAND_PRE_CORRECT=("${(z)match[-1]}")
+        if zpwrExpandRegexMatchOnCommandPosition correct; then
 
             #zpwrLogDebug "${match[@]}"
             #zpwrLogDebug "${ZPWR_EXPAND_PRE_CORRECT[@]}"
@@ -211,6 +210,52 @@ function zpwrExpandRightTrim() {
 
 }
 
+zpwrExpandTerminateSpace(){
+
+    LBUFFER+=" "
+}
+
+function zpwrExpandNonFileExpansion(){
+    :
+    #DNS lookups
+    #type -a "$lastWord" &> /dev/null || {
+    #print -r -- $lastWord | command grep -qE \
+    #'^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}\.?$'\
+    #&& {
+    ##DNS lookup
+    #A_Record=$(host $lastWord) 2>/dev/null \
+    #&& {
+    #A_Record=$(print -r -- $A_Record | command grep ' address' | head -1 | awk '{print $4}')
+    #} || A_Record=bad
+    #[[ $A_Record != bad ]] && \
+    #LBUFFER="$(print -r -- "$LBUFFER" | sed -E "s@\\b$lastWord@$A_Record@g")"
+    #} || {
+    #print -r -- $lastWord | command grep -qE \
+    #'\b([0-9]{1,3}\.){3}[0-9]{1,3}\b' && {
+    ##reverse DNS lookup
+    #PTR_Record=$(nslookup $lastWord) 2>/dev/null && {
+    #PTR_Record=$(print -r -- $PTR_Record | command grep 'name = ' | tail -1 | awk '{print $4}')
+    #} || PTR_Record=bad
+    #[[ $PTR_Record != bad ]] && \
+    #LBUFFER="$(print -r -- "$LBUFFER" | sed -E "s@\\b$lastWord\\b@${PTR_Record:0:-1}@g")"
+    #}
+    #}
+    #}
+}
+
+function zpwrExpandRegexMatchOnCommandPosition() {
+
+    if [[ "$ZPWR_EXPAND_WORDS_LPARTITION" =~ "$ZPWR_VARS[continueFirstPositionRegexNoZpwr]" ]];then
+        if [[ $1 == "correct" ]]; then
+            ZPWR_EXPAND_PRE_CORRECT=("${(z)match[-1]}")
+        else
+            ZPWR_EXPAND_PRE_EXPAND=("${(z)match[-1]}")
+        fi
+        return 0
+    fi
+    return 1
+}
+
 #}}}***********************************************************
 
 #{{{                    MARK:main fn
@@ -241,17 +286,19 @@ function zpwrExpandSupernaturalSpace() {
     if [[ $triggerKey == "${ZPWR_VARS[SPACE_KEY]}" ]]; then
         if [[ $ZPWR_CORRECT == true ]]; then
             zpwrExpandCorrectWord
+            if [[ $ZPWR_VARS[foundIncorrect] = true && $ZPWR_CORRECT_EXPAND = true ]]; then
+                #zpwrLogDebug "RE-EXPAND after incorrect spelling"
+                ZPWR_EXPAND_PRE_EXPAND=( "${ZPWR_EXPAND_POST_CORRECT[@]}" )
+                zpwrExpandParseWords "$LBUFFER"
+            else
+                ZPWR_EXPAND_PRE_EXPAND=( "${ZPWR_EXPAND_PRE_CORRECT[@]}" )
+            fi
+        else
+            zpwrExpandRegexMatchOnCommandPosition
         fi
 
-        if [[ $ZPWR_VARS[foundIncorrect] = true && $ZPWR_CORRECT_EXPAND = true ]]; then
-            #zpwrLogDebug "RE-EXPAND after incorrect spelling"
-            ZPWR_EXPAND_PRE_EXPAND=( "${ZPWR_EXPAND_POST_CORRECT[@]}" )
-            zpwrExpandParseWords "$LBUFFER"
-        else
-            ZPWR_EXPAND_PRE_EXPAND=( "${ZPWR_EXPAND_PRE_CORRECT[@]}" )
-        fi
     else
-        ZPWR_EXPAND_PRE_EXPAND=( "${ZPWR_EXPAND_PRE_CORRECT[@]}" )
+        zpwrExpandRegexMatchOnCommandPosition
     fi
 
     #dont expand =word because that is zle expand-word
@@ -324,38 +371,5 @@ function zpwrExpandSupernaturalSpace() {
     if [[ $ZPWR_TRACE == true ]]; then
         set +x
     fi
-}
-
-zpwrExpandTerminateSpace(){
-
-    LBUFFER+=" "
-}
-
-function zpwrExpandNonFileExpansion(){
-    :
-    #DNS lookups
-    #type -a "$lastWord" &> /dev/null || {
-    #print -r -- $lastWord | command grep -qE \
-    #'^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}\.?$'\
-    #&& {
-    ##DNS lookup
-    #A_Record=$(host $lastWord) 2>/dev/null \
-    #&& {
-    #A_Record=$(print -r -- $A_Record | command grep ' address' | head -1 | awk '{print $4}')
-    #} || A_Record=bad
-    #[[ $A_Record != bad ]] && \
-    #LBUFFER="$(print -r -- "$LBUFFER" | sed -E "s@\\b$lastWord@$A_Record@g")"
-    #} || {
-    #print -r -- $lastWord | command grep -qE \
-    #'\b([0-9]{1,3}\.){3}[0-9]{1,3}\b' && {
-    ##reverse DNS lookup
-    #PTR_Record=$(nslookup $lastWord) 2>/dev/null && {
-    #PTR_Record=$(print -r -- $PTR_Record | command grep 'name = ' | tail -1 | awk '{print $4}')
-    #} || PTR_Record=bad
-    #[[ $PTR_Record != bad ]] && \
-    #LBUFFER="$(print -r -- "$LBUFFER" | sed -E "s@\\b$lastWord\\b@${PTR_Record:0:-1}@g")"
-    #}
-    #}
-    #}
 }
 #}}}*********************************************************** 

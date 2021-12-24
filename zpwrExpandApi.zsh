@@ -144,8 +144,7 @@ function zpwrExpandLastWordAtCommandPosAndExpand(){
                 fi
             else
                 # here if not called by supernatural space fn
-                if [[ "$ZPWR_EXPAND_WORDS_LPARTITION" =~ "$ZPWR_VARS[continueFirstPositionRegex]" ]];then
-                    ZPWR_EXPAND_PRE_EXPAND=("${(z)match[-1]}")
+                if zpwrExpandRegexMatchOnCommandPosition; then
 
                     if (( $#ZPWR_EXPAND_PRE_EXPAND == 1)); then
                         if [[ $caller == zle ]]; then
