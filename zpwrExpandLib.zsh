@@ -262,6 +262,9 @@ function zpwrExpandRegexMatchOnCommandPosition() {
 #**************************************************************
 function zpwrExpandSupernaturalSpace() {
 
+    'builtin' emulate -L zsh
+    setopt rcquotes extended_glob zle
+
     local tempBuffer mywords badWords word nextWord i shouldStopExpansionDueToFailedRegex words ary res1  aliasOut
 
     if [[ $ZPWR_TRACE == true ]]; then
