@@ -287,6 +287,10 @@ function zpwrExpandSupernaturalSpace() {
     zpwrExpandParseWords "$LBUFFER"
 
     if [[ $triggerKey == "${ZPWR_VARS[SPACE_KEY]}" ]]; then
+        if [[ $ZPWR_EXPAND == false ]]; then
+            zle self-insert
+            return
+        fi
         if [[ $ZPWR_CORRECT == true ]]; then
             zpwrExpandCorrectWord
             if [[ $ZPWR_VARS[foundIncorrect] = true && $ZPWR_CORRECT_EXPAND = true ]]; then
@@ -301,6 +305,9 @@ function zpwrExpandSupernaturalSpace() {
         fi
 
     else
+        if [[ $ZPWR_EXPAND == false ]]; then
+            return
+        fi
         zpwrExpandRegexMatchOnCommandPosition
     fi
 
