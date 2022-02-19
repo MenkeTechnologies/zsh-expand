@@ -162,7 +162,7 @@ function zpwrExpandWordStopHistoryExpansion(){
     if [[ $LBUFFER == (#b)(*[[:space:]]#)($ZPWR_VARS[lastword_lbuffer]) ]]; then
         res1=${match[1]}
         # expand
-        regexp-replace res1 '(^|[ ])!([[:graph:]]+ )' '$match[1]\!$match[2]'
+        regexp-replace res1 '(^|[ ])!([[:graph:]]+ )' '$match[1]\!$match[2]' &> /dev/null
         LBUFFER="$res1$ZPWR_VARS[lastword_lbuffer]"
         ZPWR_VARS[WAS_EXPANDED]=true
         zle expand-word
