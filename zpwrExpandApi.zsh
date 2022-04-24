@@ -49,14 +49,20 @@ function zpwrExpandParseWords(){
     # we must find the first index of the partition
     firstIndex=0
 
-    for (( i = $#mywordsleft; i >= 0; i-- )); do
+    for (( i = $#mywordsleft; i >= 1; i-- )); do
         # ;; ; | || && are statement separating chars
         # we will split the command line and get the statement of the cursor
         # regular aliases are valid in the first position of this statement
         case $mywordsleft[$i] in
             ';;' | \; | \| | '||' | '&&' | '(' | '{')
-                firstIndex=$((i+1))
+                firstIndex=$((i + 1))
                 break
+                ;;
+            '>'* | '<'* | '&>'*)
+                #remove redirection operator from left words
+                mywordsleft[$i]=()
+                #remove redirected file
+                mywordsleft[$i]=()
                 ;;
             *)
                 ;;
