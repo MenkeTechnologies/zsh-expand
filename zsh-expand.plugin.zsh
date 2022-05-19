@@ -18,7 +18,7 @@
 
 if ! (( $+ZPWR_VARS )) || [[ ${parameters[ZPWR_VARS]} != association ]]; then
     # global map to containerize global variables
-    declare -gA ZPWR_VARS
+    typeset -gA ZPWR_VARS
 fi
 
 ZPWR_VARS[ENTER_KEY]='ENTER'
@@ -73,7 +73,7 @@ ZPWR_VARS[continueFirstPositionRegexNoZpwr]="^([[:space:]]*)${ZPWR_VARS[assignRe
 #ZPWR_VARS[continueFirstPositionRegex]="^([[:space:]]*)${ZPWR_VARS[assignRegex]}(([\\\"\']*builtin[\\\"\']*[[:space:]]+)*[\\\"\']*${ZPWR_VARS[builtinSkips]}[\\\"\']*)?([[:space:]]*)(([\\\"\']*zpwr[\\\"\']*([[:space:]]+)(-[[:graph:]]+)*)*([\\\"\']*sudo[\\\"\']*([[:space:]]+)((-[ABbEHnPSis]+[[:space:]]*|-[CghpTu][[:space:]=]+[[:graph:]]*[[:space:]]+|--)*)*)*${ZPWR_VARS[assignRegex]}([\\\"\']*env[\\\"\']*[[:space:]]+(-[iv]+[[:space:]]*|-[PSu][[:space:]=]+[[:graph:]]+[[:space:]]+|--)*)*${ZPWR_VARS[assignRegex]})*([[:space:]]*)([[:graph:]]+)$"
 #}}}***********************************************************
 
-declare -Ag ZPWR_EXPAND_CORRECT_WORDS
+typeset -Ag ZPWR_EXPAND_CORRECT_WORDS
 ZPWR_EXPAND_CORRECT_WORDS[about]="aobut abbout aabout"
 ZPWR_EXPAND_CORRECT_WORDS[alternate]="alternaet alterntae"
 ZPWR_EXPAND_CORRECT_WORDS[also]="laso alos alsoo allso"

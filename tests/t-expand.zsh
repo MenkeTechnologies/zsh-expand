@@ -9,7 +9,7 @@
 #}}}***********************************************************
 
 @setup {
-    declare -gA ZPWR_VARS
+    typeset -gA ZPWR_VARS
     0="${${0:#$ZSH_ARGZERO}:-${(%):-%N}}"
     0="${${(M)0:#/*}:-$PWD/$0}"
     pluginDir="${0:h:A}"
@@ -51,7 +51,7 @@
 }
 
 @test 'expand alias pwd="ls" keep space' {
-    declare -A ZPWR_VARS
+    typeset -A ZPWR_VARS
     LBUFFER=" ls"
     ZPWR_VARS[lastword_lbuffer]=ls
     ZPWR_VARS[EXPANDED]='ls'
