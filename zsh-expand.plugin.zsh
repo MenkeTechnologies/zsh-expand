@@ -55,22 +55,28 @@ if (( $#ZPWR_EXPAND_BLACKLIST )); then
     ZPWR_VARS[blacklistUser]="^(${(j:|:)ZPWR_EXPAND_BLACKLIST})$"
 fi
 
-ZPWR_VARS[lvalueRegex]='[[:graph:]]+='
-ZPWR_VARS[startQuoteRegex]='(\$''|[\\"''])*'
-ZPWR_VARS[endQuoteRegex]='["'']*'
-ZPWR_VARS[rvalueRegex]='((\$''|["'']).*["'']|[[:graph:]]*)'
-ZPWR_VARS[assignRegex]="(${ZPWR_VARS[lvalueRegex]}${ZPWR_VARS[rvalueRegex]}[[:space:]]+)*"
+(){
+    local ws='[:space:]'
+    local l='[:graph:]'
+    ZPWR_VARS[lvalueRegex]="[$l]+="
+    ZPWR_VARS[startQuoteRegex]='(\$''|[\\"''])*'
+    ZPWR_VARS[endQuoteRegex]='["'']*'
+    local sq=${ZPWR_VARS[startQuoteRegex]}
+    local eq=${ZPWR_VARS[endQuoteRegex]}
+    ZPWR_VARS[rvalueRegex]='((\$''|["'']).*["'']|[[:graph:]]*)'
+    ZPWR_VARS[assignRegex]="(${ZPWR_VARS[lvalueRegex]}${ZPWR_VARS[rvalueRegex]}[$ws]+)*"
+    local a=${ZPWR_VARS[assignRegex]}
 
-ZPWR_VARS[blacklistFirstPosRegex]='^(omz_history|grc|_z|zshz|cd|hub|_zsh_tmux_|_rails_|_rake_|mvn-or|gradle-or|noglob |rlwrap ).*$'
+    ZPWR_VARS[blacklistFirstPosRegex]='^(omz_history|grc|_z|zshz|cd|hub|_zsh_tmux_|_rails_|_rake_|mvn-or|gradle-or|noglob |rlwrap ).*$'
 
-ZPWR_VARS[blacklistSubcommandPositionRegex]='^(cargo|jenv|svn|git|ng|pod|docker|kubectl|rndc|yarn|npm|pip[0-9\.]*|bundle|rails|gem|nmcli|brew|apt|dnf|yum|zypper|pacman|service|proxychains[0-9\.]*|zpwr|zm|zd|zg|zinit)$'
+    ZPWR_VARS[blacklistSubcommandPositionRegex]='^(cargo|jenv|svn|git|ng|pod|docker|kubectl|rndc|yarn|npm|pip[0-9\.]*|bundle|rails|gem|nmcli|brew|apt|dnf|yum|zypper|pacman|service|proxychains[0-9\.]*|zpwr|zm|zd|zg|zinit)$'
+    # the main regex to match x=1 \builtin* 'command'* '"sudo"' -* y=2 \env* -* z=3 cmd arg1 arg2 etc
 
-# the main regex to match x=1 \builtin* 'command'* '"sudo"' -* y=2 \env* -* z=3 cmd arg1 arg2 etc
+    ZPWR_VARS[continueFirstPositionRegexNoZpwr]="^([$ws]*)${a}((${sq}builtin${eq}[$ws]+)*${sq}${ZPWR_VARS[builtinSkips]}${eq})?([$ws]*)((${sq}sudo${eq}([$ws]+)(${sq}(-[ABbEHnPSis]+${eq}[$ws]*|-[CghpTu][$ws=]+[$l]*${eq}[$ws]+|--${eq})*)*)*${a}(${sq}env${eq}[$ws]+${sq}(-[iv]+${eq}[$ws]*|-[PSu][$ws=]+[$l]*${eq}[$ws]+|--${eq})*)*${a})*([$ws]*)(.*)$"
+}
 
-ZPWR_VARS[continueFirstPositionRegexNoZpwr]="^([[:space:]]*)${ZPWR_VARS[assignRegex]}((${ZPWR_VARS[startQuoteRegex]}builtin${ZPWR_VARS[endQuoteRegex]}[[:space:]]+)*${ZPWR_VARS[startQuoteRegex]}${ZPWR_VARS[builtinSkips]}${ZPWR_VARS[endQuoteRegex]})?([[:space:]]*)((${ZPWR_VARS[startQuoteRegex]}sudo${ZPWR_VARS[endQuoteRegex]}([[:space:]]+)((-[ABbEHnPSis]+[[:space:]]*|-[CghpTu][[:space:]=]+[[:graph:]]*[[:space:]]+|--)*)*)*${ZPWR_VARS[assignRegex]}(${ZPWR_VARS[startQuoteRegex]}env${ZPWR_VARS[endQuoteRegex]}[[:space:]]+(-[iv]+[[:space:]]*|-[PSu][[:space:]=]+[[:graph:]]*[[:space:]]+|--)*)*${ZPWR_VARS[assignRegex]})*([[:space:]]*)(.*)$"
 
 
-#ZPWR_VARS[continueFirstPositionRegex]="^([[:space:]]*)${ZPWR_VARS[assignRegex]}(([\\\"\']*builtin[\\\"\']*[[:space:]]+)*[\\\"\']*${ZPWR_VARS[builtinSkips]}[\\\"\']*)?([[:space:]]*)(([\\\"\']*zpwr[\\\"\']*([[:space:]]+)(-[[:graph:]]+)*)*([\\\"\']*sudo[\\\"\']*([[:space:]]+)((-[ABbEHnPSis]+[[:space:]]*|-[CghpTu][[:space:]=]+[[:graph:]]*[[:space:]]+|--)*)*)*${ZPWR_VARS[assignRegex]}([\\\"\']*env[\\\"\']*[[:space:]]+(-[iv]+[[:space:]]*|-[PSu][[:space:]=]+[[:graph:]]+[[:space:]]+|--)*)*${ZPWR_VARS[assignRegex]})*([[:space:]]*)([[:graph:]]+)$"
 #}}}***********************************************************
 
 typeset -Ag ZPWR_EXPAND_CORRECT_WORDS
