@@ -58,6 +58,10 @@ function zpwrExpandParseWords(){
                 firstIndex=$((i + 1))
                 break
                 ;;
+            *=*)
+                #remove assignment
+                mywordsleft[$i]=()
+                ;;
             '>'* | '<'* | '&>'*)
                 #remove redirection operator from left words
                 mywordsleft[$i]=()
