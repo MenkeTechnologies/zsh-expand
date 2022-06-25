@@ -68,7 +68,7 @@ fi
     ZPWR_VARS[blacklistSubcommandPositionRegex]='^(cargo|jenv|svn|git|ng|pod|docker|kubectl|rndc|yarn|npm|pip[0-9\.]*|bundle|rails|gem|nmcli|brew|apt|dnf|yum|zypper|pacman|service|proxychains[0-9\.]*|zpwr|zm|zd|zg|zinit)$'
     # the main regex to match x=1 \builtin* 'command'* '"sudo"' -* y=2 \env* -* z=3 cmd arg1 arg2 etc
 
-    ZPWR_VARS[continueFirstPositionRegexNoZpwr]="^([$ws]*)((${sq}(-|nocorrect|time)${eq}[$ws]+)*(${sq}builtin${eq}[$ws]+)*(${sq}${ZPWR_VARS[builtinSkips]}${eq}[$ws]+)*)?((${sq}[sS][uU][dD][oO]${eq}([$ws]+)(${sq}(-[ABbEHnPSis]+${eq}[$ws]*|-[CghpTu][$ws=]+[$l]*${eq}[$ws]+|--${eq})*)*)*(${sq}[eE][nN][vV]${eq}[$ws]+(${sq}-[iv]+${eq}[$ws]*|-[PSu][$ws=]+[$l]*${eq}[$ws]+|--${eq})*)*(${sq}[nN][iI][cC][eE]${eq}[$ws]+)*(${sq}[tT][iI][mM][eE]${eq}[$ws]+)*)*([$ws]*)(.*)$"
+    ZPWR_VARS[continueFirstPositionRegexNoZpwr]="^([$ws]*)((${sq}(-|nocorrect|time|nohup)${eq}[$ws]+)*(${sq}builtin${eq}[$ws]+)*(${sq}${ZPWR_VARS[builtinSkips]}${eq}[$ws]+)*)?((${sq}[sS][uU][dD][oO]${eq}([$ws]+)(${sq}(-[ABbEHnPSis]+${eq}[$ws]*|-[CghpTu][$ws=]+[$l]*${eq}[$ws]+|--${eq})*)*)*(${sq}[eE][nN][vV]${eq}[$ws]+(${sq}-[iv]+${eq}[$ws]*|-[PSu][$ws=]+[$l]*${eq}[$ws]+|--${eq})*)*(${sq}[nN][iI][cC][eE]${eq}[$ws]+)*(${sq}[tT][iI][mM][eE]${eq}[$ws]+)*)*([$ws]*)(.*)$"
 }
 
 
