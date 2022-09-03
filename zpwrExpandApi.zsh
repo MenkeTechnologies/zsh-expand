@@ -5,7 +5,7 @@
 ##### GitHub: https://github.com/MenkeTechnologies
 ##### Date: Fri Aug 14 15:12:03 EDT 2020
 ##### Purpose: zsh script to hold expand lib fns
-##### Notes: 
+##### Notes:
 # Usage for external service like fzf.  Must have ZPWR_VARS set
 #
 # zpwrExpandParseWords
