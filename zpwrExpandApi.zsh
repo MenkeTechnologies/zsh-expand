@@ -94,7 +94,7 @@ function zpwrExpandParseWords(){
     #zpwrLogDebug "first word partition before spelling = ...$ZPWR_VARS[firstword_partition]..."
     #zpwrLogDebug "last word lbuf before spelling = ...$ZPWR_VARS[lastword_lbuffer]..."
 
-    lastWordAry=( ${(Az)${ZPWR_VARS[lastword_lbuffer]//[\[\]\{\}\(\)\']/}} )
+    lastWordAry=( ${(Az)${ZPWR_VARS[lastword_lbuffer]//[\[\]\{\}\(\)]/}} )
     finalWord=${lastWordAry[-1]}
     ZPWR_VARS[lastword_remove_special]=$finalWord
 
