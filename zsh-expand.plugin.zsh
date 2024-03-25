@@ -65,7 +65,7 @@ fi
 
     ZPWR_VARS[blacklistFirstPosRegex]='^(omz_history|podman|grc|_z|zshz|cd|hub|_zsh_tmux_|_rails_|_rake_|mvn-or|gradle-or|noglob |rlwrap ).*$'
 
-    ZPWR_VARS[blacklistSubcommandPositionRegex]='^(cargo|jenv|svn|git|ng|pod|docker|kubectl|rndc|yarn|npm|pip[0-9\.]*|bundle|rails|gem|nmcli|brew|apt|dnf|yum|zypper|pacman|service|proxychains[0-9\.]*|zpwr|zm|zd|zg|zinit)$'
+    ZPWR_VARS[blacklistSubcommandPositionRegex]='^(cargo|jenv|svn|git|ng|go|pod|docker|kubectl|rndc|yarn|npm|pip[0-9\.]*|bundle|rails|gem|nmcli|brew|apt|dnf|yum|zypper|pacman|service|proxychains[0-9\.]*|zpwr|zm|zd|zg|zinit)$'
     # the main regex to match x=1 \builtin* 'command'* '"sudo"' -* y=2 \env* -* z=3 cmd arg1 arg2 etc
 
     ZPWR_VARS[continueFirstPositionRegexNoZpwr]="^([$ws]*)((${sq}(-|nocorrect|time)${eq}[$ws]+)*(${sq}builtin${eq}[$ws]+)*(${sq}${ZPWR_VARS[builtinSkips]}${eq}[$ws]+)*)?(${sq}[sS][uU][dD][oO]${eq}([$ws]+)(${sq}(-[ABbEHnPSis]+${eq}[$ws]*|-[CghpTu][$ws=]+[$l]*${eq}[$ws]+|--${eq})*)*|${sq}[eE][nN][vV]${eq}[$ws]+(${sq}-[iv]+${eq}[$ws]*|-[PSu][$ws=]+[$l]*${eq}[$ws]+|--${eq})*|${sq}([nN][iI][cC][eE]|[tT][iI][mM][eE]|[nN][oO][hH][uU][pP]|[rR][lL][wW][rR][aA][pP])${eq}[$ws]+)*([$ws]*)(.*)$"
@@ -197,7 +197,7 @@ ZPWR_EXPAND_CORRECT_WORDS[HTML]="html"
 ZPWR_EXPAND_CORRECT_WORDS[images]="iamges"
 ZPWR_EXPAND_CORRECT_WORDS[implementation]="impl"
 ZPWR_EXPAND_CORRECT_WORDS[including]="incl"
-ZPWR_EXPAND_CORRECT_WORDS[initialization]="init"
+ZPWR_EXPAND_CORRECT_WORDS[initialization]="initi"
 ZPWR_EXPAND_CORRECT_WORDS[interface]="interfaec"
 ZPWR_EXPAND_CORRECT_WORDS[iOS]="ios"
 ZPWR_EXPAND_CORRECT_WORDS[iPad]="ipad"
