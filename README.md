@@ -1,7 +1,7 @@
 # zsh-expand
 This plugin expands regular aliases, global aliases and incorrect spellings and phrases with the spacebar key.  Native expansions such as globs, command/process substitution, =command expansion, history expansion and $parameters are also expanded by default but can be turned off.  The plugin uses only zsh with no pipes nor external commands for maximum speed.
 
-Expansion of regular aliases is done in the command/first position of a statement and after certain commands (sudo, env, zpwr) when in other positions in a statement 
+Expansion of regular aliases is done in the command/first position of a statement and after certain commands (builtin, command, sudo, env, zpwr) when in other positions in a statement 
 
 Expansion of global aliases, incorrect spellings and phrases, globs, history expansion and $parameters is global to command line.  Exception to this is when in command position and word in command position is a command, function etc., then no expansion will be performed.
 
@@ -17,21 +17,25 @@ There is optional expansion of unexpanded line into history on accepting current
 ## Comparison to other expanding abbrevation libraries 
 ### [zsh-abbr](https://github.com/olets/zsh-abbr)
 #### Features that zsh-abbr has but zsh-expand does not
-- separate abbr command
+- does not expand aliases
+- interactive management of per-session and persistent abbreviations
+- expansion after user-configured strings, user-configured globs, and linear combinations of either or both
+- can place the cursor after expanding
 #### Features that zsh-expand has but zsh-abbr does not
-- zsh-expand uses aliases with no need of separate abbr command
-- zsh-expand expands global aliases
-- zsh-expand expands aliases after builtin/command/sudo/env and linear combinations of these with and without options
-    - `sudo gco<space> => sudo git checkout`
+- zsh-expand expands aliases, including global aliases
+- zsh-expand ignores the first space after words
+- zsh-expand expands aliases after certain preselected words (e.g. builtin/command/sudo/env), and linear combinations of them, with and without options
     - `\builtin \command \sudo -u root -E \env gco<space> => \builtin \command \sudo -u root -E \env git checkout`
 - zsh-expand expands incorrect spellings and phrases, globs, command/process substitution, =command expansion, history expansion and $parameters
 
 ### [zsh-abbrev-alias](https://github.com/momo-lab/zsh-abbrev-alias)
 #### Features that zsh-abbrev-alias has but zsh-expand does not
-- separate abbrev-alias command
-#### Features that zsh-expand has but zsh-abbr does not
+- interactive management of per-session expanding aliases
+- can evaluate subshells on expansion
+- can expand aliases recursively
+#### Features that zsh-expand has but zsh-abbrev-alias does not
 - zsh-expand uses aliases and global aliases with no need of separate abbrev-alias command
-- zsh-expand expands aliases after builtin/command/sudo/env and linear combinations of these with and without options 
+- zsh-expand expands aliases after certain preselected words (e.g. builtin/command/sudo/env), and linear combinations of them, with and without options
     - `sudo gco<space> => sudo git checkout`
     - `\builtin \command \sudo -u root -E \env gco<space> => \builtin \command \sudo -u root -E \env git checkout`
 - zsh-expand expands incorrect spellings and phrases, globs, command/process substitution, =command expansion, history expansion and $parameters
