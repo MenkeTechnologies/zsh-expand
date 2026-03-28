@@ -10,6 +10,8 @@
 
 ---
 
+[![CI](https://github.com/MenkeTechnologies/zsh-expand/actions/workflows/ci.yml/badge.svg)](https://github.com/MenkeTechnologies/zsh-expand/actions/workflows/ci.yml)
+
 ### // WHAT IS THIS
 
 A high-voltage **zsh plugin** that intercepts your spacebar and **expands** everything in its path -- regular aliases, global aliases, misspellings, globs, history, parameters, and more. No pipes. No external commands. Pure zsh. Maximum speed.
