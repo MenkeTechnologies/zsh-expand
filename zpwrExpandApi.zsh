@@ -18,6 +18,356 @@
 #
 #}}}***********************************************************
 
+# Parser that walks ZPWR_EXPAND_WORDS_LPARTITION left-to-right to find
+# command position.  Strips assignments contextually (before command and
+# between prefixes, but NOT when they are flag arguments like -e trace=network).
+# Sets ZPWR_VARS[cachedRegexMatch] to the tail (command + args after all prefixes)
+# and ZPWR_VARS[cachedRegexMatched]=true on success.
+function zpwrExpandParserFindCommandPosition() {
+
+    local -a words
+    words=("${(@)ZPWR_EXPAND_WORDS_LPARTITION}")
+    local -i pos=1
+    local bare lower
+
+    # helper: strip leading/trailing quotes and backslash for comparison
+    # \sudo => sudo, 'sudo' => sudo, "sudo" => sudo, $'sudo' => sudo
+    _zpwr_bare() {
+        local w=$1
+        # strip $' prefix
+        w=${w#\$\'}
+        # strip leading \, ', "
+        w=${w#[\\\"\']}
+        # strip trailing ', "
+        w=${w%[\"\']}
+        REPLY=$w
+    }
+
+    # helper: check if word is a variable assignment (NAME=value)
+    _zpwr_is_assignment() {
+        [[ $1 == [A-Za-z_]*=* ]]
+    }
+
+    # Phase 1: consume shell keywords/builtins (case-sensitive)
+    # These are processed by the shell before any exec, can appear in any order
+    while (( pos <= $#words )); do
+        # skip assignments before/between shell keywords
+        if _zpwr_is_assignment "$words[$pos]"; then
+            (( pos++ ))
+            continue
+        fi
+        _zpwr_bare "$words[$pos]"
+        bare=$REPLY
+        case $bare in
+            nocorrect|-|builtin|eval|noglob|coproc)
+                (( pos++ ))
+                ;;
+            time)
+                (( pos++ ))
+                # consume optional -p/-l/-v flags
+                if (( pos <= $#words )); then
+                    _zpwr_bare "$words[$pos]"
+                    [[ $REPLY == -[plv]* ]] && (( pos++ ))
+                fi
+                ;;
+            command)
+                (( pos++ ))
+                # consume optional -p flag
+                if (( pos <= $#words )); then
+                    _zpwr_bare "$words[$pos]"
+                    [[ $REPLY == -p ]] && (( pos++ ))
+                fi
+                ;;
+            exec)
+                (( pos++ ))
+                # consume -c/-l combo flags and -a NAME
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[cl]*) (( pos++ )) ;;
+                        -a)     (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -a=*)   (( pos++ )) ;;
+                        *)      break ;;
+                    esac
+                done
+                ;;
+            *)
+                break
+                ;;
+        esac
+    done
+
+    # Phase 2: consume execvp wrappers (case-insensitive for sudo/doas/env/nice/time/nohup/rlwrap)
+    while (( pos <= $#words )); do
+        # skip assignments between wrappers (env FOO=bar, sudo VAR=val, etc)
+        if _zpwr_is_assignment "$words[$pos]"; then
+            (( pos++ ))
+            continue
+        fi
+        _zpwr_bare "$words[$pos]"
+        bare=$REPLY
+        lower=${(L)bare}
+        case $lower in
+            sudo|doas)
+                (( pos++ ))
+                # consume flags: combo flags, flag-with-arg, --, assignments
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        # sudo combo: -ABbEHkKnPSis, doas combo: -ns
+                        -[ABbEHkKnPSisns]*)  (( pos++ )) ;;
+                        # sudo flag-with-arg: -CghpRrTtu, doas: -uC
+                        -[CghpRrTtuC])        (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -[CghpRrTtuC]=*)      (( pos++ )) ;; # -u=root form
+                        --)                   (( pos++ )); break ;;
+                        *)                    break ;;
+                    esac
+                done
+                ;;
+            env)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    if _zpwr_is_assignment "$words[$pos]"; then
+                        (( pos++ )); continue  # env VAR=val
+                    fi
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[0iv]*)       (( pos++ )) ;;
+                        -[CPSu])       (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -[CPSu]=*)     (( pos++ )) ;;
+                        --)            (( pos++ )); break ;;
+                        *)             break ;;
+                    esac
+                done
+                ;;
+            nice)
+                (( pos++ ))
+                if (( pos <= $#words )); then
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -n)    (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;; # -n 10
+                        -n=*|-n[0-9]*) (( pos++ )) ;;     # -n=10 or -n10
+                        -[0-9]*) (( pos++ )) ;;            # -19
+                    esac
+                fi
+                ;;
+            time)
+                (( pos++ ))
+                if (( pos <= $#words )); then
+                    _zpwr_bare "$words[$pos]"
+                    [[ $REPLY == -[plv]* ]] && (( pos++ ))
+                fi
+                ;;
+            nohup)
+                (( pos++ ))
+                ;;
+            rlwrap)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[aciNr]*)     (( pos++ )) ;;
+                        -[bfHpsS])     (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -[bfHpsS]=*)   (( pos++ )) ;;
+                        *)             break ;;
+                    esac
+                done
+                ;;
+            timeout)
+                (( pos++ ))
+                # consume optional -k/-s flags
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[ks])     (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -[ks]=*)   (( pos++ )) ;;
+                        *)         break ;;
+                    esac
+                done
+                # consume mandatory DURATION (only if not the last word)
+                (( pos < $#words )) && (( pos++ ))
+                ;;
+            strace|ltrace)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[cCdDfFhikqrtTvVwxXyYzZ]*) (( pos++ )) ;;
+                        -[abeEIoOpPsSuU])   (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -[abeEIoOpPsSuU]=*) (( pos++ )) ;;
+                        *)                  break ;;
+                    esac
+                done
+                ;;
+            ionice)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[t]*)         (( pos++ )) ;;
+                        -[cn])         (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -[cn]=*|-[cn][0-9]*) (( pos++ )) ;;
+                        *)             break ;;
+                    esac
+                done
+                ;;
+            caffeinate)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[dimsu]*)     (( pos++ )) ;;
+                        -[tw])         (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -[tw]=*)       (( pos++ )) ;;
+                        *)             break ;;
+                    esac
+                done
+                ;;
+            setsid)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[cfw]*) (( pos++ )) ;;
+                        *)       break ;;
+                    esac
+                done
+                ;;
+            chrt)
+                (( pos++ ))
+                # consume optional policy flag
+                if (( pos <= $#words )); then
+                    _zpwr_bare "$words[$pos]"
+                    [[ $REPLY == -[bfimor]* ]] && (( pos++ ))
+                fi
+                # consume mandatory PRIORITY (only if not the last word)
+                (( pos < $#words )) && (( pos++ ))
+                ;;
+            taskset)
+                (( pos++ ))
+                # consume optional -c flag
+                if (( pos <= $#words )); then
+                    _zpwr_bare "$words[$pos]"
+                    [[ $REPLY == -c ]] && (( pos++ ))
+                fi
+                # consume mandatory MASK (only if not the last word)
+                (( pos < $#words )) && (( pos++ ))
+                ;;
+            watch)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[dgtecxbpw]*)  (( pos++ )) ;;
+                        -n)             (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -n=*|-n[0-9]*) (( pos++ )) ;;
+                        *)              break ;;
+                    esac
+                done
+                ;;
+            runuser)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[l]*)         (( pos++ )) ;;
+                        -[ugG])        (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -[ugG]=*)      (( pos++ )) ;;
+                        *)             break ;;
+                    esac
+                done
+                ;;
+            flock)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[nsux]*)      (( pos++ )) ;;
+                        -[wE])         (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -[wE]=*)       (( pos++ )) ;;
+                        *)             break ;;
+                    esac
+                done
+                # consume mandatory FILE (only if not the last word)
+                (( pos < $#words )) && (( pos++ ))
+                ;;
+            chroot)
+                (( pos++ ))
+                # consume mandatory PATH (only if not the last word)
+                (( pos < $#words )) && (( pos++ ))
+                ;;
+            unshare)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[fmnpuUirC]*) (( pos++ )) ;;
+                        --)            (( pos++ )); break ;;
+                        *)             break ;;
+                    esac
+                done
+                ;;
+            cpulimit)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[l])      (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -[l]=*)    (( pos++ )) ;;
+                        *)         break ;;
+                    esac
+                done
+                ;;
+            pkexec|fakeroot|unbuffer|chronic|torify|torsocks|tsocks|proxychains4|daemonize|firejail|sem|valgrind|systemd-run)
+                (( pos++ ))
+                ;;
+            *)
+                break
+                ;;
+        esac
+    done
+
+    # Build prefix string (everything consumed) and tail string (remaining words)
+    local -a prefix_words=()
+    for (( i = 1; i < pos && i <= $#words; i++ )); do
+        prefix_words+=("$words[$i]")
+    done
+    ZPWR_VARS[cachedParserPrefix]="${prefix_words[*]}"
+
+    if (( pos <= $#words )); then
+        local -a tail=()
+        for (( i = pos; i <= $#words; i++ )); do
+            tail+=("$words[$i]")
+        done
+        ZPWR_VARS[cachedRegexMatch]="${tail[*]}"
+        ZPWR_VARS[cachedRegexMatched]=true
+
+        # also update ZPWR_EXPAND_WORDS_LPARTITION to have assignments stripped
+        # (downstream code expects this)
+        local -a cleaned=()
+        for (( i = 1; i <= $#words; i++ )); do
+            if ! _zpwr_is_assignment "$words[$i]"; then
+                cleaned+=("$words[$i]")
+            fi
+        done
+        ZPWR_EXPAND_WORDS_LPARTITION=("${cleaned[@]}")
+    else
+        # all words consumed as prefixes — still a valid parse, just no command yet
+        ZPWR_VARS[cachedRegexMatch]=""
+        ZPWR_VARS[cachedRegexMatched]=true
+
+        local -a cleaned=()
+        for (( i = 1; i <= $#words; i++ )); do
+            if ! _zpwr_is_assignment "$words[$i]"; then
+                cleaned+=("$words[$i]")
+            fi
+        done
+        ZPWR_EXPAND_WORDS_LPARTITION=("${cleaned[@]}")
+    fi
+
+    unfunction _zpwr_bare _zpwr_is_assignment 2>/dev/null
+}
+
 function zpwrExpandParseWords(){
 
     local i lastword_partition firstIndex lastIndex finalWord tmp
@@ -48,10 +398,6 @@ function zpwrExpandParseWords(){
                 firstIndex=$((i + 1))
                 break
                 ;;
-            *=*)
-                #remove assignment
-                mywordsleft[$i]=()
-                ;;
             '>'* | '<'* | '&>'*)
                 #remove redirection operator from left words
                 mywordsleft[$i]=()
@@ -65,18 +411,16 @@ function zpwrExpandParseWords(){
 
     ZPWR_EXPAND_WORDS_LPARTITION=( $mywordsleft[$firstIndex,$#mywordsleft] )
 
-    # strip quotes from last word only in argument position (not command position)
-    # command position includes: first word, or word after sudo/env/builtin/etc prefixes
-    # cache the regex result for zpwrExpandRegexMatchOnCommandPosition to reuse
+    # use parser to find command position — strips assignments contextually,
+    # consumes shell keywords and execvp wrappers with their flags
     ZPWR_VARS[cachedRegexMatch]=""
     ZPWR_VARS[cachedRegexMatched]=false
     local -i isArgPosition=0
     if (( $#ZPWR_EXPAND_WORDS_LPARTITION > 1 )); then
-        if [[ "$ZPWR_EXPAND_WORDS_LPARTITION" =~ "$ZPWR_VARS[continueFirstPositionRegexNoZpwr]" ]]; then
-            ZPWR_VARS[cachedRegexMatch]=${match[-1]}
+        zpwrExpandParserFindCommandPosition
+        if [[ -n $ZPWR_VARS[cachedRegexMatch] || $ZPWR_VARS[cachedRegexMatched] == true ]]; then
             ZPWR_VARS[cachedRegexMatched]=true
-            local -a tailWords=( ${(z)match[-1]} )
-            # >1 word after prefixes means last word is an argument
+            local -a tailWords=( ${(z)ZPWR_VARS[cachedRegexMatch]} )
             (( $#tailWords > 1 )) && isArgPosition=1
         else
             isArgPosition=1

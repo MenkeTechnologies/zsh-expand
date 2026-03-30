@@ -43,6 +43,15 @@ teh<space>  =>  the
 nocorrect time -p command sudo -kE -u root env -0iv -C /tmp \
   nice -n 10 rlwrap -acN -f comp nohup gco<space>
   =>  ...git checkout
+
+# extreme stack — proxy, auth, env, debug, scheduling, sandbox,
+# process control, wrapper, all with flags:
+torify sudo -kE -u root env -0iv -C /tmp                     \
+  strace -f -e trace=network ionice -c 2 chrt -f 10          \
+  taskset -c 0 nice -n 10 caffeinate -i setsid -f            \
+  flock /tmp/lock timeout 30 unbuffer rlwrap -acN             \
+  cpulimit -l 50 nohup time -v gco<space>
+  =>  ...git checkout
 ```
 
 ### // DEMO
@@ -133,7 +142,24 @@ External wrappers (execvp commands):
 | `torify` `torsocks` `tsocks` `proxychains4` | — | — | `torify gco` |
 | `firejail` `daemonize` `sem` `systemd-run` | — | — | `firejail gco` |
 
-All prefixes support `\escaped`, `'single-quoted'`, and `"double-quoted"` forms. `sudo`/`doas`/`env`/`nice`/`time`/`nohup`/`rlwrap` are case-insensitive. Variable assignments (`X=1`, `PATH=/usr/bin`) are stripped automatically.
+All prefixes support `\escaped`, `'single-quoted'`, and `"double-quoted"` forms. `sudo`/`doas`/`env`/`nice`/`time`/`nohup`/`rlwrap` are case-insensitive. Variable assignments (`X=1`, `PATH=/usr/bin`) are stripped automatically at any position:
+
+```
+X=1 sudo gco                    =>  X=1 sudo git checkout
+sudo X=1 env Y=2 gco            =>  sudo X=1 env Y=2 git checkout
+env FOO=bar BAZ=qux gco         =>  env FOO=bar BAZ=qux git checkout
+PATH=/usr/bin LANG=C sudo gco   =>  PATH=/usr/bin LANG=C sudo git checkout
+```
+
+**Known limitation:** flag arguments containing `=` are also stripped, which can cause expansion to fail:
+
+```
+strace -e trace=network gco     =>  no expansion (trace=network stripped)
+strace -e trace=open -o out gco =>  no expansion (cascading misparse)
+env -S echo=hello gco           =>  no expansion (echo=hello stripped)
+```
+
+Workaround: use the space form instead of `=` where possible (`strace -e network gco`), or accept that these rare cases won't expand.
 
 ---
 

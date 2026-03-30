@@ -933,3 +933,109 @@
     assert $state equals 0
     assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
 }
+
+#==============================================================
+# strace -e trace=X (parser = fix)
+#==============================================================
+
+@test 'regex: strace -e trace=network' {
+    zpwrExpandParseWords "strace -e trace=network git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: strace -e trace=open -o /tmp/out' {
+    zpwrExpandParseWords "strace -e trace=open -o /tmp/out git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: strace -cf -e trace=write -s 256 -o /tmp/log' {
+    zpwrExpandParseWords "strace -cf -e trace=write -s 256 -o /tmp/log git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: sudo -E strace -f -e trace=network' {
+    zpwrExpandParseWords "sudo -E strace -f -e trace=network git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+#==============================================================
+# extreme stacked: every category represented
+#==============================================================
+
+@test 'regex: proxy auth env debug sched wrapper process' {
+    zpwrExpandParseWords "torify sudo -kE -u root env -0iv -C /tmp strace -f -e trace=network ionice -c 2 chrt -f 10 taskset -c 0 nice -n 10 caffeinate -i setsid -f rlwrap -acN cpulimit -l 50 nohup time -v git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: full keyword chain then all wrappers with assignments' {
+    zpwrExpandParseWords "A=1 B=2 nocorrect time -p command -p doas -n -u root env -0iv FOO=bar -C /tmp ionice -c2 -n0 chrt -f 10 taskset -c 0 nice -n 10 caffeinate -i setsid -cfw rlwrap -acN -f comp -s 500 nohup time -v git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: proxy chain into sandbox into auth into env' {
+    zpwrExpandParseWords "torify proxychains4 fakeroot strace -f -e trace=file ionice -c 2 chrt -f 10 taskset -c 0 nice -n 10 caffeinate -i setsid -f flock /tmp/lock timeout 30 unbuffer rlwrap -acN cpulimit -l 50 nohup time -v git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: all no-flag wrappers stacked' {
+    zpwrExpandParseWords "fakeroot valgrind ltrace chronic torify torsocks tsocks proxychains4 pkexec firejail sem systemd-run daemonize unbuffer nohup git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: every shell keyword then every auth wrapper' {
+    zpwrExpandParseWords "nocorrect time -plv - builtin command -p eval noglob coproc sudo -kE -u root doas -ns -u deploy pkexec git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: assignments interspersed with env vars and flag=args' {
+    zpwrExpandParseWords "PATH=/usr/bin LD_PRELOAD=x.so DISPLAY=:0 LANG=C nocorrect time -p command -p sudo -kE -u root env -0iv FOO=bar BAR=baz -C /tmp -u TERM strace -f -e trace=open nice -n 10 nohup git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: escaped chain with flags' {
+    zpwrExpandParseWords "\\nocorrect \\time -p \\builtin \\command -p \\sudo -kE -u root \\env -0iv \\nice -n 10 \\nohup git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: single-quoted chain with flags' {
+    zpwrExpandParseWords "'nocorrect' 'time' -p 'builtin' 'command' -p 'sudo' -kE -u root 'env' -0iv 'nice' -n 10 'nohup' git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: double-quoted chain with flags' {
+    zpwrExpandParseWords "\"nocorrect\" \"time\" -p \"builtin\" \"command\" -p \"sudo\" -kE -u root \"env\" -0iv \"nice\" -n 10 \"nohup\" git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: mixed quoting with all flag styles' {
+    zpwrExpandParseWords "\\nocorrect 'time' -p \"builtin\" \\command -p 'sudo' -kE -u root \"env\" -0iv \\nice -n 10 'rlwrap' -acN \"nohup\" git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
