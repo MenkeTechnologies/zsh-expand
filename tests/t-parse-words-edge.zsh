@@ -281,8 +281,8 @@
 
 @test 'parseWords: path with spaces (quoted) lastword is last token' {
     zpwrExpandParseWords "cd '/path with spaces'"
-    # (z) respects quotes, so the entire quoted path is one token
-    assert "$ZPWR_VARS[lastword_lbuffer]" same_as '/path with spaces'
+    # (z) preserves quotes around the token
+    assert "$ZPWR_VARS[lastword_lbuffer]" same_as "'/path with spaces'"
 }
 
 #==============================================================
