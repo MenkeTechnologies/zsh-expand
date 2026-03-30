@@ -55,6 +55,10 @@ teh<space>  =>  the
 | **Spelling Correction** | 300+ built-in misspelling/abbreviation corrections -- `teh` -> `the`, `cmd` -> `command`, `bg` -> `background` -- user-extensible via associative array |
 | **Native Expansion** | Globs, `$parameters`, `$(command substitution)`, `=(process substitution)`, `!history` expansion via zle `expand-word` |
 | **Tabstop Snippets** | Aliases with `$ZPWR_TABSTOP` placeholders act as templates -- cursor jumps to the placeholder on expansion |
+| **Self-Referential Alias Escape** | `alias git="hub"` expands to `\hub` -- backslash-escapes the first word to prevent infinite recursion |
+| **Correct-Then-Expand** | Typo correction chains into alias expansion in a single keypress -- `goc` -> `gco` -> `git checkout` |
+| **Quote-Aware Expansion** | Optionally expands aliases inside `"double"` or `'single'` quoted strings |
+| **Autopair Integration** | Detects [autopair](https://github.com/hlissner/zsh-autopair) and delegates space insertion to preserve bracket/quote auto-pairing |
 | **History Injection** | Optionally writes the fully-expanded form of your command into history |
 
 ---
@@ -162,7 +166,11 @@ The key is the correct word, the value is a space-separated list of misspellings
 | Clobber protection | **yes** | n/a | no | no |
 | Glob / history / param expansion | **yes** | no | no | yes |
 | Tabstop snippets (cursor placement) | **yes** | no | no | no |
+| Self-referential alias escape | **yes** | no | no | no |
+| Correct-then-expand chaining | **yes** | no | no | no |
 | History injection | **yes** | no | no | no |
+| Expand inside quotes | **yes** | no | no | no |
+| Autopair integration | **yes** | no | no | no |
 | Blacklist / filter | **yes** | n/a | no | yes |
 | Test suite | **9,300+** | yes | no | no |
 | Pure zsh (no external deps) | **yes** | yes | yes | ohmyzsh |
