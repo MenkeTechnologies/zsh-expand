@@ -364,6 +364,49 @@ export ZPWR_EXPAND_PRE_EXEC_NATIVE=true
 
 ---
 
+### // COMMAND-POSITION PARSER
+
+Previous versions used a single POSIX extended regex to match prefix commands and their flags. This worked for simple cases but couldn't scale -- every new command and flag combination made the regex longer and harder to debug. Flag arguments containing `=` (like `strace -e trace=network`) were incorrectly stripped as variable assignments.
+
+The current architecture uses a **left-to-right parser** (`zpwrExpandParserFindCommandPosition`) that walks the word array and understands shell grammar:
+
+```
+Phase 1: consume shell keywords (nocorrect, time -p, builtin, command -p, exec -cl, eval, noglob, coproc, -)
+Phase 2: consume execvp wrappers (sudo, doas, env, nice, strace, timeout, ionice, caffeinate, ...)
+Result:  everything remaining is the command + arguments
+```
+
+Each command has its own `case` branch that knows exactly which flags take arguments. This means:
+
+- `strace -e trace=network gco` -- the parser knows `-e` takes an argument, so `trace=network` is consumed as a flag value, not stripped as a variable assignment. `gco` expands correctly.
+- `env -i FOO=bar gco` -- the parser knows `FOO=bar` after `env` is an environment variable, not a shell assignment. `gco` expands correctly.
+- `sudo -kE -u root gco` -- the parser knows `-u` takes an argument (`root`), so it consumes both. `gco` expands correctly.
+
+Adding a new prefix command is a single `case` branch:
+
+```zsh
+mynewcmd)
+    (( pos++ ))
+    while (( pos <= $#words )); do
+        _zpwr_bare "$words[$pos]"
+        case $REPLY in
+            -[vq]*)    (( pos++ )) ;;           # combo flags
+            -[of])     (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;; # flag with arg
+            *)         break ;;
+        esac
+    done
+    ;;
+```
+
+The parser exposes two results for downstream consumers:
+
+| Variable | Contents | Example |
+|---|---|---|
+| `ZPWR_VARS[cachedRegexMatch]` | tail: command + args after all prefixes | `gco arg1 arg2` |
+| `ZPWR_VARS[cachedParserPrefix]` | everything consumed as prefix | `sudo -kE -u root env -i` |
+
+---
+
 ### // PERFORMANCE
 
 Source files can be compiled to `.zwc` bytecode for instant loading (`zcompile` or via your plugin manager). The plugin uses zero external commands -- no `sed`, `awk`, `grep`, or subshells. Every expansion runs in pure zsh builtins and parameter expansion, keeping latency invisible on every keypress.

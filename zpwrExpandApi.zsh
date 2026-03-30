@@ -441,14 +441,26 @@ function zpwrExpandParseWords(){
 
     ZPWR_VARS[firstword_partition]=${lpartAry[1]}
 
-    ZPWR_VARS[lastword_lbuffer]=${lpartAry[-1]}
+    # skip words containing = (assignments and --flag=value) for lastword
+    local -a _noeq=()
+    local _w
+    for _w in "${lpartAry[@]}"; do
+        [[ $_w != *=* ]] && _noeq+=("$_w")
+    done
+    if (( $#_noeq )); then
+        ZPWR_VARS[lastword_lbuffer]=${_noeq[-1]}
+    else
+        ZPWR_VARS[lastword_lbuffer]=''
+    fi
 
     #zpwrLogDebug "first word partition = ...$ZPWR_VARS[firstword_partition]..."
     #zpwrLogDebug "last word lbuf before no dbl quotes and [-1] = ...$ZPWR_VARS[lastword_lbuffer]..."
 
     lbufAry=( ${(z)${ZPWR_VARS[lastword_lbuffer]}} )
 
-    ZPWR_VARS[lastword_lbuffer]=${lbufAry[-1]}
+    if (( $#lbufAry )); then
+        ZPWR_VARS[lastword_lbuffer]=${lbufAry[-1]}
+    fi
     #zpwrLogDebug "last word lbuf after no dbl quotes and [-1] = ...$ZPWR_VARS[lastword_lbuffer]..."
 
     #zpwrLogDebug "first word partition before spelling = ...$ZPWR_VARS[firstword_partition]..."
