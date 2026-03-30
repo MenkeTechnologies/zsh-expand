@@ -117,7 +117,7 @@ function zpwrExpandGetAliasValue(){
 
 function zpwrExpandAliasEscape(){
 
-    local res1 result
+    local res1
 
     if [[ $LBUFFER == (#b)(*[[:space:]]#)($ZPWR_VARS[lastword_lbuffer]) ]]; then
         res1=${match[1]}
@@ -132,7 +132,7 @@ function zpwrExpandAliasEscape(){
 function zpwrExpandWordStopHistoryExpansion(){
     #escapes all previous history !pwd etc before last word because zle expand-word always expands them
 
-    local res1 result
+    local res1
 
     if [[ $LBUFFER == (#b)(*[[:space:]]#)($ZPWR_VARS[lastword_lbuffer]) ]]; then
         res1=${match[1]}
@@ -147,7 +147,7 @@ function zpwrExpandWordStopHistoryExpansion(){
 
 function zpwrExpandAlias(){
 
-    local res1 result
+    local res1
 
     if [[ $LBUFFER == (#b)(*[[:space:]]#)($ZPWR_VARS[lastword_lbuffer]) ]]; then
         res1=${match[1]}
@@ -162,9 +162,14 @@ function zpwrExpandGlobalAliases() {
 
     local res1 result
 
-    ZPWR_VARS[lastword_lbuffer]="$1"
+    if [[ -n "$1" ]]; then
+        ZPWR_VARS[lastword_lbuffer]="$1"
+    else
+        # called as ZLE widget (e.g. via keybinding) — parse words from LBUFFER
+        zpwrExpandParseWords "$LBUFFER"
+    fi
     result=$galiases[$ZPWR_VARS[lastword_lbuffer]]
-    if [[ $LBUFFER == (#b)(*[[:space:]]#)($ZPWR_VARS[lastword_lbuffer]) ]]; then
+    if [[ -n $result ]] && [[ $LBUFFER == (#b)(*[[:space:]]#)($ZPWR_VARS[lastword_lbuffer]) ]]; then
 
         res1=${match[1]}
         # expand
