@@ -38,6 +38,11 @@
 gco<space>  =>  git checkout
 sudo gco<space>  =>  sudo git checkout
 teh<space>  =>  the
+
+# deep prefix chain — all flags parsed, alias still expanded:
+nocorrect time -p command sudo -kE -u root env -0iv -C /tmp \
+  nice -n 10 rlwrap -acN -f comp nohup gco<space>
+  =>  ...git checkout
 ```
 
 ### // DEMO
@@ -50,7 +55,7 @@ teh<space>  =>  the
 
 | Layer | What It Does |
 |---|---|
-| **Alias Expansion** | Expands regular aliases in command position and after `sudo`, `env`, `builtin`, `command`, `noglob`, `nice`, `nohup`, `rlwrap`, `time` and linear combos of these with options |
+| **Alias Expansion** | Expands regular aliases in command position and after `sudo`, `env`, `builtin`, `command`, `exec`, `eval`, `noglob`, `nocorrect`, `nice`, `nohup`, `rlwrap`, `time` and arbitrary combos of these with full flag support |
 | **Global Alias Expansion** | Expands global aliases anywhere on the command line |
 | **Spelling Correction** | 300+ built-in misspelling/abbreviation corrections -- `teh` -> `the`, `cmd` -> `command`, `bg` -> `background` -- user-extensible via associative array |
 | **Native Expansion** | Globs, `$parameters`, `$(command substitution)`, `=(process substitution)`, `!history` expansion via zle `expand-word` |
@@ -82,6 +87,53 @@ CURSOR RULES
   one space after word (menuselect)     => expand
   two spaces after word                 => bypass
 ```
+
+---
+
+### // SUPPORTED PREFIXES AND FLAGS
+
+Shell builtins/keywords (must precede external wrappers):
+
+| Prefix | Flags | Example |
+|---|---|---|
+| `nocorrect` | — | `nocorrect gco` |
+| `time` | `-p` `-l` `-v` | `time -plv gco` |
+| `-` | — | `- gco` |
+| `builtin` | — | `builtin gco` |
+| `command` | `-p` | `command -p gco` |
+| `exec` | `-c` `-l` `-a NAME` | `exec -cl -a name gco` |
+| `eval` | — | `eval gco` |
+| `noglob` | — | `noglob gco` |
+
+External wrappers (execvp commands):
+
+| Prefix | Combo flags | Flag-with-arg | Example |
+|---|---|---|---|
+| `sudo` | `-A -B -b -E -H -k -K -n -P -S -i -s` | `-C N` `-g GRP` `-h HOST` `-p PROMPT` `-R DIR` `-r ROLE` `-T SEC` `-t TYPE` `-u USER` `--` | `sudo -kE -u root gco` |
+| `doas` | `-n -s` | `-u USER` `-C CFG` `--` | `doas -n -u root gco` |
+| `env` | `-0 -i -v` | `-C DIR` `-P PATH` `-S STR` `-u VAR` `--` | `env -0iv -C /tmp -u HOME gco` |
+| `nice` | — | `-n ADJ` `-ADJ` | `nice -n 10 gco` |
+| `time` | `-p -l -v` | — | `time -v gco` |
+| `nohup` | — | — | `nohup gco` |
+| `rlwrap` | `-a -c -i -N -r` | `-b CHARS` `-f FILE` `-H FILE` `-p COLOR` `-s N` `-S PROMPT` | `rlwrap -acN -f comp -s 500 gco` |
+| `timeout` | — | `-k DUR` `-s SIG` | `timeout -k 10 30 gco` |
+| `strace` | `-c -C -d -D -f -F -h -i -k -q -r -t -T -v -V -w -x -X -y -Y -z -Z` | `-a COL` `-b SZ` `-e EXPR` `-E VAR` `-I N` `-o FILE` `-O N` `-p PID` `-P PATH` `-s SZ` `-S BY` `-u COL` `-U COL` | `strace -cf -s 256 gco` |
+| `ionice` | `-t` | `-c CLASS` `-n LEVEL` | `ionice -c 2 -n 7 gco` |
+| `caffeinate` | `-d -i -m -s -u` | `-t SEC` `-w PID` | `caffeinate -i gco` |
+| `setsid` | `-c -f -w` | — | `setsid -f gco` |
+| `chrt` | `-b -f -i -m -o -r` | — | `chrt -f 10 gco` |
+| `taskset` | `-c` | — | `taskset -c 0-3 gco` |
+| `watch` | `-d -g -t -e -c -x -b -p -w` | `-n INTERVAL` | `watch -d -n 1 gco` |
+| `flock` | `-n -s -u -x` | `-w SEC` `-E N` | `flock -w 5 /tmp/lock gco` |
+| `chroot` | — | — | `chroot /path gco` |
+| `runuser` | `-l` | `-u USER` `-g GRP` `-G GRP` | `runuser -u deploy gco` |
+| `unshare` | `-f -m -n -p -u -U -i -r -C` | `--` | `unshare -mn gco` |
+| `cpulimit` | — | `-l LIMIT` | `cpulimit -l 50 gco` |
+| `pkexec` `fakeroot` `unbuffer` `chronic` `valgrind` `ltrace` | — | — | `valgrind gco` |
+| `torify` `torsocks` `tsocks` `proxychains4` | — | — | `torify gco` |
+| `firejail` `daemonize` `sem` `systemd-run` | — | — | `firejail gco` |
+
+All prefixes support `\escaped`, `'single-quoted'`, and `"double-quoted"` forms. `sudo`/`doas`/`env`/`nice`/`time`/`nohup`/`rlwrap` are case-insensitive. Variable assignments (`X=1`, `PATH=/usr/bin`) are stripped automatically.
 
 ---
 
