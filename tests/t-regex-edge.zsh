@@ -391,15 +391,15 @@
     assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
 }
 
-@test 'regex: sudo -r role flag-with-arg' {
-    zpwrExpandParseWords "sudo -r unconfined_r git"
+@test 'regex: sudo -D dir flag-with-arg' {
+    zpwrExpandParseWords "sudo -D /tmp git"
     zpwrExpandRegexMatchOnCommandPosition
     assert $state equals 0
     assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
 }
 
-@test 'regex: sudo -t type flag-with-arg' {
-    zpwrExpandParseWords "sudo -t unconfined_t git"
+@test 'regex: sudo -U user flag-with-arg' {
+    zpwrExpandParseWords "sudo -U deploy git"
     zpwrExpandRegexMatchOnCommandPosition
     assert $state equals 0
     assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
@@ -413,7 +413,7 @@
 }
 
 @test 'regex: sudo all flags combined' {
-    zpwrExpandParseWords "sudo -ABbEHkKnPSis -C 3 -g wheel -h host -p pass -R /root -r role -T 30 -t type -u root git"
+    zpwrExpandParseWords "sudo -ABbEHkKnPSis -C 3 -D /tmp -g wheel -h host -p pass -R /root -T 30 -U deploy -u root git"
     zpwrExpandRegexMatchOnCommandPosition
     assert $state equals 0
     assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
@@ -649,7 +649,7 @@
 #==============================================================
 
 @test 'regex: every prefix every flag monster chain' {
-    zpwrExpandParseWords "nocorrect time -plv - builtin builtin command -p command eval exec -cl -a name noglob sudo -ABbEHkKnPSis -C 3 -g wheel -h host -p pass -R /root -r role -T 30 -t type -u root env -0iv -C /tmp -P /bin -S cat -u TERM nice -n 10 rlwrap -acN -b x -f y -H z -p r -s 5 -S p nohup time -v git"
+    zpwrExpandParseWords "nocorrect time -plv - builtin builtin command -p command eval exec -cl -a name noglob sudo -ABbEHkKnPSis -C 3 -D /tmp -g wheel -h host -p pass -R /root -T 30 -U deploy -u root env -0iv -C /tmp -P /bin -S cat -u TERM nice -n 10 rlwrap -acN -b x -f y -H z -p r -s 5 -S p nohup time -v git"
     zpwrExpandRegexMatchOnCommandPosition
     assert $state equals 0
     assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
