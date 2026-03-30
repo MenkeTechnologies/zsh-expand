@@ -241,7 +241,9 @@ The key is the correct word, the value is a space-separated list of misspellings
 | Feature | zsh-expand | [zsh-abbr](https://github.com/olets/zsh-abbr) | [zsh-abbrev-alias](https://github.com/momo-lab/zsh-abbrev-alias) | [globalias](https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/globalias) |
 |---|---|---|---|---|
 | Uses native `alias` / `global alias` | **yes** | no (own `abbr` cmd) | no (own `abbrev-alias` cmd) | yes |
-| Expands after `sudo`/`env`/`builtin` combos | **yes** | no | no | no |
+| Expands after 30+ prefix commands with flags | **yes** | no | no | no |
+| Full parser for prefix/flag/arg stripping | **yes** | no | no | no |
+| Context-aware `VAR=val` vs flag-arg handling | **yes** | no | no | no |
 | Spelling correction (300+ built-in) | **yes** | no | no | no |
 | User-extensible corrections | **yes** | no | no | no |
 | No correction of valid commands | **yes** | n/a | no | no |
