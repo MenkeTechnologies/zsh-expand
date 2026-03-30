@@ -68,7 +68,7 @@ teh<space>  =>  the
 ```
 COMMAND POSITION
   alias in first word position         => expanded
-  alias after sudo/env/builtin/etc     => expanded
+  alias after sudo/env/builtin/etc     => expanded (case-insensitive: SUDO, Sudo, sUdO all work)
   word is a real command/function       => NOT expanded (no clobbering)
 
 GLOBAL
@@ -171,6 +171,7 @@ The key is the correct word, the value is a space-separated list of misspellings
 | History injection | **yes** | no | no | no |
 | Expand inside quotes | **yes** | no | no | no |
 | Autopair integration | **yes** | no | no | no |
+| Case-insensitive prefix matching | **yes** | no | no | no |
 | Blacklist / filter | **yes** | n/a | no | yes |
 | Test suite | **9,300+** | yes | no | no |
 | Pure zsh (no external deps) | **yes** | yes | yes | ohmyzsh |
