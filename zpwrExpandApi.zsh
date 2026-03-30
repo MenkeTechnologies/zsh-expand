@@ -142,14 +142,16 @@ function zpwrExpandParserFindCommandPosition() {
                 ;;
             nice)
                 (( pos++ ))
-                if (( pos <= $#words )); then
+                while (( pos <= $#words )); do
                     _zpwr_bare "$words[$pos]"
                     case $REPLY in
                         -n)    (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;; # -n 10
                         -n=*|-n[0-9]*) (( pos++ )) ;;     # -n=10 or -n10
                         -[0-9]*) (( pos++ )) ;;            # -19
+                        --)    (( pos++ )); break ;;
+                        *)     break ;;
                     esac
-                fi
+                done
                 ;;
             time)
                 (( pos++ ))
@@ -174,6 +176,7 @@ function zpwrExpandParserFindCommandPosition() {
                         -[acEhiImnNoRrUvWX]*)  (( pos++ )) ;;
                         -[bCDefgHlMOpPqsSttwz])  (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
                         -[bCDefgHlMOpPqsSttwz]=*) (( pos++ )) ;;
+                        --)            (( pos++ )); break ;;
                         *)             break ;;
                     esac
                 done
@@ -187,6 +190,7 @@ function zpwrExpandParserFindCommandPosition() {
                         -[fpv]*)   (( pos++ )) ;;
                         -[ks])     (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
                         -[ks]=*)   (( pos++ )) ;;
+                        --)        (( pos++ )); break ;;
                         *)         break ;;
                     esac
                 done
@@ -201,6 +205,7 @@ function zpwrExpandParserFindCommandPosition() {
                         -[AcCdDfFhiknNqrtTvVwxyYzZ]*) (( pos++ )) ;;
                         -[abeEIoOpPsSuUX])   (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
                         -[abeEIoOpPsSuUX]=*) (( pos++ )) ;;
+                        --)                  (( pos++ )); break ;;
                         *)                   break ;;
                     esac
                 done
@@ -213,6 +218,7 @@ function zpwrExpandParserFindCommandPosition() {
                         -[bcCfhiLrStTV]*) (( pos++ )) ;;
                         -[aADeFlnopsuwx])   (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
                         -[aADeFlnopsuwx]=*) (( pos++ )) ;;
+                        --)                 (( pos++ )); break ;;
                         *)                  break ;;
                     esac
                 done
@@ -225,6 +231,7 @@ function zpwrExpandParserFindCommandPosition() {
                         -[t]*)         (( pos++ )) ;;
                         -[cn])         (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
                         -[cn]=*|-[cn][0-9]*) (( pos++ )) ;;
+                        --)            (( pos++ )); break ;;
                         *)             break ;;
                     esac
                 done
@@ -247,6 +254,7 @@ function zpwrExpandParserFindCommandPosition() {
                     _zpwr_bare "$words[$pos]"
                     case $REPLY in
                         -[cfw]*) (( pos++ )) ;;
+                        --)      (( pos++ )); break ;;
                         *)       break ;;
                     esac
                 done
@@ -260,6 +268,7 @@ function zpwrExpandParserFindCommandPosition() {
                         -[abdefimoprRv]*)  (( pos++ )) ;;
                         -[DPT])    (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
                         -[DPT]=*)  (( pos++ )) ;;
+                        --)        (( pos++ )); break ;;
                         *)         break ;;
                     esac
                 done
@@ -273,6 +282,7 @@ function zpwrExpandParserFindCommandPosition() {
                     _zpwr_bare "$words[$pos]"
                     case $REPLY in
                         -[acp]*) (( pos++ )) ;;
+                        --)      (( pos++ )); break ;;
                         *)       break ;;
                     esac
                 done
@@ -287,6 +297,7 @@ function zpwrExpandParserFindCommandPosition() {
                         -[bdCcefgprtwx]*)  (( pos++ )) ;;
                         -[nqs])         (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
                         -[nqs]=*|-[nqs][0-9]*) (( pos++ )) ;;
+                        --)             (( pos++ )); break ;;
                         *)              break ;;
                     esac
                 done
@@ -299,6 +310,7 @@ function zpwrExpandParserFindCommandPosition() {
                         -[flmpPT]*)    (( pos++ )) ;;
                         -[cgsGuw])     (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
                         -[cgsGuw]=*)   (( pos++ )) ;;
+                        --)            (( pos++ )); break ;;
                         *)             break ;;
                     esac
                 done
@@ -311,6 +323,7 @@ function zpwrExpandParserFindCommandPosition() {
                         -[eFnosux]*)   (( pos++ )) ;;
                         -[cwE])        (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
                         -[cwE]=*)      (( pos++ )) ;;
+                        --)            (( pos++ )); break ;;
                         *)             break ;;
                     esac
                 done
@@ -319,6 +332,11 @@ function zpwrExpandParserFindCommandPosition() {
                 ;;
             chroot)
                 (( pos++ ))
+                # consume optional --
+                if (( pos <= $#words )); then
+                    _zpwr_bare "$words[$pos]"
+                    [[ $REPLY == -- ]] && (( pos++ ))
+                fi
                 # consume mandatory PATH (only if not the last word)
                 (( pos <= $#words )) && (( pos++ ))
                 ;;
@@ -349,6 +367,7 @@ function zpwrExpandParserFindCommandPosition() {
                         -[viz]*)   (( pos++ )) ;;
                         -[elp])    (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
                         -[elp]=*)  (( pos++ )) ;;
+                        --)        (( pos++ )); break ;;
                         *)         break ;;
                     esac
                 done
@@ -375,6 +394,7 @@ function zpwrExpandParserFindCommandPosition() {
                     case $REPLY in
                         -[ioe])        (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
                         -[ioe]=*|-[ioe]?*) (( pos++ )) ;; # -o=L or -oL combined
+                        --)            (( pos++ )); break ;;
                         *)             break ;;
                     esac
                 done
@@ -393,6 +413,7 @@ function zpwrExpandParserFindCommandPosition() {
                         -n=*)          (( pos++ )) ;;
                         -p)            (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
                         -p=*)          (( pos++ )) ;;
+                        --)            (( pos++ )); break ;;
                         *)             break ;;
                     esac
                 done
@@ -405,6 +426,7 @@ function zpwrExpandParserFindCommandPosition() {
                         -[aceFimnpruUCTwWZ]*)  (( pos++ )) ;;
                         -[tSGN])       (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
                         -[tSGN]=*)     (( pos++ )) ;;
+                        --)            (( pos++ )); break ;;
                         *)             break ;;
                     esac
                 done
@@ -417,6 +439,7 @@ function zpwrExpandParserFindCommandPosition() {
                         -[absHl]*)     (( pos++ )) ;;
                         -[iCNmpwP])    (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
                         -[iCNmpwP]=*)  (( pos++ )) ;;
+                        --)            (( pos++ )); break ;;
                         *)             break ;;
                     esac
                 done
@@ -444,6 +467,7 @@ function zpwrExpandParserFindCommandPosition() {
                         --reuid|--regid|--groups|--inh-caps|--ambient-caps|--bounding-set|--securebits|--selinux-label|--apparmor-profile|--pdeathsig)
                                        (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
                         --*=*)         (( pos++ )) ;;
+                        --)            (( pos++ )); break ;;
                         *)             break ;;
                     esac
                 done
@@ -511,6 +535,7 @@ function zpwrExpandParserFindCommandPosition() {
                         -[vVP012]*)            (( pos++ )) ;;
                         -[uUbenlLmdopfct/])  (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
                         -[uUbenlLmdopfct/]=*) (( pos++ )) ;;
+                        --)                    (( pos++ )); break ;;
                         *)                     break ;;
                     esac
                 done
@@ -524,6 +549,7 @@ function zpwrExpandParserFindCommandPosition() {
                         -g)            (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
                         -g=*)          (( pos++ )) ;;
                         --sticky)      (( pos++ )) ;;
+                        --)            (( pos++ )); break ;;
                         *)             break ;;
                     esac
                 done
@@ -536,6 +562,7 @@ function zpwrExpandParserFindCommandPosition() {
                         -[hvVs]*)      (( pos++ )) ;;
                         -[duwtnlP])    (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
                         -[duwtnlP]=*)  (( pos++ )) ;;
+                        --)            (( pos++ )); break ;;
                         *)             break ;;
                     esac
                 done
@@ -610,6 +637,7 @@ function zpwrExpandParserFindCommandPosition() {
                     case $REPLY in
                         -[dhqsv]*)     (( pos++ )) ;;
                         --*=*)         (( pos++ )) ;;
+                        --)            (( pos++ )); break ;;
                         --*)           (( pos++ )) ;;
                         *)             break ;;
                     esac
@@ -641,6 +669,7 @@ function zpwrExpandParserFindCommandPosition() {
                     _zpwr_bare "$words[$pos]"
                     case $REPLY in
                         -[ev]*)    (( pos++ )) ;;
+                        --)        (( pos++ )); break ;;
                         *)         break ;;
                     esac
                 done
@@ -677,6 +706,7 @@ function zpwrExpandParserFindCommandPosition() {
                         -[av]*)    (( pos++ )) ;;
                         -[ceElopu])  (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
                         -[ceElopu]=*) (( pos++ )) ;;
+                        --)        (( pos++ )); break ;;
                         *)         break ;;
                     esac
                 done
@@ -689,6 +719,7 @@ function zpwrExpandParserFindCommandPosition() {
                         -[c])      (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
                         -[c]=*)    (( pos++ )) ;;
                         --*=*)     (( pos++ )) ;;
+                        --)        (( pos++ )); break ;;
                         --*)       (( pos++ )) ;;
                         *)         break ;;
                     esac
@@ -702,6 +733,7 @@ function zpwrExpandParserFindCommandPosition() {
                         -[jP])     (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
                         -[jP]=*)   (( pos++ )) ;;
                         --*=*)     (( pos++ )) ;;
+                        --)        (( pos++ )); break ;;
                         --*)       (( pos++ )) ;;
                         *)         break ;;
                     esac
@@ -716,6 +748,7 @@ function zpwrExpandParserFindCommandPosition() {
                         -[CEHMpu])   (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
                         -[CEHMpu]=*) (( pos++ )) ;;
                         --*=*)       (( pos++ )) ;;
+                        --)          (( pos++ )); break ;;
                         --*)         (( pos++ )) ;;
                         *)           break ;;
                     esac
@@ -728,6 +761,7 @@ function zpwrExpandParserFindCommandPosition() {
                     case $REPLY in
                         -[n])      (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
                         -[n]=*)    (( pos++ )) ;;
+                        --)        (( pos++ )); break ;;
                         *)         break ;;
                     esac
                 done
@@ -740,6 +774,7 @@ function zpwrExpandParserFindCommandPosition() {
                         -[hsv]*)   (( pos++ )) ;;
                         -[bcdel])  (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
                         -[bcdel]=*) (( pos++ )) ;;
+                        --)        (( pos++ )); break ;;
                         *)         break ;;
                     esac
                 done
@@ -803,6 +838,7 @@ function zpwrExpandParserFindCommandPosition() {
                     _zpwr_bare "$words[$pos]"
                     case $REPLY in
                         --*=*)     (( pos++ )) ;;
+                        --)        (( pos++ )); break ;;
                         --*)       (( pos++ )) ;;
                         *)         break ;;
                     esac
