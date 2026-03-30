@@ -611,6 +611,19 @@ Benchmarks (Apple Silicon, 10,000 iterations):
 
 Human perception threshold is ~100ms -- these are 350-570x below that.
 
+Stress test scaling (Apple Silicon, full prefix chain per loop):
+
+| Input size | Tokens | Expand | Time |
+|---|---|---|---|
+| 7 KB | 1.4K | YES | 22 ms |
+| 69 KB | 14K | YES | 536 ms |
+| 343 KB | 70K | YES | 10 sec |
+| 687 KB | 140K | YES | 39 sec |
+| 1.3 MB | 280K | YES | 2.5 min |
+| 3.4 MB | 700K | YES | 15.5 min |
+
+The parser never fails -- it just gets slower on inputs no human would ever type. The bottleneck is zsh's `(z)` word splitter, not the parser itself. Normal command lines are under 1KB and expand in under 1ms.
+
 ---
 
 ### // TEST COVERAGE
