@@ -68,7 +68,16 @@ fi
     ZPWR_VARS[blacklistSubcommandPositionRegex]='^(gh|cargo|jenv|svn|git|ng|go|pod|docker|kubectl|rndc|yarn|npm|pip[0-9\.]*|bundle|rails|gem|nmcli|brew|apt|dnf|yum|zypper|pacman|service|proxychains[0-9\.]*|zpwr|zm|zd|zg|zinit)$'
     # the main regex to match x=1 \builtin* 'command'* '"sudo"' -* y=2 \env* -* z=3 cmd arg1 arg2 etc
 
-    ZPWR_VARS[continueFirstPositionRegexNoZpwr]="^([$ws]*)((${sq}(-|nocorrect|time)${eq}[$ws]+)*(${sq}builtin${eq}[$ws]+)*(${sq}${ZPWR_VARS[builtinSkips]}${eq}[$ws]+)*)?(${sq}[sS][uU][dD][oO]${eq}([$ws]+)(${sq}(-[ABbEHnPSis]+${eq}[$ws]*|-[CghpTu][$ws=]+[$l]*${eq}[$ws]+|--${eq})*)*|${sq}[eE][nN][vV]${eq}[$ws]+(${sq}-[iv]+${eq}[$ws]*|-[PSu][$ws=]+[$l]*${eq}[$ws]+|--${eq})*|${sq}([nN][iI][cC][eE]|[tT][iI][mM][eE]|[nN][oO][hH][uU][pP]|[rR][lL][wW][rR][aA][pP])${eq}[$ws]+)*([$ws]*)(.*)$"
+    # sudo with short/long flags and optional flag arguments
+    local sudo_pat="${sq}[sS][uU][dD][oO]${eq}([$ws]+)(${sq}(-[ABbEHnPSis]+${eq}[$ws]*|-[CghpTu][$ws=]+[$l]*${eq}[$ws]+|--${eq})*)*"
+    # env with -i/-v and -P/-S/-u flag arguments
+    local env_pat="${sq}[eE][nN][vV]${eq}[$ws]+(${sq}-[iv]+${eq}[$ws]*|-[PSu][$ws=]+[$l]*${eq}[$ws]+|--${eq})*"
+    # nice, time, nohup, rlwrap — wrapper commands with no flag arguments
+    local wrapper_no_flags_pat="${sq}([nN][iI][cC][eE]|[tT][iI][mM][eE]|[nN][oO][hH][uU][pP]|[rR][lL][wW][rR][aA][pP])${eq}[$ws]+"
+    # builtin/command/exec/eval/noglob/nocorrect/time/dash — shell keyword prefixes
+    local shell_keyword_pat="(${sq}(-|nocorrect|time)${eq}[$ws]+)*(${sq}builtin${eq}[$ws]+)*(${sq}${ZPWR_VARS[builtinSkips]}${eq}[$ws]+)*"
+
+    ZPWR_VARS[continueFirstPositionRegexNoZpwr]="^([$ws]*)(${shell_keyword_pat})?(${sudo_pat}|${env_pat}|${wrapper_no_flags_pat})*([$ws]*)(.*)$"
 }
 
 
