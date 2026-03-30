@@ -72,7 +72,7 @@ torify sudo -kE -u root su -l deploy                         \
 
 ### // THE MONSTER CHAIN
 
-No other expansion plugin can do this. 757 tokens. 12 shell builtin permutations up front, then every one of the 30 execvp wrapper commands duplicated with different flag combos. `strace` and `ltrace` with all 26 flags maxed out. Variable assignments scattered everywhere. Shell builtins come first (they only exist inside zsh), then execvp wrappers chain freely. The parser consumes the entire prefix and `gco` expands to `git checkout`:
+No other expansion plugin can do this. 12 shell builtin permutations up front, then every one of the 38 execvp wrapper commands duplicated with different flag combos. `strace` and `ltrace` with all 26 flags maxed out. Variable assignments scattered everywhere. Shell builtins come first (they only exist inside zsh), then execvp wrappers chain freely. The parser consumes the entire prefix and `gco` expands to `git checkout`:
 
 ```
 nocorrect time -p command -p builtin eval noglob coproc       \
@@ -88,17 +88,19 @@ nocorrect time -p command -p builtin eval noglob coproc       \
   eval noglob nocorrect builtin coproc                        \
   noglob coproc nocorrect builtin eval time -p command        \
   nocorrect eval noglob builtin coproc                        \
-  torify sudo -kE -u root env -0iv -C /tmp VAR1=a VAR2=b     \
-  doas -n -u deploy env FOO=bar BAZ=qux LANG=C               \
+  torify sudo -kE -u root su -l deploy                        \
+    env -0iv -C /tmp VAR1=a VAR2=b                            \
+  doas -n -u ops env FOO=bar BAZ=qux LANG=C                  \
   sudo -ABbHnPS -g wheel -h h1 -p pw -R /ch -r r1 -T 60     \
     -t t1 -u admin                                            \
-  env -i HOME=/r1 PATH=/b1 TERM=x1                           \
+  su -flm root env -i HOME=/r1 PATH=/b1 TERM=x1              \
   doas -s -C /etc/d1 env -u DISPLAY TERM=xterm-256           \
   sudo -kKi -u nobody env -v -C /var CC=gcc CFLAGS=-O2       \
   sudo -kE -u daemon env -0i -C /opt RUST_LOG=debug          \
   doas -n -u _www env -i SHELL=/bin/zsh EDITOR=vim            \
   torsocks sudo -kE -u test env -i GOPATH=/go                 \
   proxychains4                                                \
+  su -s /bin/zsh -g staff root stdbuf -i 0 -o L -e 0         \
   nice -n 10 nohup nice -n 5 nohup nice -n 1 nohup           \
   nice -n 19 nohup nice -n 15 nohup nice -n 12 nohup         \
   rlwrap -acirN -f /d1 -s 500 -b x -H /h1 -p red -S p1      \
@@ -112,13 +114,18 @@ nocorrect time -p command -p builtin eval noglob coproc       \
   ionice -t -c 2 -n 7 caffeinate -dimsu -t 60 -w 1234        \
   setsid -cf chrt -f 10 taskset -c 0-3                        \
   watch -dgtecxbp -n 2                                        \
+  nsenter -t 1 -m -u -i -n -p                                 \
+  numactl -C 0-3 -m 0 choom -n -500                           \
+  sg staff                                                    \
   flock -nsux -w 10 -E 2 /tmp/lk1 chroot /nr1                \
   runuser -l -u deploy -g staff -G docker                     \
-  unshare -fmnpuUirC -- cpulimit -l 50                        \
+  unshare -fmnpuUirC --                                       \
+  prlimit --nofile=4096 cpulimit -l 50                        \
   pkexec fakeroot unbuffer chronic valgrind                   \
   torify torsocks tsocks proxychains4                         \
-  daemonize firejail sem systemd-run                          \
-  sudo -kE -u www env -0i -C /v2 PATH=/b2 GOPATH=/go         \
+  daemonize firejail sem systemd-run dbus-run-session         \
+  sudo -kE -u www su root stdbuf -oL                          \
+    env -0i -C /v2 PATH=/b2 GOPATH=/go                        \
   doas -n -u _httpd                                           \
   nice -n 8 nohup nice -n 3 nohup                             \
   rlwrap -acN -f /d2 -s 1000 -b y -H /h2 -p blue -S p2      \
@@ -128,12 +135,15 @@ nocorrect time -p command -p builtin eval noglob coproc       \
   ionice -c 1 -n 3 caffeinate -im -t 120                      \
   setsid -f chrt -r 20 taskset -c 0-7                         \
   watch -dx -n 5                                              \
+  nsenter -t 2 -m numactl -i all choom -n -1000               \
   flock -nx -w 3 -E 3 /tmp/lk2 chroot /nr2                   \
-  runuser -u op -g sys unshare -mn -- cpulimit -l 75          \
+  runuser -u op -g sys unshare -mn --                         \
+  prlimit --nproc=512 cpulimit -l 75                          \
   pkexec fakeroot unbuffer chronic valgrind                   \
   torify torsocks proxychains4                                \
-  daemonize firejail sem systemd-run                          \
-  sudo -kE -u test env -i RUST_LOG=trace NODE_ENV=prod        \
+  daemonize firejail sem systemd-run dbus-run-session         \
+  sudo -kE -u test su -l svc stdbuf -e 0                      \
+    env -i RUST_LOG=trace NODE_ENV=prod                        \
   doas -n -u _test                                            \
   nice -n 7 nohup nice -n 2 nohup                             \
   rlwrap -air -f /d3 -s 200 -b z -H /h3 -p green -S p3      \
@@ -143,13 +153,15 @@ nocorrect time -p command -p builtin eval noglob coproc       \
   ionice -t -c 3 -n 0 caffeinate -d -t 30                     \
   setsid -cfw chrt -i 0 taskset -c 0                          \
   watch -dt -n 1                                              \
+  nsenter -t 3 -n sg wheel                                    \
   flock -su -w 1 -E 1 /tmp/lk3 chroot /nr3                   \
-  runuser -l -u svc -g svc unshare -fpU -- cpulimit -l 25    \
+  runuser -l -u svc -g svc unshare -fpU --                    \
+  prlimit --stack=8192 cpulimit -l 25                         \
   pkexec fakeroot unbuffer chronic valgrind                   \
   torify torsocks tsocks proxychains4                         \
-  daemonize firejail sem systemd-run                          \
+  daemonize firejail sem systemd-run dbus-run-session         \
   sudo -kKnP -u op -T 120 -r mgr -t user_t                   \
-    env -0iv -C /run DB=pg REDIS=6379                         \
+    su -P root env -0iv -C /run DB=pg REDIS=6379              \
   doas -s -C /etc/d2                                          \
   nice -n 14 nohup nice -n 9 nohup nice -n 4 nohup           \
   rlwrap -aciN -f /d4 -s 750 -b w -H /h4 -p cyan -S p4      \
@@ -163,13 +175,16 @@ nocorrect time -p command -p builtin eval noglob coproc       \
   ionice -t -c 2 -n 5 caffeinate -dimsu -t 90 -w 5678        \
   setsid -cf chrt -b 5 taskset -c 0-15                        \
   watch -dgtecxbp -n 3                                        \
+  nsenter -t 4 -m -u numactl -N 0 -m 0 choom -n 100          \
   flock -nsux -w 15 -E 4 /tmp/lk4 chroot /nr4                \
   runuser -l -u admin -g adm -G wheel                         \
-  unshare -fmnpuUirC -- cpulimit -l 90                        \
+  unshare -fmnpuUirC --                                       \
+  prlimit --memlock=unlimited cpulimit -l 90                  \
   pkexec fakeroot unbuffer chronic valgrind                   \
   torify torsocks tsocks proxychains4                         \
-  daemonize firejail sem systemd-run                          \
-  sudo -kE -u root env -0iv -C /final VAR=last FINAL=yes     \
+  daemonize firejail sem systemd-run dbus-run-session         \
+  sudo -kE -u root su root stdbuf -o 0                        \
+    env -0iv -C /final VAR=last FINAL=yes                      \
   doas -n -u root                                             \
   nice -n 0 nohup time -v gco<space>
   =>  ...git checkout
@@ -177,7 +192,7 @@ nocorrect time -p command -p builtin eval noglob coproc       \
 
 Scales to 96,000+ tokens (468KB) and beyond. `ARG_MAX` only matters at `execve()` time -- zsh's line editor is just a string in memory with no kernel limit. Try that with a regex.
 
-And if you want one that looks like it was written by someone who should be institutionalized -- triple-proxied through tor, traced at the syscall AND library level with every flag maxed, CPU limited to 1%, real-time priority 99, pinned to 64 cores, locked, chrooted, jailed, namespaced, sandboxed, daemonized, caffeinated for 24 hours:
+And if you want one that looks like it was written by someone who should be institutionalized -- triple-proxied through tor, user-switched twice, namespace-entered, NUMA-pinned, OOM-adjusted, stream-buffered, resource-limited, traced at the syscall AND library level with every flag maxed, CPU limited to 1%, real-time priority 99, pinned to 64 cores, locked, chrooted, jailed, namespaced, sandboxed, daemonized, caffeinated for 24 hours:
 
 ```
 nocorrect noglob builtin eval coproc time -p command -p       \
@@ -187,6 +202,7 @@ nocorrect noglob builtin eval coproc time -p command -p       \
   torify                                                      \
   sudo -kKEHnPS -g wheel -h fortress -p "password is gco"    \
     -R /dungeon -r overlord -T 9999 -t unconfined_t -u root  \
+  su -l deploy                                                \
   env -0iv -C /dev/null                                       \
     DOOM=eternal FEAR=none PATH=/usr/games LANG=chaos         \
     CC=gcc CXX=g++ CFLAGS=-O666 LDFLAGS=-lmadness            \
@@ -194,11 +210,12 @@ nocorrect noglob builtin eval coproc time -p command -p       \
     EDITOR=ed VISUAL=ed PAGER=cat SHELL=/bin/zsh              \
   doas -s -C /etc/doas.d/monster -u _chaos                   \
   torsocks                                                    \
-  sudo -kE -u daemon env -i                                   \
+  sudo -kE -u daemon su root env -i                           \
     MALLOC_CHECK_=3 LD_PRELOAD=/lib/libevil.so                \
     ASAN_OPTIONS=detect_leaks=1                               \
     UBSAN_OPTIONS=print_stacktrace=1                          \
   proxychains4                                                \
+  stdbuf -i 0 -o L -e 0                                      \
   nice -n -20 nohup                                           \
   nice -n 19 nohup                                            \
   nice -n 0 nohup                                             \
@@ -221,11 +238,16 @@ nocorrect noglob builtin eval coproc time -p command -p       \
   setsid -cfw                                                 \
   chrt -f 99                                                  \
   taskset -c 0-63                                             \
+  nsenter -t 1 -m -u -i -n -p                                 \
+  numactl -C 0-63 -m all                                      \
+  choom -n -1000                                              \
+  sg nogroup                                                  \
   watch -dgtecxbp -n 1                                        \
   flock -nsux -w 3600 -E 42 /tmp/lock.of.ages                \
   chroot /newroot/of/all/evil                                 \
   runuser -l -u nobody -g nogroup -G wheel                    \
   unshare -fmnpuUirC --                                       \
+  prlimit --nofile=1048576 --nproc=unlimited                  \
   cpulimit -l 1                                               \
   rlwrap -acirN                                               \
     -f /usr/share/dict/words                                  \
@@ -237,9 +259,10 @@ nocorrect noglob builtin eval coproc time -p command -p       \
   timeout -k 1 -s KILL 86400                                  \
   pkexec fakeroot unbuffer chronic                            \
   valgrind                                                    \
-  daemonize firejail sem systemd-run                          \
+  daemonize firejail sem systemd-run dbus-run-session         \
   tsocks                                                      \
-  sudo -kE -u www-data env -0iv -C /srv                       \
+  sudo -kE -u www-data su -l app stdbuf -oL                   \
+    env -0iv -C /srv                                           \
     DATABASE_URL=postgres://doom:fire@localhost/inferno        \
     REDIS_URL=redis://localhost:6379/0                         \
     SECRET_KEY=hunter2 API_KEY=sk-AAAA                        \
@@ -252,15 +275,17 @@ nocorrect noglob builtin eval coproc time -p command -p       \
   setsid -f                                                   \
   chrt -r 50                                                  \
   taskset -c 0                                                \
+  nsenter -t 2 -m -n numactl -i all choom -n 500             \
   flock -x -w 60 -E 1 /tmp/final.lock                        \
   chroot /srv/jail                                            \
   runuser -u app -g app                                       \
   unshare -mn --                                              \
-  cpulimit -l 100                                             \
+  prlimit --memlock=unlimited cpulimit -l 100                 \
   pkexec fakeroot unbuffer chronic valgrind                   \
   torify torsocks tsocks proxychains4                         \
-  daemonize firejail sem systemd-run                          \
-  sudo -kE -u root env -i PATH=/usr/bin LAST_WORDS=goodbye   \
+  daemonize firejail sem systemd-run dbus-run-session         \
+  sudo -kE -u root su root stdbuf -o 0                        \
+    env -i PATH=/usr/bin LAST_WORDS=goodbye                    \
   doas -n -u root                                             \
   nice -n 0 nohup time -v gco<space>
   =>  ...git checkout
@@ -352,7 +377,7 @@ External wrappers (execvp commands):
 | `sg` | — | — | `sg staff gco` |
 | `choom` | — | `-n ADJ` `-p PID` | `choom -n -1000 gco` |
 | `nsenter` | `-m -u -i -n -p -U -C -r -F -G` | `-t PID` `-S UID` | `nsenter -t 1 -m gco` |
-| `numactl` | `-i -H` | `-C CPUS` `-N NODES` `-m NODES` `-p PID` | `numactl -C 0,1 gco` |
+| `numactl` | `-l` | `-i NODES` `-C CPUS` `-N NODES` `-m NODES` `-p PID` | `numactl -C 0,1 gco` |
 | `prlimit` | `-v` | `-p PID` `--RESOURCE=LIMIT` | `prlimit --nofile=1024 gco` |
 | `pkexec` `fakeroot` `unbuffer` `chronic` `valgrind` | — | — | `valgrind gco` |
 | `torify` `torsocks` `tsocks` `proxychains4` | — | — | `torify gco` |

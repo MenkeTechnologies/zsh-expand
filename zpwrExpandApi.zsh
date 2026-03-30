@@ -339,7 +339,7 @@ function zpwrExpandParserFindCommandPosition() {
                     _zpwr_bare "$words[$pos]"
                     case $REPLY in
                         -[ioe])        (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
-                        -[ioe]=*)      (( pos++ )) ;;
+                        -[ioe]=*|-[ioe]?*) (( pos++ )) ;; # -o=L or -oL combined
                         *)             break ;;
                     esac
                 done
@@ -379,9 +379,9 @@ function zpwrExpandParserFindCommandPosition() {
                 while (( pos <= $#words )); do
                     _zpwr_bare "$words[$pos]"
                     case $REPLY in
-                        -[iH]*)        (( pos++ )) ;;
-                        -[CNmp])       (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
-                        -[CNmp]=*)     (( pos++ )) ;;
+                        -[l]*)         (( pos++ )) ;;  # -l/--localalloc
+                        -[iCNmp])      (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -[iCNmp]=*)    (( pos++ )) ;;
                         *)             break ;;
                     esac
                 done
