@@ -199,6 +199,11 @@ function zpwrExpandSuffixAlias(){
     local ext=${word:e}
     local res1
 
+    # only expand at command position: single word or single word after prefixes
+    if (( $#ZPWR_EXPAND_WORDS_LPARTITION > 1 )) && (( $#ZPWR_EXPAND_PRE_EXPAND != 1 )); then
+        return
+    fi
+
     if [[ -n $ext ]] && (( ${+saliases[$ext]} )); then
         if [[ $LBUFFER == (#b)(*[[:space:]]#)($word) ]]; then
             res1=${match[1]}
@@ -307,8 +312,7 @@ function zpwrExpandSupernaturalSpace() {
                     zpwrExpandGlobalAliases "$ZPWR_VARS[lastword_lbuffer]"
                     ZPWR_VARS[LAST_WORD_WAS_AT_COMMAND]=true
                     ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
-                elif [[ $ZPWR_EXPAND_SUFFIX == true ]] && (( $#ZPWR_EXPAND_WORDS_LPARTITION == 1 )); then
-                    # suffix alias expansion at command position
+                elif [[ $ZPWR_EXPAND_SUFFIX == true ]]; then
                     zpwrExpandRightTrim
                     zpwrExpandSuffixAlias
                 fi
