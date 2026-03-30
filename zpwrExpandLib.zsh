@@ -40,7 +40,7 @@ function zpwrExpandGoToTabStopOrEndOfLBuffer(){
         # sub out all num tabstops
         # insert key fn will send key to all indexes apply any modifications
         # keep track of num keys to have activated region
-        ZPWR_VARS[indexTS$num]=$lenToFirstTS
+        ZPWR_VARS[indexTS]=$lenToFirstTS
 
         CURSOR=$lenToFirstTS
         RBUFFER=${RBUFFER:$#ZPWR_TABSTOP}
