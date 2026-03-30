@@ -1652,3 +1652,270 @@
     assert $state equals 0
     assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
 }
+
+#==============================================================
+# -- end-of-options tests for all wrappers that support it
+#==============================================================
+
+@test 'regex: nice -- git' {
+    zpwrExpandParseWords "nice -- git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: nice -n 10 -- git' {
+    zpwrExpandParseWords "nice -n 10 -- git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: nohup -- git' {
+    zpwrExpandParseWords "nohup -- git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: rlwrap -acN -- git' {
+    zpwrExpandParseWords "rlwrap -acN -- git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: timeout -v -- 30 git' {
+    zpwrExpandParseWords "timeout -v -- 30 git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: strace -f -- git' {
+    zpwrExpandParseWords "strace -f -- git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: ltrace -f -- git' {
+    zpwrExpandParseWords "ltrace -f -- git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: ionice -c 2 -- git' {
+    zpwrExpandParseWords "ionice -c 2 -- git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: setsid -f -- git' {
+    zpwrExpandParseWords "setsid -f -- git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: chrt -f -- 10 git' {
+    zpwrExpandParseWords "chrt -f -- 10 git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: taskset -c -- 0xff git' {
+    zpwrExpandParseWords "taskset -c -- 0xff git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: watch -d -- git' {
+    zpwrExpandParseWords "watch -d -- git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: runuser -u deploy -- git' {
+    zpwrExpandParseWords "runuser -u deploy -- git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: flock -n -- /tmp/lock git' {
+    zpwrExpandParseWords "flock -n -- /tmp/lock git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: chroot -- /path git' {
+    zpwrExpandParseWords "chroot -- /path git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: cpulimit -l 50 -- git' {
+    zpwrExpandParseWords "cpulimit -l 50 -- git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: stdbuf -oL -- git' {
+    zpwrExpandParseWords "stdbuf -oL -- git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: choom -n -1000 -- git' {
+    zpwrExpandParseWords "choom -n -1000 -- git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: nsenter -t 1 -m -- git' {
+    zpwrExpandParseWords "nsenter -t 1 -m -- git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: numactl -C 0,1 -- git' {
+    zpwrExpandParseWords "numactl -C 0,1 -- git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: setpriv --reuid=1000 -- git' {
+    zpwrExpandParseWords "setpriv --reuid=1000 -- git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: chpst -u www -- git' {
+    zpwrExpandParseWords "chpst -u www -- git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: cgexec -g cpu:mygroup -- git' {
+    zpwrExpandParseWords "cgexec -g cpu:mygroup -- git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: trickle -d 100 -- git' {
+    zpwrExpandParseWords "trickle -d 100 -- git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: valgrind -- git' {
+    zpwrExpandParseWords "valgrind -- git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: valgrind --tool=memcheck -- git' {
+    zpwrExpandParseWords "valgrind --tool=memcheck -- git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: chronic -v -- git' {
+    zpwrExpandParseWords "chronic -v -- git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: daemonize -v -u www -- git' {
+    zpwrExpandParseWords "daemonize -v -u www -- git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: firejail -- git' {
+    zpwrExpandParseWords "firejail -- git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: firejail --private --net=none -- git' {
+    zpwrExpandParseWords "firejail --private --net=none -- git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: sem -j 4 -- git' {
+    zpwrExpandParseWords "sem -j 4 -- git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: systemd-run -t -- git' {
+    zpwrExpandParseWords "systemd-run -t -- git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: nocache -- git' {
+    zpwrExpandParseWords "nocache -- git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: fakechroot -s -- git' {
+    zpwrExpandParseWords "fakechroot -s -- git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: dbus-launch -- git' {
+    zpwrExpandParseWords "dbus-launch -- git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: dbus-launch --exit-with-session -- git' {
+    zpwrExpandParseWords "dbus-launch --exit-with-session -- git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+#==============================================================
+# mega chain with -- separators
+#==============================================================
+
+@test 'regex: sudo -E -- env -i -- nice -n 10 -- strace -f -- git' {
+    zpwrExpandParseWords "sudo -E -- env -i -- nice -n 10 -- strace -f -- git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
