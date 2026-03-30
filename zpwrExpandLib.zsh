@@ -258,8 +258,6 @@ function zpwrExpandSupernaturalSpace() {
     'builtin' emulate -L zsh
     setopt rcquotes extended_glob zle
 
-    local tempBuffer mywords badWords word nextWord i shouldStopExpansionDueToFailedRegex words ary res1  aliasOut
-
     if [[ $ZPWR_TRACE == true ]]; then
         set -x
     fi
@@ -350,22 +348,11 @@ function zpwrExpandSupernaturalSpace() {
 
     if [[ $triggerKey != "${ZPWR_VARS[ENTER_KEY]}" ]]; then
         if [[ $ZPWR_VARS[NEED_TO_ADD_SPACECHAR] == true ]];then
-            if [[ $ZPWR_VARS[WAS_EXPANDED] == false ]]; then
-                # no expansion occurred
+            if [[ $ZPWR_VARS[WAS_EXPANDED] == false || $LBUFFER[-1] != ' ' ]]; then
                 if [[ $ZPWR_VARS[AP_SPACE] == true ]]; then
                     zle autopair-insert
                 else
                     zle self-insert
-                fi
-            else
-                # expansion occurred
-                if [[ $LBUFFER[-1] != ' ' ]]; then
-                    # stop duplicate space
-                    if [[ $ZPWR_VARS[AP_SPACE] == true ]]; then
-                        zle autopair-insert
-                    else
-                        zle self-insert
-                    fi
                 fi
             fi
         fi
