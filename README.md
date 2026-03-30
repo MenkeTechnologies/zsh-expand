@@ -472,9 +472,10 @@ The key is the correct word, the value is a space-separated list of misspellings
 | Feature | zsh-expand | [zsh-abbr](https://github.com/olets/zsh-abbr) | [zsh-abbrev-alias](https://github.com/momo-lab/zsh-abbrev-alias) | [globalias](https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/globalias) |
 |---|---|---|---|---|
 | Uses native `alias` / `global alias` | **yes** | no (own `abbr` cmd) | no (own `abbrev-alias` cmd) | yes |
-| Expands after 30+ prefix commands with flags | **yes** | no | no | no |
+| Expands after 38 prefix commands with flags | **yes** | no | no | no |
 | Full parser for prefix/flag/arg stripping | **yes** | no | no | no |
 | Context-aware `VAR=val` vs flag-arg handling | **yes** | no | no | no |
+| Positional arg depth limits (`su gco` != command) | **yes** | no | no | no |
 | Spelling correction (300+ built-in) | **yes** | no | no | no |
 | User-extensible corrections | **yes** | no | no | no |
 | No correction of valid commands | **yes** | n/a | no | no |
@@ -607,11 +608,13 @@ Phase 2: consume execvp wrappers (sudo, doas, env, nice, strace, timeout, ionice
 Result:  everything remaining is the command + arguments
 ```
 
-Each command has its own `case` branch that knows exactly which flags take arguments. This means:
+Each command has its own `case` branch that knows exactly which flags take arguments and which positional args are mandatory. This means:
 
 - `strace -e trace=network gco` -- the parser knows `-e` takes an argument, so `trace=network` is consumed as a flag value, not stripped as a variable assignment. `gco` expands correctly.
 - `env -i FOO=bar gco` -- the parser knows `FOO=bar` after `env` is an environment variable, not a shell assignment. `gco` expands correctly.
 - `sudo -kE -u root gco` -- the parser knows `-u` takes an argument (`root`), so it consumes both. `gco` expands correctly.
+- `su gco` -- the parser knows `gco` is the USER argument, not a command. `gco` does **not** expand. But `su root gco` expands correctly because `root` fills the USER slot and `gco` is at command position.
+- Same for `timeout gco` (DURATION), `chroot gco` (PATH), `taskset gco` (MASK), `chrt gco` (PRIORITY), `sg gco` (GROUP), `flock gco` (FILE) -- mandatory positional args are never mistaken for commands.
 
 Adding a new prefix command is a single `case` branch:
 
