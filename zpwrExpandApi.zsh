@@ -160,6 +160,11 @@ function zpwrExpandParserFindCommandPosition() {
                 ;;
             nohup)
                 (( pos++ ))
+                # consume optional --
+                if (( pos <= $#words )); then
+                    _zpwr_bare "$words[$pos]"
+                    [[ $REPLY == -- ]] && (( pos++ ))
+                fi
                 ;;
             rlwrap)
                 (( pos++ ))
@@ -188,14 +193,26 @@ function zpwrExpandParserFindCommandPosition() {
                 # consume mandatory DURATION (only if not the last word)
                 (( pos <= $#words )) && (( pos++ ))
                 ;;
-            strace|ltrace)
+            strace)
                 (( pos++ ))
                 while (( pos <= $#words )); do
                     _zpwr_bare "$words[$pos]"
                     case $REPLY in
-                        -[cCdDfhikLNnqrtTvVyYzZ]*) (( pos++ )) ;;
-                        -[aAbeEFIlnoOpPsSuUwX])   (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
-                        -[aAbeEFIlnoOpPsSuUwX]=*) (( pos++ )) ;;
+                        -[AcCdDfFhiknNqrtTvVwxyYzZ]*) (( pos++ )) ;;
+                        -[abeEIoOpPsSuUX])   (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -[abeEIoOpPsSuUX]=*) (( pos++ )) ;;
+                        *)                   break ;;
+                    esac
+                done
+                ;;
+            ltrace)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[bcCfhiLrStTV]*) (( pos++ )) ;;
+                        -[aADeFlnopsuwx])   (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -[aADeFlnopsuwx]=*) (( pos++ )) ;;
                         *)                  break ;;
                     esac
                 done
