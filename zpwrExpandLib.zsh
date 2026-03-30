@@ -58,39 +58,31 @@ function zpwrExpandCorrectWord(){
         return
     fi
 
-    if (( $#ZPWR_EXPAND_WORDS_PARTITION == 1)); then
-        if zpwrExpandIsCommand $ZPWR_VARS[firstword_partition]; then
-            #zpwrLogDebug "No correction from 1 word => '"'$ZPWR_VARS[firstword_partition]'"'_____ = ""'$ZPWR_VARS[firstword_partition]'"
-            # git<space>
-            return
-        fi
-    else
 
-        if zpwrExpandRegexMatchOnCommandPosition correct; then
+    if zpwrExpandRegexMatchOnCommandPosition correct; then
 
-            #zpwrLogDebug "${match[@]}"
-            #zpwrLogDebug "${ZPWR_EXPAND_PRE_CORRECT[@]}"
+        #zpwrLogDebug "${match[@]}"
+        #zpwrLogDebug "${ZPWR_EXPAND_PRE_CORRECT[@]}"
 
-            word=${ZPWR_EXPAND_PRE_CORRECT[1]}
-            if (( $#ZPWR_EXPAND_PRE_CORRECT == 1)); then
-                if zpwrExpandIsCommand $word; then
-                    #zpwrLogDebug "No correction from >= 2 words => '"'$word'"'_____ = ""'$word'"
-                    # sudo/env pwd<space>
-                    return
-                fi
-
-            elif (( $#ZPWR_EXPAND_PRE_CORRECT == 2)); then
-                if [[ $word =~ $ZPWR_VARS[blacklistSubcommandPositionRegex] ]]; then
-                    # sudo/env git init<space>
-                    return
-                fi
+        word=${ZPWR_EXPAND_PRE_CORRECT[1]}
+        if (( $#ZPWR_EXPAND_PRE_CORRECT == 1)); then
+            if zpwrExpandIsCommand $word; then
+                #zpwrLogDebug "No correction from >= 2 words => '"'$word'"'_____ = ""'$word'"
+                # sudo/env pwd<space>
+                return
             fi
 
-        else
-            #zpwrLogDebug "no match ZPWR_EXPAND_WORDS_LPARTITION '$ZPWR_EXPAND_WORDS_LPARTITION'"
-            zpwrLogConsoleErr zpwr expand should not reach here
-            return
+        elif (( $#ZPWR_EXPAND_PRE_CORRECT == 2)); then
+            if [[ $word =~ $ZPWR_VARS[blacklistSubcommandPositionRegex] ]]; then
+                # sudo/env git init<space>
+                return
+            fi
         fi
+
+    else
+        #zpwrLogDebug "no match ZPWR_EXPAND_WORDS_LPARTITION '$ZPWR_EXPAND_WORDS_LPARTITION'"
+        zpwrLogConsoleErr zpwr expand should not reach here
+        return
     fi
 
     #zpwrLogDebug "______'"'attempt correction'"'_____ = ""'$ZPWR_VARS[lastword_remove_special]'"
@@ -258,7 +250,6 @@ function zpwrExpandSupernaturalSpace() {
     local triggerKey="$1"
     # globals
     ZPWR_EXPAND_WORDS_LPARTITION=()
-    ZPWR_EXPAND_WORDS_PARTITION=()
     ZPWR_EXPAND_PRE_CORRECT=()
     ZPWR_EXPAND_POST_CORRECT=()
     ZPWR_EXPAND_PRE_EXPAND=()
