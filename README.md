@@ -1,9 +1,27 @@
 # zsh-expand
 
 ```
- _______ _____  _____        _______ _     _ _____  _______ __   _ ______
-    /   |_____] |_____|    |______ _\__/_ |_____] |_____| | \  | |     \
-   /    |_____] |     |    |______ /\ /\  |       |     | |  \_| |_____/
+@@@@@@@@   @@@@@@   @@@  @@@             @@@@@@@@  @@@  @@@  @@@@@@@
+@@@@@@@@  @@@@@@@   @@@  @@@             @@@@@@@@  @@@  @@@  @@@@@@@@
+     @@!  !@@       @@!  @@@             @@!       @@!  !@@  @@!  @@@
+    !@!   !@!       !@!  @!@             !@!       !@!  @!!  !@!  @!@
+   @!!    !!@@!!    @!@!@!@!  @!@!@!@!@  @!!!:!     !@@!@!   @!@@!@!
+  !!!      !!@!!!   !!!@!!!!  !!!@!@!!!  !!!!!:      @!!!    !!@!!!
+ !!:           !:!  !!:  !!!             !!:        !: :!!   !!:
+:!:           !:!   :!:  !:!             :!:       :!:  !:!  :!:
+ :: ::::  :::: ::   ::   :::              :: ::::   ::  :::   ::
+: :: : :  :: : :     :   : :             : :: ::    :   ::    :
+
+ @@@@@@   @@@  @@@  @@@@@@@
+@@@@@@@@  @@@@ @@@  @@@@@@@@
+@@!  @@@  @@!@!@@@  @@!  @@@
+!@!  @!@  !@!!@!@!  !@!  @!@
+@!@!@!@!  @!@ !!@!  @!@  !@!
+!!!@!!!!  !@!  !!!  !@!  !!!
+!!:  !!!  !!:  !!!  !!:  !!!
+:!:  !:!  :!:  !:!  :!:  !:!
+::   :::   ::   ::   :::: ::
+ :   : :  ::    :   :: :  :
 ```
 
 > *Jack into your shell. Let the machine think faster than you can type.*
@@ -34,7 +52,7 @@ teh<space>  =>  the
 |---|---|
 | **Alias Expansion** | Expands regular aliases in command position and after `sudo`, `env`, `builtin`, `command`, `noglob`, `nice`, `nohup`, `rlwrap`, `time` and linear combos of these with options |
 | **Global Alias Expansion** | Expands global aliases anywhere on the command line |
-| **Spelling Correction** | 300+ hardcoded misspelling/abbreviation corrections -- `teh` -> `the`, `cmd` -> `command`, `bg` -> `background` |
+| **Spelling Correction** | 300+ built-in misspelling/abbreviation corrections -- `teh` -> `the`, `cmd` -> `command`, `bg` -> `background` -- user-extensible via associative array |
 | **Native Expansion** | Globs, `$parameters`, `$(command substitution)`, `=(process substitution)`, `!history` expansion via zle `expand-word` |
 | **History Injection** | Optionally writes the fully-expanded form of your command into history |
 
@@ -106,6 +124,29 @@ export ZPWR_EXPAND_BLACKLIST=(g gco)      # aliases to never expand
 | `Space` | Supernatural expand + insert space |
 | `Ctrl+Space` | Insert literal space (bypass) |
 | `Esc Ctrl+E` | Expand all global aliases on line |
+
+---
+
+### // CUSTOM CORRECTIONS
+
+The correction dictionary is a plain associative array. Add your own entries after the plugin loads, then rebuild the O(1) reverse lookup:
+
+```sh
+# map misspellings to the correct word
+ZPWR_EXPAND_CORRECT_WORDS[kubernetes]="k8ss kuberntes kuberneets"
+ZPWR_EXPAND_CORRECT_WORDS[terraform]="terrafrom terrafomr"
+
+# append to an existing built-in entry
+ZPWR_EXPAND_CORRECT_WORDS[echo]+=" oech"
+
+# remove a built-in correction
+unset 'ZPWR_EXPAND_CORRECT_WORDS[background]'
+
+# rebuild the reverse lookup table after any changes
+zpwrExpandRebuildCorrectReverse
+```
+
+The key is the correct word, the value is a space-separated list of misspellings. Use underscores in keys to expand to spaces (e.g. `hello_world` expands to `hello world`).
 
 ---
 

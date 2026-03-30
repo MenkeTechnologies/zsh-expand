@@ -48,7 +48,7 @@ function zpwrExpandGoToTabStopOrEndOfLBuffer(){
 
 function zpwrExpandCorrectWord(){
 
-    local word nextWord badWords misspelling key res1
+    local word key res1
 
     if (( ${+galiases[${ZPWR_VARS[lastword_lbuffer]}]} )); then
         return
@@ -91,44 +91,23 @@ function zpwrExpandCorrectWord(){
 
     #zpwrLogDebug "______'"'attempt correction'"'_____ = ""'$ZPWR_VARS[lastword_remove_special]'"
 
-    if [[ $ZPWR_TRACE == true ]]; then
-        set +x
-    fi
-    for key in ${(k)ZPWR_EXPAND_CORRECT_WORDS[@]}; do
+    local misspelling=${ZPWR_VARS[lastword_remove_special]}
+    key=${ZPWR_EXPAND_CORRECT_REVERSE[$misspelling]}
 
-        badWords=( "${(z)ZPWR_EXPAND_CORRECT_WORDS[$key]}" )
-        for misspelling in $badWords[@];do
-
-            if [[ ${ZPWR_VARS[lastword_remove_special]} == $misspelling ]]; then
-
-                # expand only when cursor is right of misspelled word
-                if [[ $LBUFFER == (#b)(*[[:space:]]#)($misspelling) ]]; then
-                    res1=${match[1]}
-                    # expand
-                    LBUFFER="$res1${key:gs/_/ /}"
-                    ZPWR_VARS[foundIncorrect]=true
-                    # ZPWR_VARS[finished]=true
-                fi
-
-                # expand only when cursor is right of misspelled word
-                if [[ $ZPWR_EXPAND_PRE_CORRECT == (#b)(*[[:space:]]#)($misspelling) ]]; then
-                    res1=${match[1]}
-                    ZPWR_EXPAND_POST_CORRECT=( "${(z):-$res1${key:gs/_/ /}}" )
-                    ZPWR_VARS[foundIncorrect]=true
-                    # ZPWR_VARS[finished]=true
-                fi
-
-                # break to outer for loop
-                break 2
-            fi
-        done
-        if [[ $ZPWR_VARS[finished] == true ]];then
-            zle self-insert
-            return 0
+    if [[ -n $key ]]; then
+        # expand only when cursor is right of misspelled word
+        if [[ $LBUFFER == (#b)(*[[:space:]]#)($misspelling) ]]; then
+            res1=${match[1]}
+            LBUFFER="$res1${key:gs/_/ /}"
+            ZPWR_VARS[foundIncorrect]=true
         fi
-    done
-    if [[ $ZPWR_TRACE == true ]]; then
-        set -x
+
+        # expand only when cursor is right of misspelled word
+        if [[ $ZPWR_EXPAND_PRE_CORRECT == (#b)(*[[:space:]]#)($misspelling) ]]; then
+            res1=${match[1]}
+            ZPWR_EXPAND_POST_CORRECT=( "${(z):-$res1${key:gs/_/ /}}" )
+            ZPWR_VARS[foundIncorrect]=true
+        fi
     fi
 }
 
