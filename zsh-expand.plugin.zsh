@@ -24,7 +24,7 @@ fi
 ZPWR_VARS[ENTER_KEY]='ENTER'
 ZPWR_VARS[SPACEBAR_KEY]='SPACE'
 
-if ! (( $+ZPWR_TABSTOP )) || [[ ${parameters[ZPWR_TABSTOP]} != scalar-export ]]; ; then
+if ! (( $+ZPWR_TABSTOP )) || [[ ${parameters[ZPWR_TABSTOP]} != scalar-export ]]; then
     export ZPWR_TABSTOP=__________
 fi
 
@@ -110,7 +110,7 @@ ZPWR_EXPAND_CORRECT_WORDS[based]="baesd absed"
 ZPWR_EXPAND_CORRECT_WORDS[because]="bc b/c"
 ZPWR_EXPAND_CORRECT_WORDS[before]="befor beforre befre beffooorr beforee b4"
 ZPWR_EXPAND_CORRECT_WORDS[best]="bets"
-ZPWR_EXPAND_CORRECT_WORDS[between]="bt btn between"
+ZPWR_EXPAND_CORRECT_WORDS[between]="bt btn"
 ZPWR_EXPAND_CORRECT_WORDS[binary]="bianry bniary"
 ZPWR_EXPAND_CORRECT_WORDS[BIOS]="bios"
 ZPWR_EXPAND_CORRECT_WORDS[BSD]="bsd"
@@ -221,7 +221,7 @@ ZPWR_EXPAND_CORRECT_WORDS[iSCSI]="iscsi"
 ZPWR_EXPAND_CORRECT_WORDS[ISO]="iso"
 ZPWR_EXPAND_CORRECT_WORDS[JavaScript]="js"
 ZPWR_EXPAND_CORRECT_WORDS[JSON]="josn json"
-ZPWR_EXPAND_CORRECT_WORDS[just]="jsut jutsi just"
+ZPWR_EXPAND_CORRECT_WORDS[just]="jsut jutsi"
 ZPWR_EXPAND_CORRECT_WORDS[last]="llasst lllast llast"
 ZPWR_EXPAND_CORRECT_WORDS[LaTeX]="latex"
 ZPWR_EXPAND_CORRECT_WORDS[layer]="lyaer layyer llayer"
@@ -298,7 +298,7 @@ ZPWR_EXPAND_CORRECT_WORDS[result]="res resullt resultt"
 ZPWR_EXPAND_CORRECT_WORDS[reverse]="rvs revrse"
 ZPWR_EXPAND_CORRECT_WORDS[reverb]="rvb"
 ZPWR_EXPAND_CORRECT_WORDS[route]="rotue roote"
-ZPWR_EXPAND_CORRECT_WORDS[runnning]="runnign"
+ZPWR_EXPAND_CORRECT_WORDS[running]="runnign"
 ZPWR_EXPAND_CORRECT_WORDS[same]="saem"
 ZPWR_EXPAND_CORRECT_WORDS[SATA]="sata"
 ZPWR_EXPAND_CORRECT_WORDS[SCSI]="scsi"
@@ -369,7 +369,7 @@ ZPWR_EXPAND_CORRECT_WORDS[VPN]="vpn"
 ZPWR_EXPAND_CORRECT_WORDS[was_not]="wasnt"
 ZPWR_EXPAND_CORRECT_WORDS[whitespace]="whitespaec whitespacee whitespacce whitesppace whitespaace"
 ZPWR_EXPAND_CORRECT_WORDS[will_not]="wont"
-ZPWR_EXPAND_CORRECT_WORDS[with]="with wiht itwh witth iwth wtih"
+ZPWR_EXPAND_CORRECT_WORDS[with]="wiht itwh witth iwth wtih"
 ZPWR_EXPAND_CORRECT_WORDS[would_not]="wouldnt"
 ZPWR_EXPAND_CORRECT_WORDS[why]="hwy wyh"
 ZPWR_EXPAND_CORRECT_WORDS[without]="wo w/o"

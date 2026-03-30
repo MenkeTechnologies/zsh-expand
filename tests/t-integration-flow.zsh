@@ -346,7 +346,7 @@
     alias __zexptest_int_lw1='git status'
     LBUFFER="__zexptest_int_lw1"
     zpwrExpandParseWords "$LBUFFER"
-    zpwrExpandLastWordAtCommandPosAndExpand moveCursor zle "${ZPWR_VARS[SPACE_KEY]}"
+    zpwrExpandLastWordAtCommandPosAndExpand moveCursor zle "${ZPWR_VARS[SPACEBAR_KEY]}"
     assert $LBUFFER same_as 'git status'
     assert $ZPWR_VARS[LAST_WORD_WAS_AT_COMMAND] same_as 'true'
     unalias __zexptest_int_lw1
@@ -356,7 +356,7 @@
     alias __zexptest_int_lw2='git status'
     LBUFFER="__zexptest_int_lw2"
     zpwrExpandParseWords "$LBUFFER"
-    zpwrExpandLastWordAtCommandPosAndExpand moveCursor zle "${ZPWR_VARS[SPACE_KEY]}"
+    zpwrExpandLastWordAtCommandPosAndExpand moveCursor zle "${ZPWR_VARS[SPACEBAR_KEY]}"
     assert $ZPWR_VARS[ORIGINAL_LAST_COMMAND] same_as '__zexptest_int_lw2'
     unalias __zexptest_int_lw2
 }
@@ -367,7 +367,7 @@
     LBUFFER="sudo __zexptest_int_lw3"
     zpwrExpandParseWords "$LBUFFER"
     zpwrExpandRegexMatchOnCommandPosition
-    zpwrExpandLastWordAtCommandPosAndExpand moveCursor zle "${ZPWR_VARS[SPACE_KEY]}"
+    zpwrExpandLastWordAtCommandPosAndExpand moveCursor zle "${ZPWR_VARS[SPACEBAR_KEY]}"
     assert $LBUFFER same_as 'sudo git status'
     unalias __zexptest_int_lw3
 }
@@ -376,7 +376,7 @@
     alias __zexptest_int_lw4='__zexptest_int_lw4 -la'
     LBUFFER="__zexptest_int_lw4"
     zpwrExpandParseWords "$LBUFFER"
-    zpwrExpandLastWordAtCommandPosAndExpand moveCursor zle "${ZPWR_VARS[SPACE_KEY]}"
+    zpwrExpandLastWordAtCommandPosAndExpand moveCursor zle "${ZPWR_VARS[SPACEBAR_KEY]}"
     assert "$LBUFFER" same_as '\\__zexptest_int_lw4 -la'
     unalias __zexptest_int_lw4
 }
