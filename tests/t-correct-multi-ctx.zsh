@@ -126,6 +126,96 @@
     assert $LBUFFER same_as 'diff about'
 }
 
+@test 'print: aabout -> about' {
+    correct_in_ctx print aabout
+    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
+    assert $LBUFFER same_as 'print about'
+}
+
+@test 'cat: aabout -> about' {
+    correct_in_ctx cat aabout
+    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
+    assert $LBUFFER same_as 'cat about'
+}
+
+@test 'grep: aabout -> about' {
+    correct_in_ctx grep aabout
+    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
+    assert $LBUFFER same_as 'grep about'
+}
+
+@test 'sed: aabout -> about' {
+    correct_in_ctx sed aabout
+    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
+    assert $LBUFFER same_as 'sed about'
+}
+
+@test 'awk: aabout -> about' {
+    correct_in_ctx awk aabout
+    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
+    assert $LBUFFER same_as 'awk about'
+}
+
+@test 'man: aabout -> about' {
+    correct_in_ctx man aabout
+    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
+    assert $LBUFFER same_as 'man about'
+}
+
+@test 'ls: aabout -> about' {
+    correct_in_ctx ls aabout
+    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
+    assert $LBUFFER same_as 'ls about'
+}
+
+@test 'head: aabout -> about' {
+    correct_in_ctx head aabout
+    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
+    assert $LBUFFER same_as 'head about'
+}
+
+@test 'tail: aabout -> about' {
+    correct_in_ctx tail aabout
+    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
+    assert $LBUFFER same_as 'tail about'
+}
+
+@test 'sort: aabout -> about' {
+    correct_in_ctx sort aabout
+    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
+    assert $LBUFFER same_as 'sort about'
+}
+
+@test 'uniq: aabout -> about' {
+    correct_in_ctx uniq aabout
+    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
+    assert $LBUFFER same_as 'uniq about'
+}
+
+@test 'wc: aabout -> about' {
+    correct_in_ctx wc aabout
+    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
+    assert $LBUFFER same_as 'wc about'
+}
+
+@test 'tr: aabout -> about' {
+    correct_in_ctx tr aabout
+    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
+    assert $LBUFFER same_as 'tr about'
+}
+
+@test 'cut: aabout -> about' {
+    correct_in_ctx cut aabout
+    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
+    assert $LBUFFER same_as 'cut about'
+}
+
+@test 'diff: aabout -> about' {
+    correct_in_ctx diff aabout
+    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
+    assert $LBUFFER same_as 'diff about'
+}
+
 @test 'print: aka -> AKA' {
     correct_in_ctx print aka
     assert $ZPWR_VARS[foundIncorrect] same_as 'true'
@@ -302,6 +392,96 @@
 
 @test 'diff: alll -> all' {
     correct_in_ctx diff alll
+    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
+    assert $LBUFFER same_as 'diff all'
+}
+
+@test 'print: aall -> all' {
+    correct_in_ctx print aall
+    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
+    assert $LBUFFER same_as 'print all'
+}
+
+@test 'cat: aall -> all' {
+    correct_in_ctx cat aall
+    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
+    assert $LBUFFER same_as 'cat all'
+}
+
+@test 'grep: aall -> all' {
+    correct_in_ctx grep aall
+    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
+    assert $LBUFFER same_as 'grep all'
+}
+
+@test 'sed: aall -> all' {
+    correct_in_ctx sed aall
+    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
+    assert $LBUFFER same_as 'sed all'
+}
+
+@test 'awk: aall -> all' {
+    correct_in_ctx awk aall
+    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
+    assert $LBUFFER same_as 'awk all'
+}
+
+@test 'man: aall -> all' {
+    correct_in_ctx man aall
+    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
+    assert $LBUFFER same_as 'man all'
+}
+
+@test 'ls: aall -> all' {
+    correct_in_ctx ls aall
+    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
+    assert $LBUFFER same_as 'ls all'
+}
+
+@test 'head: aall -> all' {
+    correct_in_ctx head aall
+    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
+    assert $LBUFFER same_as 'head all'
+}
+
+@test 'tail: aall -> all' {
+    correct_in_ctx tail aall
+    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
+    assert $LBUFFER same_as 'tail all'
+}
+
+@test 'sort: aall -> all' {
+    correct_in_ctx sort aall
+    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
+    assert $LBUFFER same_as 'sort all'
+}
+
+@test 'uniq: aall -> all' {
+    correct_in_ctx uniq aall
+    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
+    assert $LBUFFER same_as 'uniq all'
+}
+
+@test 'wc: aall -> all' {
+    correct_in_ctx wc aall
+    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
+    assert $LBUFFER same_as 'wc all'
+}
+
+@test 'tr: aall -> all' {
+    correct_in_ctx tr aall
+    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
+    assert $LBUFFER same_as 'tr all'
+}
+
+@test 'cut: aall -> all' {
+    correct_in_ctx cut aall
+    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
+    assert $LBUFFER same_as 'cut all'
+}
+
+@test 'diff: aall -> all' {
+    correct_in_ctx diff aall
     assert $ZPWR_VARS[foundIncorrect] same_as 'true'
     assert $LBUFFER same_as 'diff all'
 }
