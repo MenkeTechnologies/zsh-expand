@@ -260,11 +260,6 @@
     assert $LBUFFER same_as 'echo between'
 }
 
-@test 'correct: between -> between' {
-    correct_word between
-    assert $LBUFFER same_as 'echo between'
-}
-
 #==============================================================
 # binary
 #==============================================================
@@ -1522,11 +1517,6 @@
     assert $LBUFFER same_as 'echo just'
 }
 
-@test 'correct: just -> just' {
-    correct_word just
-    assert $LBUFFER same_as 'echo just'
-}
-
 #==============================================================
 # last
 #==============================================================
@@ -2311,12 +2301,12 @@
 }
 
 #==============================================================
-# runnning
+# running
 #==============================================================
 
-@test 'correct: runnign -> runnning' {
+@test 'correct: runnign -> running' {
     correct_word runnign
-    assert $LBUFFER same_as 'echo runnning'
+    assert $LBUFFER same_as 'echo running'
 }
 
 #==============================================================

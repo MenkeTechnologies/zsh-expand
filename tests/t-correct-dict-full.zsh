@@ -383,12 +383,6 @@
     assert $LBUFFER same_as 'echo between'
 }
 
-@test 'dict echo: between -> between' {
-    correct_word between
-    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
-    assert $LBUFFER same_as 'echo between'
-}
-
 @test 'dict echo: bianry -> binary' {
     correct_word bianry
     assert $ZPWR_VARS[foundIncorrect] same_as 'true'
@@ -1919,12 +1913,6 @@
     assert $LBUFFER same_as 'echo just'
 }
 
-@test 'dict echo: just -> just' {
-    correct_word just
-    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
-    assert $LBUFFER same_as 'echo just'
-}
-
 @test 'dict echo: llasst -> last' {
     correct_word llasst
     assert $ZPWR_VARS[foundIncorrect] same_as 'true'
@@ -2825,10 +2813,10 @@
     assert $LBUFFER same_as 'echo route'
 }
 
-@test 'dict echo: runnign -> runnning' {
+@test 'dict echo: runnign -> running' {
     correct_word runnign
     assert $ZPWR_VARS[foundIncorrect] same_as 'true'
-    assert $LBUFFER same_as 'echo runnning'
+    assert $LBUFFER same_as 'echo running'
 }
 
 @test 'dict echo: saem -> same' {
@@ -3657,12 +3645,6 @@
     correct_word wont
     assert $ZPWR_VARS[foundIncorrect] same_as 'true'
     assert $LBUFFER same_as 'echo will not'
-}
-
-@test 'dict echo: with -> with' {
-    correct_word with
-    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
-    assert $LBUFFER same_as 'echo with'
 }
 
 @test 'dict echo: wiht -> with' {

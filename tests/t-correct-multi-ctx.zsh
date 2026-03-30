@@ -19026,94 +19026,94 @@
     assert $LBUFFER same_as 'diff route'
 }
 
-@test 'print: runnign -> runnning' {
+@test 'print: runnign -> running' {
     correct_in_ctx print runnign
     assert $ZPWR_VARS[foundIncorrect] same_as 'true'
-    assert $LBUFFER same_as 'print runnning'
+    assert $LBUFFER same_as 'print running'
 }
 
-@test 'cat: runnign -> runnning' {
+@test 'cat: runnign -> running' {
     correct_in_ctx cat runnign
     assert $ZPWR_VARS[foundIncorrect] same_as 'true'
-    assert $LBUFFER same_as 'cat runnning'
+    assert $LBUFFER same_as 'cat running'
 }
 
-@test 'grep: runnign -> runnning' {
+@test 'grep: runnign -> running' {
     correct_in_ctx grep runnign
     assert $ZPWR_VARS[foundIncorrect] same_as 'true'
-    assert $LBUFFER same_as 'grep runnning'
+    assert $LBUFFER same_as 'grep running'
 }
 
-@test 'sed: runnign -> runnning' {
+@test 'sed: runnign -> running' {
     correct_in_ctx sed runnign
     assert $ZPWR_VARS[foundIncorrect] same_as 'true'
-    assert $LBUFFER same_as 'sed runnning'
+    assert $LBUFFER same_as 'sed running'
 }
 
-@test 'awk: runnign -> runnning' {
+@test 'awk: runnign -> running' {
     correct_in_ctx awk runnign
     assert $ZPWR_VARS[foundIncorrect] same_as 'true'
-    assert $LBUFFER same_as 'awk runnning'
+    assert $LBUFFER same_as 'awk running'
 }
 
-@test 'man: runnign -> runnning' {
+@test 'man: runnign -> running' {
     correct_in_ctx man runnign
     assert $ZPWR_VARS[foundIncorrect] same_as 'true'
-    assert $LBUFFER same_as 'man runnning'
+    assert $LBUFFER same_as 'man running'
 }
 
-@test 'ls: runnign -> runnning' {
+@test 'ls: runnign -> running' {
     correct_in_ctx ls runnign
     assert $ZPWR_VARS[foundIncorrect] same_as 'true'
-    assert $LBUFFER same_as 'ls runnning'
+    assert $LBUFFER same_as 'ls running'
 }
 
-@test 'head: runnign -> runnning' {
+@test 'head: runnign -> running' {
     correct_in_ctx head runnign
     assert $ZPWR_VARS[foundIncorrect] same_as 'true'
-    assert $LBUFFER same_as 'head runnning'
+    assert $LBUFFER same_as 'head running'
 }
 
-@test 'tail: runnign -> runnning' {
+@test 'tail: runnign -> running' {
     correct_in_ctx tail runnign
     assert $ZPWR_VARS[foundIncorrect] same_as 'true'
-    assert $LBUFFER same_as 'tail runnning'
+    assert $LBUFFER same_as 'tail running'
 }
 
-@test 'sort: runnign -> runnning' {
+@test 'sort: runnign -> running' {
     correct_in_ctx sort runnign
     assert $ZPWR_VARS[foundIncorrect] same_as 'true'
-    assert $LBUFFER same_as 'sort runnning'
+    assert $LBUFFER same_as 'sort running'
 }
 
-@test 'uniq: runnign -> runnning' {
+@test 'uniq: runnign -> running' {
     correct_in_ctx uniq runnign
     assert $ZPWR_VARS[foundIncorrect] same_as 'true'
-    assert $LBUFFER same_as 'uniq runnning'
+    assert $LBUFFER same_as 'uniq running'
 }
 
-@test 'wc: runnign -> runnning' {
+@test 'wc: runnign -> running' {
     correct_in_ctx wc runnign
     assert $ZPWR_VARS[foundIncorrect] same_as 'true'
-    assert $LBUFFER same_as 'wc runnning'
+    assert $LBUFFER same_as 'wc running'
 }
 
-@test 'tr: runnign -> runnning' {
+@test 'tr: runnign -> running' {
     correct_in_ctx tr runnign
     assert $ZPWR_VARS[foundIncorrect] same_as 'true'
-    assert $LBUFFER same_as 'tr runnning'
+    assert $LBUFFER same_as 'tr running'
 }
 
-@test 'cut: runnign -> runnning' {
+@test 'cut: runnign -> running' {
     correct_in_ctx cut runnign
     assert $ZPWR_VARS[foundIncorrect] same_as 'true'
-    assert $LBUFFER same_as 'cut runnning'
+    assert $LBUFFER same_as 'cut running'
 }
 
-@test 'diff: runnign -> runnning' {
+@test 'diff: runnign -> running' {
     correct_in_ctx diff runnign
     assert $ZPWR_VARS[foundIncorrect] same_as 'true'
-    assert $LBUFFER same_as 'diff runnning'
+    assert $LBUFFER same_as 'diff running'
 }
 
 @test 'print: saem -> same' {
@@ -25504,96 +25504,6 @@
     correct_in_ctx diff wont
     assert $ZPWR_VARS[foundIncorrect] same_as 'true'
     assert $LBUFFER same_as 'diff will not'
-}
-
-@test 'print: with -> with' {
-    correct_in_ctx print with
-    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
-    assert $LBUFFER same_as 'print with'
-}
-
-@test 'cat: with -> with' {
-    correct_in_ctx cat with
-    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
-    assert $LBUFFER same_as 'cat with'
-}
-
-@test 'grep: with -> with' {
-    correct_in_ctx grep with
-    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
-    assert $LBUFFER same_as 'grep with'
-}
-
-@test 'sed: with -> with' {
-    correct_in_ctx sed with
-    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
-    assert $LBUFFER same_as 'sed with'
-}
-
-@test 'awk: with -> with' {
-    correct_in_ctx awk with
-    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
-    assert $LBUFFER same_as 'awk with'
-}
-
-@test 'man: with -> with' {
-    correct_in_ctx man with
-    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
-    assert $LBUFFER same_as 'man with'
-}
-
-@test 'ls: with -> with' {
-    correct_in_ctx ls with
-    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
-    assert $LBUFFER same_as 'ls with'
-}
-
-@test 'head: with -> with' {
-    correct_in_ctx head with
-    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
-    assert $LBUFFER same_as 'head with'
-}
-
-@test 'tail: with -> with' {
-    correct_in_ctx tail with
-    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
-    assert $LBUFFER same_as 'tail with'
-}
-
-@test 'sort: with -> with' {
-    correct_in_ctx sort with
-    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
-    assert $LBUFFER same_as 'sort with'
-}
-
-@test 'uniq: with -> with' {
-    correct_in_ctx uniq with
-    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
-    assert $LBUFFER same_as 'uniq with'
-}
-
-@test 'wc: with -> with' {
-    correct_in_ctx wc with
-    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
-    assert $LBUFFER same_as 'wc with'
-}
-
-@test 'tr: with -> with' {
-    correct_in_ctx tr with
-    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
-    assert $LBUFFER same_as 'tr with'
-}
-
-@test 'cut: with -> with' {
-    correct_in_ctx cut with
-    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
-    assert $LBUFFER same_as 'cut with'
-}
-
-@test 'diff: with -> with' {
-    correct_in_ctx diff with
-    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
-    assert $LBUFFER same_as 'diff with'
 }
 
 @test 'print: wo -> without' {
