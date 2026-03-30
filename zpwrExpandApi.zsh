@@ -592,7 +592,155 @@ function zpwrExpandParserFindCommandPosition() {
                     esac
                 done
                 ;;
-            pkexec|fakeroot|unbuffer|chronic|torify|torsocks|tsocks|proxychains4|daemonize|firejail|sem|systemd-run|dbus-run-session|eatmydata|catchsegv|nocache|fakechroot|ccache|distcc|dbus-launch)
+            fakeroot)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[huv]*)   (( pos++ )) ;;
+                        -[bils])   (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -[bils]=*) (( pos++ )) ;;
+                        --)        (( pos++ )); break ;;
+                        *)         break ;;
+                    esac
+                done
+                ;;
+            unbuffer)
+                (( pos++ ))
+                if (( pos <= $#words )); then
+                    _zpwr_bare "$words[$pos]"
+                    [[ $REPLY == -p ]] && (( pos++ ))
+                fi
+                ;;
+            chronic)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[ev]*)    (( pos++ )) ;;
+                        *)         break ;;
+                    esac
+                done
+                ;;
+            torsocks)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[dhiq6]*) (( pos++ )) ;;
+                        -[apPu])   (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -[apPu]=*) (( pos++ )) ;;
+                        *)         break ;;
+                    esac
+                done
+                ;;
+            proxychains4)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[q]*)     (( pos++ )) ;;
+                        -[f])      (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -[f]=*)    (( pos++ )) ;;
+                        *)         break ;;
+                    esac
+                done
+                ;;
+            daemonize)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[av]*)    (( pos++ )) ;;
+                        -[ceElopu])  (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -[ceElopu]=*) (( pos++ )) ;;
+                        *)         break ;;
+                    esac
+                done
+                ;;
+            firejail)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[c])      (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -[c]=*)    (( pos++ )) ;;
+                        --*=*)     (( pos++ )) ;;
+                        --*)       (( pos++ )) ;;
+                        *)         break ;;
+                    esac
+                done
+                ;;
+            sem)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[jP])     (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -[jP]=*)   (( pos++ )) ;;
+                        --*=*)     (( pos++ )) ;;
+                        --*)       (( pos++ )) ;;
+                        *)         break ;;
+                    esac
+                done
+                ;;
+            systemd-run)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[dGhPqrRSTtv]*) (( pos++ )) ;;
+                        -[CEHMpu])   (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -[CEHMpu]=*) (( pos++ )) ;;
+                        --*=*)       (( pos++ )) ;;
+                        --*)         (( pos++ )) ;;
+                        *)           break ;;
+                    esac
+                done
+                ;;
+            nocache)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[n])      (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -[n]=*)    (( pos++ )) ;;
+                        *)         break ;;
+                    esac
+                done
+                ;;
+            fakechroot)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[hsv]*)   (( pos++ )) ;;
+                        -[bcdel])  (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -[bcdel]=*) (( pos++ )) ;;
+                        *)         break ;;
+                    esac
+                done
+                ;;
+            ccache)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[cChpsvVxz]*) (( pos++ )) ;;
+                        -[dFkMoX])   (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -[dFkMoX]=*) (( pos++ )) ;;
+                        *)           break ;;
+                    esac
+                done
+                ;;
+            distcc)
+                (( pos++ ))
+                if (( pos <= $#words )); then
+                    _zpwr_bare "$words[$pos]"
+                    [[ $REPLY == -j ]] && (( pos++ ))
+                fi
+                ;;
+            pkexec|torify|tsocks|dbus-run-session|eatmydata|catchsegv|dbus-launch)
                 (( pos++ ))
                 ;;
             *)

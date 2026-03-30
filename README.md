@@ -91,8 +91,8 @@ nocorrect time -p command -p builtin eval noglob coproc       \
   torify sudo -kE -u root su -l deploy                        \
     env -0iv -C /tmp VAR1=a VAR2=b                            \
   doas -n -u ops env FOO=bar BAZ=qux LANG=C                  \
-  sudo -ABbHnPS -g wheel -h h1 -p pw -R /ch -r r1 -T 60     \
-    -t t1 -u admin                                            \
+  sudo -ABbHnPS -g wheel -h h1 -p pw -R /ch -D /d1 -T 60    \
+    -U deploy -u admin                                        \
   su -flm root env -i HOME=/r1 PATH=/b1 TERM=x1              \
   doas -s -C /etc/d1 env -u DISPLAY TERM=xterm-256           \
   sudo -kKi -u nobody env -v -C /var CC=gcc CFLAGS=-O2       \
@@ -160,7 +160,7 @@ nocorrect time -p command -p builtin eval noglob coproc       \
   pkexec fakeroot unbuffer chronic valgrind                   \
   torify torsocks tsocks proxychains4                         \
   daemonize firejail sem systemd-run dbus-run-session         \
-  sudo -kKnP -u op -T 120 -r mgr -t user_t                   \
+  sudo -kKnP -u op -T 120 -D /tmp -U mgr                     \
     su -P root env -0iv -C /run DB=pg REDIS=6379              \
   doas -s -C /etc/d2                                          \
   nice -n 14 nohup nice -n 9 nohup nice -n 4 nohup           \
@@ -392,11 +392,21 @@ External prefix commands:
 | `bwrap` | `--unshare-* --clearenv --new-session --die-with-parent --as-pid-1` | `--bind SRC DST` `--ro-bind SRC DST` `--dev-bind SRC DST` `--setenv VAR VAL` `--tmpfs DST` `--proc DST` `--dev DST` `--uid UID` `--gid GID` | `bwrap --ro-bind / / --unshare-net gco` |
 | `capsh` | `--print --noamb --noenv --quiet` | `--caps=TXT` `--drop=LIST` `--uid=UID` `--gid=GID` `--user=NAME` `--chroot=PATH` `--shell=PATH` `--` | `capsh --drop=cap_net_raw -- gco` |
 | `valgrind` | `-d -h -q -s -v` | `--tool=NAME` `--log-file=FILE` `--*=VAL` | `valgrind --tool=memcheck gco` |
-| `pkexec` `fakeroot` `unbuffer` `chronic` | — | — | `fakeroot gco` |
-| `torify` `torsocks` `tsocks` `proxychains4` | — | — | `torify gco` |
-| `firejail` `daemonize` `sem` `systemd-run` `dbus-run-session` | — | — | `firejail gco` |
-| `eatmydata` `catchsegv` `nocache` `fakechroot` | — | — | `eatmydata gco` |
-| `ccache` `distcc` `dbus-launch` | — | — | `ccache gco` |
+| `fakeroot` | `-h -u -v` | `-b FD` `-i FILE` `-l LIB` `-s FILE` `--` | `fakeroot gco` |
+| `unbuffer` | `-p` | — | `unbuffer -p gco` |
+| `chronic` | `-e -v` | — | `chronic -v gco` |
+| `torsocks` | `-6 -d -h -i -q` | `-a ADDR` `-p PASS` `-P PORT` `-u USER` | `torsocks gco` |
+| `proxychains4` | `-q` | `-f FILE` | `proxychains4 -q gco` |
+| `daemonize` | `-a -v` | `-c DIR` `-e FILE` `-E VAR` `-l FILE` `-o FILE` `-p FILE` `-u USER` | `daemonize -u www gco` |
+| `firejail` | — | `-c CMD` `--*=VAL` `--*` | `firejail --private gco` |
+| `sem` | — | `-j N` `-P N` `--*=VAL` `--*` | `sem -j 4 gco` |
+| `systemd-run` | `-d -G -h -P -q -r -R -S -t -T -v` | `-C CAP` `-E VAR` `-H HOST` `-M MACH` `-p PROP` `-u UNIT` `--*=VAL` `--*` | `systemd-run -t gco` |
+| `nocache` | — | `-n N` | `nocache gco` |
+| `fakechroot` | `-h -s -v` | `-b DIR` `-c DIR` `-d LINKER` `-e ENV` `-l LIB` | `fakechroot gco` |
+| `ccache` | `-c -C -h -p -s -v -V -x -z` | `-d PATH` `-F NUM` `-k KEY` `-M SIZE` `-o KEY=VAL` `-X LVL` | `ccache gco` |
+| `distcc` | `-j` | — | `distcc gco` |
+| `pkexec` `torify` `tsocks` `dbus-run-session` | — | — | `pkexec gco` |
+| `eatmydata` `catchsegv` `dbus-launch` | — | — | `eatmydata gco` |
 
 All prefixes support `\escaped`, `'single-quoted'`, and `"double-quoted"` forms. `sudo`/`doas`/`env`/`nice`/`time`/`nohup`/`rlwrap` are case-insensitive. Variable assignments (`X=1`, `PATH=/usr/bin`) are stripped automatically at any position:
 
