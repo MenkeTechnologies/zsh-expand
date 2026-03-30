@@ -195,6 +195,55 @@ No other zsh expansion plugin supports cursor placement on expansion.
 
 ---
 
+### // SELF-REFERENTIAL ALIAS ESCAPE
+
+If an alias expands to something whose first word is the alias name itself, zsh-expand backslash-escapes it to prevent infinite recursion:
+
+```sh
+alias git="hub"
+```
+
+```
+git<space>  =>  \hub    (escaped, won't re-expand)
+```
+
+Other plugins either infinite-loop or silently break on this.
+
+---
+
+### // CORRECT-THEN-EXPAND
+
+When `ZPWR_CORRECT_EXPAND=true`, typo correction chains into alias expansion in a single keypress:
+
+```
+goc<space>  =>  gco  =>  git checkout    (corrected, then expanded)
+```
+
+The spelling corrector fires first, then the corrected word is re-checked for alias expansion -- all before the space character is inserted.
+
+---
+
+### // EXPAND INSIDE QUOTES
+
+Optionally expand aliases inside quoted strings:
+
+```sh
+export ZPWR_EXPAND_QUOTE_DOUBLE=true   # expand inside "double quotes"
+export ZPWR_EXPAND_QUOTE_SINGLE=true   # expand inside 'single quotes'
+```
+
+```
+echo "gco<space>"  =>  echo "git checkout "
+```
+
+---
+
+### // AUTOPAIR INTEGRATION
+
+If [zsh-autopair](https://github.com/hlissner/zsh-autopair) is loaded, zsh-expand delegates space insertion to `autopair-insert` so bracket and quote auto-pairing is preserved during expansion.
+
+---
+
 ### // HISTORY INJECTION
 
 When `ZPWR_EXPAND_TO_HISTORY=true`:
