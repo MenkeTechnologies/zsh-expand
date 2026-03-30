@@ -50,7 +50,6 @@ fi
 
 #{{{                    MARK:regex
 #**************************************************************
-ZPWR_VARS[builtinSkips]='(builtin|command|exec|eval|noglob|-)'
 
 ZPWR_VARS[blacklistUser]=""
 if (( $#ZPWR_EXPAND_BLACKLIST )); then
@@ -58,64 +57,9 @@ if (( $#ZPWR_EXPAND_BLACKLIST )); then
 fi
 
 (){
-    'builtin' emulate -L zsh
-    setopt RC_QUOTES
-    local ws='[:space:]'
-    local l='[:graph:]'
-    ZPWR_VARS[startQuoteRegex]='(\$''|[\\"''])*'
-    ZPWR_VARS[endQuoteRegex]='["'']*'
-    local sq=${ZPWR_VARS[startQuoteRegex]}
-    local eq=${ZPWR_VARS[endQuoteRegex]}
-
     ZPWR_VARS[blacklistFirstPosRegex]='^(omz_history|podman|grc|_z|zshz|cd|hub|_zsh_tmux_|_rails_|_rake_|mvn-or|gradle-or|noglob |rlwrap ).*$'
 
     ZPWR_VARS[blacklistSubcommandPositionRegex]='^(gh|cargo|jenv|svn|git|ng|go|pod|docker|kubectl|rndc|yarn|npm|pip[0-9\.]*|bundle|rails|gem|nmcli|brew|apt|dnf|yum|zypper|pacman|service|proxychains[0-9\.]*|zpwr|zm|zd|zg|zinit)$'
-    # the main regex to match x=1 \builtin* 'command'* '"sudo"' -* y=2 \env* -* z=3 cmd arg1 arg2 etc
-
-    # sudo with short/long flags and optional flag arguments
-    local sudo_pat="${sq}[sS][uU][dD][oO]${eq}([$ws]+)(${sq}(-[ABbEHkKnPSis]+${eq}[$ws]*|-[CghpRrTtu][$ws=]+[$l]*${eq}[$ws]+|--${eq})*)*"
-    # env with -0/-i/-v and -C/-P/-S/-u flag arguments
-    local env_pat="${sq}[eE][nN][vV]${eq}[$ws]+(${sq}-[0iv]+${eq}[$ws]*|-[CPSu][$ws=]+[$l]*${eq}[$ws]+|--${eq})*"
-    # nice with optional -n PRIORITY or -PRIORITY
-    local nice_pat="${sq}[nN][iI][cC][eE]${eq}[$ws]+(-[0-9]+${eq}[$ws]+|-n[$ws=]*-?[0-9]+${eq}[$ws]+)?"
-    # time with optional -p/-l/-v flags (external /usr/bin/time)
-    local time_pat="${sq}[tT][iI][mM][eE]${eq}[$ws]+(-[plv]+[$ws]+)?"
-    # rlwrap with optional flags: -a/-c/-i/-N/-r (combo), -b/-f/-H/-p/-s/-S (with arg)
-    local rlwrap_pat="${sq}[rR][lL][wW][rR][aA][pP]${eq}[$ws]+(${sq}-[aciNr]+${eq}[$ws]+|-[bfHpsS][$ws=]+[$l]*${eq}[$ws]+)*"
-    # doas (sudo alternative) with -n/-s combo and -u/-C flag-with-arg
-    local doas_pat="${sq}[dD][oO][aA][sS]${eq}[$ws]+(${sq}-[ns]+${eq}[$ws]*|-[uC][$ws=]+[$l]*${eq}[$ws]+|--${eq})*"
-    # timeout with optional -k/-s flags then mandatory DURATION
-    local timeout_pat="${sq}timeout${eq}[$ws]+(-[ks][$ws=]+[$l]+${eq}[$ws]+)*[$l]+[$ws]+"
-    # strace with combo flags and flag-with-arg
-    local strace_pat="${sq}strace${eq}[$ws]+(-[cCdDfFhikqrtTvVwxXyYzZ]+${eq}[$ws]*|-[abeEIoOpPsSuU][$ws=]+[$l]+${eq}[$ws]+)*"
-    # ionice with -t combo and -c/-n flag-with-arg (supports -c2 -n7 no-space form)
-    local ionice_pat="${sq}ionice${eq}[$ws]+(-[t]+${eq}[$ws]*|-[cn][$ws=]*[0-9]+${eq}[$ws]+)*"
-    # caffeinate (macOS) with -d/-i/-m/-s/-u combo and -t/-w flag-with-arg
-    local caffeinate_pat="${sq}caffeinate${eq}[$ws]+(-[dimsu]+${eq}[$ws]*|-[tw][$ws=]+[$l]+${eq}[$ws]+)*"
-    # setsid with -c/-f/-w combo flags
-    local setsid_pat="${sq}setsid${eq}[$ws]+(-[cfw]+${eq}[$ws]+)*"
-    # chrt with -b/-f/-i/-o/-r policy combo then mandatory PRIORITY
-    local chrt_pat="${sq}chrt${eq}[$ws]+(-[bfimor]+${eq}[$ws]+)*[0-9]+[$ws]+"
-    # taskset with optional -c then mandatory MASK
-    local taskset_pat="${sq}taskset${eq}[$ws]+(-c[$ws]+)?[$l]+[$ws]+"
-    # watch with -d/-g/-t/-e/-c/-x/-b/-p/-w combo and -n INTERVAL flag-with-arg
-    local watch_pat="${sq}watch${eq}[$ws]+(-[dgtecxbpw]+${eq}[$ws]*|-n[$ws=]*[0-9.]+${eq}[$ws]+)*"
-    # runuser with -l combo and -u/-g/-G flag-with-arg
-    local runuser_pat="${sq}runuser${eq}[$ws]+(-[l]+${eq}[$ws]*|-[ugG][$ws=]+[$l]+${eq}[$ws]+)*"
-    # flock with -n/-s/-u/-x combo, -w TIMEOUT flag-with-arg, then mandatory FILE
-    local flock_pat="${sq}flock${eq}[$ws]+(-[nsux]+${eq}[$ws]*|-[wE][$ws=]+[$l]+${eq}[$ws]+)*[$l]+[$ws]+"
-    # chroot with mandatory PATH then command
-    local chroot_pat="${sq}chroot${eq}[$ws]+[$l]+[$ws]+"
-    # unshare with combo flags and --
-    local unshare_pat="${sq}unshare${eq}[$ws]+(-[fmnpuUirC]+${eq}[$ws]*|--${eq}[$ws]+)*"
-    # cpulimit with -l LIMIT flag-with-arg
-    local cpulimit_pat="${sq}cpulimit${eq}[$ws]+(-[l][$ws=]+[$l]+${eq}[$ws]+)*"
-    # nohup and simple no-flag wrappers
-    local wrapper_no_flags_pat="${sq}([nN][oO][hH][uU][pP]|pkexec|fakeroot|unbuffer|chronic|torify|torsocks|tsocks|proxychains4|daemonize|firejail|sem|valgrind|ltrace|systemd-run)${eq}[$ws]+"
-    # shell keyword prefixes: -/nocorrect/time(-plv), then builtin, then command(-p)/exec(-acl)/coproc/other builtins
-    local shell_keyword_pat="(${sq}(-|nocorrect)${eq}[$ws]+|${sq}time${eq}[$ws]+(-[plv]+[$ws]+)?)*(${sq}builtin${eq}[$ws]+)*(${sq}(builtin|eval|noglob|coproc|-)${eq}[$ws]+|${sq}command${eq}[$ws]+(-p[$ws]+)?|${sq}exec${eq}[$ws]+(-[cl]+${eq}[$ws]+|-a[$ws=]+[$l]+${eq}[$ws]+)*)*"
-
-    ZPWR_VARS[continueFirstPositionRegexNoZpwr]="^([$ws]*)(${shell_keyword_pat})?(${sudo_pat}|${env_pat}|${nice_pat}|${time_pat}|${rlwrap_pat}|${doas_pat}|${timeout_pat}|${strace_pat}|${ionice_pat}|${caffeinate_pat}|${setsid_pat}|${chrt_pat}|${taskset_pat}|${watch_pat}|${runuser_pat}|${flock_pat}|${chroot_pat}|${unshare_pat}|${cpulimit_pat}|${wrapper_no_flags_pat})*([$ws]*)(.*)$"
 }
 
 
