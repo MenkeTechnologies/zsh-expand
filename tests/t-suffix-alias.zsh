@@ -99,10 +99,11 @@
 @test 'suffix: does not expand in argument position' {
     LBUFFER="echo file.txt"
     ZPWR_VARS[WAS_EXPANDED]=false
+    ZPWR_EXPAND_PRE_EXPAND=()
     zpwrExpandParseWords "$LBUFFER"
-    # zpwrExpandSuffixAlias only fires when partition == 1
-    # so calling it here should not expand since word is file.txt not at command pos
-    assert (( $#ZPWR_EXPAND_WORDS_LPARTITION > 1 )) equals 1
+    zpwrExpandSuffixAlias
+    assert $LBUFFER same_as 'echo file.txt'
+    assert $ZPWR_VARS[WAS_EXPANDED] same_as 'false'
 }
 
 #==============================================================
@@ -145,4 +146,44 @@
     zpwrExpandRightTrim
     zpwrExpandSuffixAlias
     assert $LBUFFER same_as 'file.txt  '
+}
+
+#==============================================================
+# suffix alias after prefix chains
+#==============================================================
+
+@test 'suffix: expands after sudo' {
+    LBUFFER="sudo file.txt"
+    ZPWR_VARS[WAS_EXPANDED]=false
+    zpwrExpandParseWords "$LBUFFER"
+    zpwrExpandRegexMatchOnCommandPosition
+    zpwrExpandSuffixAlias
+    assert $LBUFFER same_as 'sudo vim file.txt'
+}
+
+@test 'suffix: expands after env' {
+    LBUFFER="env file.py"
+    ZPWR_VARS[WAS_EXPANDED]=false
+    zpwrExpandParseWords "$LBUFFER"
+    zpwrExpandRegexMatchOnCommandPosition
+    zpwrExpandSuffixAlias
+    assert $LBUFFER same_as 'env python file.py'
+}
+
+@test 'suffix: expands after sudo env' {
+    LBUFFER="sudo env file.json"
+    ZPWR_VARS[WAS_EXPANDED]=false
+    zpwrExpandParseWords "$LBUFFER"
+    zpwrExpandRegexMatchOnCommandPosition
+    zpwrExpandSuffixAlias
+    assert $LBUFFER same_as 'sudo env jq file.json'
+}
+
+@test 'suffix: expands after builtin command sudo -E env' {
+    LBUFFER='builtin command sudo -E env file.txt'
+    ZPWR_VARS[WAS_EXPANDED]=false
+    zpwrExpandParseWords "$LBUFFER"
+    zpwrExpandRegexMatchOnCommandPosition
+    zpwrExpandSuffixAlias
+    assert $LBUFFER same_as 'builtin command sudo -E env vim file.txt'
 }
