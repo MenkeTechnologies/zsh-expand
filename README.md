@@ -152,14 +152,19 @@ The key is the correct word, the value is a space-separated list of misspellings
 
 ### // VERSUS THE COMPETITION
 
-#### [zsh-abbrev-alias](https://github.com/momo-lab/zsh-abbrev-alias)
-
-| | zsh-expand | zsh-abbrev-alias |
-|---|---|---|
-| Uses native `alias` / `global alias` | yes | no (separate `abbrev-alias` cmd) |
-| Expands after `sudo`/`env`/`builtin` combos | yes | no |
-| Spelling correction | yes | no |
-| Glob / history / param expansion | yes | no |
+| Feature | zsh-expand | [zsh-abbr](https://github.com/olets/zsh-abbr) | [zsh-abbrev-alias](https://github.com/momo-lab/zsh-abbrev-alias) | [globalias](https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/globalias) |
+|---|---|---|---|---|
+| Uses native `alias` / `global alias` | **yes** | no (own `abbr` cmd) | no (own `abbrev-alias` cmd) | yes |
+| Expands after `sudo`/`env`/`builtin` combos | **yes** | no | no | no |
+| Spelling correction (300+ built-in) | **yes** | no | no | no |
+| User-extensible corrections | **yes** | no | no | no |
+| Clobber protection | **yes** | n/a | no | no |
+| Glob / history / param expansion | **yes** | no | no | yes |
+| History injection | **yes** | no | no | no |
+| Blacklist / filter | **yes** | n/a | no | yes |
+| Test suite | **9,300+** | yes | no | no |
+| Pure zsh (no external deps) | **yes** | yes | yes | ohmyzsh |
+| Active (2026) | **yes** | yes | slow (2024) | stale (2020) |
 
 ---
 
