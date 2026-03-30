@@ -68,7 +68,7 @@ teh<space>  =>  the
 ```
 COMMAND POSITION
   alias in first word position         => expanded
-  alias after sudo/env/builtin/etc     => expanded (case-insensitive: SUDO, Sudo, sUdO all work)
+  alias after sudo/env/builtin/etc     => expanded (case-insensitive: SUDO, Sudo, sUdO — works on macOS/Windows)
   word is a real command/function       => NOT expanded (no clobbering)
 
 GLOBAL
