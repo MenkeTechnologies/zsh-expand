@@ -2415,3 +2415,192 @@
     zpwrExpandParseWords "nocorrect noglob su -l root nsenter -t 1 -m choom -n -500 gco"
     assert $ZPWR_VARS[lastword_lbuffer] same_as 'gco'
 }
+
+#==============================================================
+# exec depth limits — mandatory positional args must NOT expand
+# when the alias is at the positional arg slot, not command slot
+#==============================================================
+
+@test 'no-expand: su gco must not expand (gco is USER)' {
+    alias gco="git checkout"
+    LBUFFER="su gco"
+    ZPWR_EXPAND=true
+    ZPWR_EXPAND_SECOND_POSITION=true
+    zpwrExpandParseWords "$LBUFFER"
+    zpwrExpandRegexMatchOnCommandPosition
+    zpwrExpandLastWordAtCommandPosAndExpand moveCursor zle ENTER
+    assert "$LBUFFER" same_as 'su gco'
+    unalias gco
+}
+
+@test 'no-expand: chroot gco must not expand (gco is PATH)' {
+    alias gco="git checkout"
+    LBUFFER="chroot gco"
+    ZPWR_EXPAND=true
+    ZPWR_EXPAND_SECOND_POSITION=true
+    zpwrExpandParseWords "$LBUFFER"
+    zpwrExpandRegexMatchOnCommandPosition
+    zpwrExpandLastWordAtCommandPosAndExpand moveCursor zle ENTER
+    assert "$LBUFFER" same_as 'chroot gco'
+    unalias gco
+}
+
+@test 'no-expand: timeout gco must not expand (gco is DURATION)' {
+    alias gco="git checkout"
+    LBUFFER="timeout gco"
+    ZPWR_EXPAND=true
+    ZPWR_EXPAND_SECOND_POSITION=true
+    zpwrExpandParseWords "$LBUFFER"
+    zpwrExpandRegexMatchOnCommandPosition
+    zpwrExpandLastWordAtCommandPosAndExpand moveCursor zle ENTER
+    assert "$LBUFFER" same_as 'timeout gco'
+    unalias gco
+}
+
+@test 'no-expand: chrt gco must not expand (gco is PRIORITY)' {
+    alias gco="git checkout"
+    LBUFFER="chrt gco"
+    ZPWR_EXPAND=true
+    ZPWR_EXPAND_SECOND_POSITION=true
+    zpwrExpandParseWords "$LBUFFER"
+    zpwrExpandRegexMatchOnCommandPosition
+    zpwrExpandLastWordAtCommandPosAndExpand moveCursor zle ENTER
+    assert "$LBUFFER" same_as 'chrt gco'
+    unalias gco
+}
+
+@test 'no-expand: taskset gco must not expand (gco is MASK)' {
+    alias gco="git checkout"
+    LBUFFER="taskset gco"
+    ZPWR_EXPAND=true
+    ZPWR_EXPAND_SECOND_POSITION=true
+    zpwrExpandParseWords "$LBUFFER"
+    zpwrExpandRegexMatchOnCommandPosition
+    zpwrExpandLastWordAtCommandPosAndExpand moveCursor zle ENTER
+    assert "$LBUFFER" same_as 'taskset gco'
+    unalias gco
+}
+
+@test 'no-expand: sg gco must not expand (gco is GROUP)' {
+    alias gco="git checkout"
+    LBUFFER="sg gco"
+    ZPWR_EXPAND=true
+    ZPWR_EXPAND_SECOND_POSITION=true
+    zpwrExpandParseWords "$LBUFFER"
+    zpwrExpandRegexMatchOnCommandPosition
+    zpwrExpandLastWordAtCommandPosAndExpand moveCursor zle ENTER
+    assert "$LBUFFER" same_as 'sg gco'
+    unalias gco
+}
+
+@test 'no-expand: flock gco must not expand (gco is FILE)' {
+    alias gco="git checkout"
+    LBUFFER="flock gco"
+    ZPWR_EXPAND=true
+    ZPWR_EXPAND_SECOND_POSITION=true
+    zpwrExpandParseWords "$LBUFFER"
+    zpwrExpandRegexMatchOnCommandPosition
+    zpwrExpandLastWordAtCommandPosAndExpand moveCursor zle ENTER
+    assert "$LBUFFER" same_as 'flock gco'
+    unalias gco
+}
+
+@test 'no-expand: sudo su gco must not expand (gco is USER after su)' {
+    alias gco="git checkout"
+    LBUFFER="sudo su gco"
+    ZPWR_EXPAND=true
+    ZPWR_EXPAND_SECOND_POSITION=true
+    zpwrExpandParseWords "$LBUFFER"
+    zpwrExpandRegexMatchOnCommandPosition
+    zpwrExpandLastWordAtCommandPosAndExpand moveCursor zle ENTER
+    assert "$LBUFFER" same_as 'sudo su gco'
+    unalias gco
+}
+
+@test 'no-expand: sudo timeout gco must not expand (gco is DURATION)' {
+    alias gco="git checkout"
+    LBUFFER="sudo timeout gco"
+    ZPWR_EXPAND=true
+    ZPWR_EXPAND_SECOND_POSITION=true
+    zpwrExpandParseWords "$LBUFFER"
+    zpwrExpandRegexMatchOnCommandPosition
+    zpwrExpandLastWordAtCommandPosAndExpand moveCursor zle ENTER
+    assert "$LBUFFER" same_as 'sudo timeout gco'
+    unalias gco
+}
+
+#==============================================================
+# expand: positional arg filled, gco IS at command slot
+#==============================================================
+
+@test 'expand: su root gco expands (gco is command after USER)' {
+    alias gco="git checkout"
+    LBUFFER="su root gco"
+    ZPWR_EXPAND=true
+    ZPWR_EXPAND_SECOND_POSITION=true
+    zpwrExpandParseWords "$LBUFFER"
+    zpwrExpandRegexMatchOnCommandPosition
+    zpwrExpandLastWordAtCommandPosAndExpand moveCursor zle SPACE
+    assert "$LBUFFER" matches 'git checkout$'
+    unalias gco
+}
+
+@test 'expand: chroot /path gco expands' {
+    alias gco="git checkout"
+    LBUFFER="chroot /path gco"
+    ZPWR_EXPAND=true
+    ZPWR_EXPAND_SECOND_POSITION=true
+    zpwrExpandParseWords "$LBUFFER"
+    zpwrExpandRegexMatchOnCommandPosition
+    zpwrExpandLastWordAtCommandPosAndExpand moveCursor zle SPACE
+    assert "$LBUFFER" matches 'git checkout$'
+    unalias gco
+}
+
+@test 'expand: timeout 30 gco expands' {
+    alias gco="git checkout"
+    LBUFFER="timeout 30 gco"
+    ZPWR_EXPAND=true
+    ZPWR_EXPAND_SECOND_POSITION=true
+    zpwrExpandParseWords "$LBUFFER"
+    zpwrExpandRegexMatchOnCommandPosition
+    zpwrExpandLastWordAtCommandPosAndExpand moveCursor zle SPACE
+    assert "$LBUFFER" matches 'git checkout$'
+    unalias gco
+}
+
+@test 'expand: sg staff gco expands' {
+    alias gco="git checkout"
+    LBUFFER="sg staff gco"
+    ZPWR_EXPAND=true
+    ZPWR_EXPAND_SECOND_POSITION=true
+    zpwrExpandParseWords "$LBUFFER"
+    zpwrExpandRegexMatchOnCommandPosition
+    zpwrExpandLastWordAtCommandPosAndExpand moveCursor zle SPACE
+    assert "$LBUFFER" matches 'git checkout$'
+    unalias gco
+}
+
+@test 'expand: flock /tmp/lk gco expands' {
+    alias gco="git checkout"
+    LBUFFER="flock /tmp/lk gco"
+    ZPWR_EXPAND=true
+    ZPWR_EXPAND_SECOND_POSITION=true
+    zpwrExpandParseWords "$LBUFFER"
+    zpwrExpandRegexMatchOnCommandPosition
+    zpwrExpandLastWordAtCommandPosAndExpand moveCursor zle SPACE
+    assert "$LBUFFER" matches 'git checkout$'
+    unalias gco
+}
+
+@test 'expand: sudo -u root su -l deploy gco expands' {
+    alias gco="git checkout"
+    LBUFFER="sudo -u root su -l deploy gco"
+    ZPWR_EXPAND=true
+    ZPWR_EXPAND_SECOND_POSITION=true
+    zpwrExpandParseWords "$LBUFFER"
+    zpwrExpandRegexMatchOnCommandPosition
+    zpwrExpandLastWordAtCommandPosAndExpand moveCursor zle SPACE
+    assert "$LBUFFER" matches 'git checkout$'
+    unalias gco
+}

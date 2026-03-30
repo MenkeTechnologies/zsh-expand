@@ -185,7 +185,7 @@ function zpwrExpandParserFindCommandPosition() {
                     esac
                 done
                 # consume mandatory DURATION (only if not the last word)
-                (( pos < $#words )) && (( pos++ ))
+                (( pos <= $#words )) && (( pos++ ))
                 ;;
             strace|ltrace)
                 (( pos++ ))
@@ -241,7 +241,7 @@ function zpwrExpandParserFindCommandPosition() {
                     [[ $REPLY == -[bfimor]* ]] && (( pos++ ))
                 fi
                 # consume mandatory PRIORITY (only if not the last word)
-                (( pos < $#words )) && (( pos++ ))
+                (( pos <= $#words )) && (( pos++ ))
                 ;;
             taskset)
                 (( pos++ ))
@@ -251,7 +251,7 @@ function zpwrExpandParserFindCommandPosition() {
                     [[ $REPLY == -c ]] && (( pos++ ))
                 fi
                 # consume mandatory MASK (only if not the last word)
-                (( pos < $#words )) && (( pos++ ))
+                (( pos <= $#words )) && (( pos++ ))
                 ;;
             watch)
                 (( pos++ ))
@@ -289,12 +289,12 @@ function zpwrExpandParserFindCommandPosition() {
                     esac
                 done
                 # consume mandatory FILE (only if not the last word)
-                (( pos < $#words )) && (( pos++ ))
+                (( pos <= $#words )) && (( pos++ ))
                 ;;
             chroot)
                 (( pos++ ))
                 # consume mandatory PATH (only if not the last word)
-                (( pos < $#words )) && (( pos++ ))
+                (( pos <= $#words )) && (( pos++ ))
                 ;;
             unshare)
                 (( pos++ ))
@@ -331,7 +331,7 @@ function zpwrExpandParserFindCommandPosition() {
                     esac
                 done
                 # consume optional USER (only if not the last word)
-                (( pos < $#words )) && (( pos++ ))
+                (( pos <= $#words )) && (( pos++ ))
                 ;;
             stdbuf)
                 (( pos++ ))
@@ -347,7 +347,7 @@ function zpwrExpandParserFindCommandPosition() {
             sg)
                 (( pos++ ))
                 # consume mandatory GROUP (only if not the last word)
-                (( pos < $#words )) && (( pos++ ))
+                (( pos <= $#words )) && (( pos++ ))
                 ;;
             choom)
                 (( pos++ ))
@@ -592,7 +592,7 @@ function zpwrExpandLastWordAtCommandPosAndExpand(){
                     return
                 fi
 
-                if (( $#ZPWR_EXPAND_PRE_EXPAND == 1)); then
+                if (( $#ZPWR_EXPAND_PRE_EXPAND == 1)) && [[ -n $ZPWR_EXPAND_PRE_EXPAND[1] ]]; then
                     if [[ $caller == zle ]]; then
                         zpwrExpandGetAliasValue
                         zpwrExpandAlias
@@ -609,7 +609,7 @@ function zpwrExpandLastWordAtCommandPosAndExpand(){
                 # here if not called by supernatural space fn
                 if zpwrExpandRegexMatchOnCommandPosition; then
 
-                    if (( $#ZPWR_EXPAND_PRE_EXPAND == 1)); then
+                    if (( $#ZPWR_EXPAND_PRE_EXPAND == 1)) && [[ -n $ZPWR_EXPAND_PRE_EXPAND[1] ]]; then
                         if [[ $caller == zle ]]; then
                             zpwrExpandGetAliasValue
                         fi
