@@ -261,7 +261,7 @@ function zpwrExpandSupernaturalSpace() {
 
     zpwrExpandParseWords "$LBUFFER"
 
-    if [[ $triggerKey == "${ZPWR_VARS[SPACE_KEY]}" ]]; then
+    if [[ $triggerKey == "${ZPWR_VARS[SPACEBAR_KEY]}" ]]; then
         if [[ $ZPWR_EXPAND == false ]]; then
             zle self-insert
             return

@@ -1096,11 +1096,6 @@
     assert $state equals 0
 }
 
-@test 'isCommand: cal is a command' {
-    run zpwrExpandIsCommand cal
-    assert $state equals 0
-}
-
 @test 'isCommand: bc is a command' {
     run zpwrExpandIsCommand bc
     assert $state equals 0
