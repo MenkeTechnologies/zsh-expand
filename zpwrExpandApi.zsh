@@ -194,8 +194,8 @@ function zpwrExpandParserFindCommandPosition() {
                     _zpwr_bare "$words[$pos]"
                     case $REPLY in
                         -[cCdDfhikLNnqrtTvVyYzZ]*) (( pos++ )) ;;
-                        -[aAbBeEFIlnoOpPsSuUwX])   (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
-                        -[aAbBeEFIlnoOpPsSuUwX]=*) (( pos++ )) ;;
+                        -[aAbeEFIlnoOpPsSuUwX])   (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -[aAbeEFIlnoOpPsSuUwX]=*) (( pos++ )) ;;
                         *)                  break ;;
                     esac
                 done
@@ -740,7 +740,60 @@ function zpwrExpandParserFindCommandPosition() {
                     [[ $REPLY == -j ]] && (( pos++ ))
                 fi
                 ;;
-            pkexec|torify|tsocks|dbus-run-session|eatmydata|catchsegv|dbus-launch)
+            pkexec)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[u])      (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        --user)    (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        --user=*)  (( pos++ )) ;;
+                        --disable-internal-agent|--keep-cwd)
+                                   (( pos++ )) ;;
+                        *)         break ;;
+                    esac
+                done
+                ;;
+            torify)
+                (( pos++ ))
+                if (( pos <= $#words )); then
+                    _zpwr_bare "$words[$pos]"
+                    [[ $REPLY == -v ]] && (( pos++ ))
+                fi
+                ;;
+            dbus-run-session)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        --config-file|--dbus-daemon)
+                                   (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        --*=*)     (( pos++ )) ;;
+                        --)        (( pos++ )); break ;;
+                        *)         break ;;
+                    esac
+                done
+                ;;
+            dbus-launch)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        --*=*)     (( pos++ )) ;;
+                        --*)       (( pos++ )) ;;
+                        *)         break ;;
+                    esac
+                done
+                ;;
+            eatmydata)
+                (( pos++ ))
+                # consume optional --
+                if (( pos <= $#words )); then
+                    _zpwr_bare "$words[$pos]"
+                    [[ $REPLY == -- ]] && (( pos++ ))
+                fi
+                ;;
+            tsocks|catchsegv)
                 (( pos++ ))
                 ;;
             *)

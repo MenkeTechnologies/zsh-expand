@@ -1127,8 +1127,8 @@
     assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
 }
 
-@test 'regex: strace -A -X raw -w 5 -F pathlist' {
-    zpwrExpandParseWords "strace -A -X raw -w 5 -F pathlist git"
+@test 'regex: strace -A out -X raw -w 5 -F pathlist' {
+    zpwrExpandParseWords "strace -A out -X raw -w 5 -F pathlist git"
     zpwrExpandRegexMatchOnCommandPosition
     assert $state equals 0
     assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
@@ -1141,8 +1141,8 @@
     assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
 }
 
-@test 'regex: strace -B 32 -l libbar' {
-    zpwrExpandParseWords "strace -B 32 -l libbar git"
+@test 'regex: strace -b execve -l libbar' {
+    zpwrExpandParseWords "strace -b execve -l libbar git"
     zpwrExpandRegexMatchOnCommandPosition
     assert $state equals 0
     assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
@@ -1496,7 +1496,7 @@
 #==============================================================
 
 @test 'regex: mega chain all new flags' {
-    zpwrExpandParseWords "proxychains4 -q -f /etc/pc.conf torsocks -diq6 -a 127.0.0.1 -P 9050 sudo -elNVv -D /chdir -U other doas -Lns -u root env -a argv0 -0iv fakeroot -u -s /tmp/save chronic -ev systemd-run -dGqt -u unit -p prop daemonize -av -c /tmp -u www firejail --private ccache nocache -n 2 fakechroot -s -l /lib sem -j 4 unbuffer -p valgrind -qv --tool=memcheck strace -LNn -A -X raw rlwrap -EhIoRUvWX -C name -D 2 -z filt timeout -fpv -k 5 30 chrt -adepRv -D 1000 -T 500 -f 10 taskset -acp 0xff watch -Cfrw -q 5 -s /dir -n 1 flock -eFo -c cmd -w 5 /tmp/lock runuser -fmpPT -c cmd -s /bin/bash -u deploy unshare -cfmnpuUirCT -R /root -S 1000 -G 1000 cpulimit -viz -e app -p 1234 -l 50 nsenter -aceZTwW -t 1 -S 0 -G 0 -N 3 numactl -absH -w 0,1 -P 2,3 prlimit -o RES -p 1234 su -flmpPT -c cmd root nice -n 10 nohup git"
+    zpwrExpandParseWords "proxychains4 -q -f /etc/pc.conf torsocks -diq6 -a 127.0.0.1 -P 9050 sudo -elNVv -D /chdir -U other doas -Lns -u root env -a argv0 -0iv fakeroot -u -s /tmp/save chronic -ev systemd-run -dGqt -u unit -p prop daemonize -av -c /tmp -u www firejail --private ccache nocache -n 2 fakechroot -s -l /lib sem -j 4 unbuffer -p valgrind -qv --tool=memcheck strace -LNn -A out -X raw rlwrap -EhIoRUvWX -C name -D 2 -z filt timeout -fpv -k 5 30 chrt -adepRv -D 1000 -T 500 -f 10 taskset -acp 0xff watch -Cfrw -q 5 -s /dir -n 1 flock -eFo -c cmd -w 5 /tmp/lock runuser -fmpPT -c cmd -s /bin/bash -u deploy unshare -cfmnpuUirCT -R /root -S 1000 -G 1000 cpulimit -viz -e app -p 1234 -l 50 nsenter -aceZTwW -t 1 -S 0 -G 0 -N 3 numactl -absH -w 0,1 -P 2,3 prlimit -o RES -p 1234 su -flmpPT -c cmd root nice -n 10 nohup git"
     zpwrExpandRegexMatchOnCommandPosition
     assert $state equals 0
     assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'

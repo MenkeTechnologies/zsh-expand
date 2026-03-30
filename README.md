@@ -72,7 +72,7 @@ torify sudo -kE -u root su -l deploy                         \
 
 ### // THE MONSTER CHAIN
 
-No other expansion plugin can do this. 12 shell builtin permutations up front, then every one of the 62 command wrapper commands duplicated with different flag combos. `strace` and `ltrace` with all 41 flags maxed out. Variable assignments scattered everywhere. Shell builtins come first (they only exist inside zsh), then command wrappers chain freely. The parser consumes the entire prefix and `gco` expands to `git checkout`:
+No other expansion plugin can do this. 12 shell builtin permutations up front, then every one of the 62 command wrapper commands duplicated with different flag combos. `strace` and `ltrace` with all 40 flags maxed out. Variable assignments scattered everywhere. Shell builtins come first (they only exist inside zsh), then command wrappers chain freely. The parser consumes the entire prefix and `gco` expands to `git checkout`:
 
 ```
 nocorrect time -p command -p builtin eval noglob coproc       \
@@ -360,7 +360,7 @@ External prefix commands:
 | `nohup` | — | — | `nohup gco` |
 | `rlwrap` | `-a -c -E -h -i -I -m -n -N -o -R -r -U -v -W -X` | `-b CHARS` `-C NAME` `-D N` `-e CHAR` `-f FILE` `-g REGEX` `-H FILE` `-l FILE` `-M EXT` `-O REGEX` `-p COLOR` `-P INPUT` `-q CHARS` `-s N` `-S PROMPT` `-t NAME` `-w MS` `-z FILTER` | `rlwrap -acN -f comp -s 500 gco` |
 | `timeout` | `-f -p -v` | `-k DUR` `-s SIG` | `timeout -k 10 30 gco` |
-| `strace` `ltrace` | `-c -C -d -D -f -h -i -k -L -N -n -q -r -t -T -v -V -y -Y -z -Z` | `-a COL` `-A N` `-b SZ` `-B SZ` `-e EXPR` `-E VAR` `-F LIST` `-I N` `-l LIB` `-n N` `-o FILE` `-O N` `-p PID` `-P PATH` `-s SZ` `-S BY` `-u USER` `-U COL` `-w N` `-X FMT` | `strace -cf -s 256 gco` |
+| `strace` `ltrace` | `-c -C -d -D -f -h -i -k -L -N -n -q -r -t -T -v -V -y -Y -z -Z` | `-a COL` `-A N` `-b SZ` `-e EXPR` `-E VAR` `-F LIST` `-I N` `-l LIB` `-n N` `-o FILE` `-O N` `-p PID` `-P PATH` `-s SZ` `-S BY` `-u USER` `-U COL` `-w N` `-X FMT` | `strace -cf -s 256 gco` |
 | `ionice` | `-t` | `-c CLASS` `-n LEVEL` | `ionice -c 2 -n 7 gco` |
 | `caffeinate` | `-d -i -m -s -u` | `-t SEC` `-w PID` | `caffeinate -i gco` |
 | `setsid` | `-c -f -w` | — | `setsid -f gco` |
@@ -405,8 +405,12 @@ External prefix commands:
 | `fakechroot` | `-h -s -v` | `-b DIR` `-c DIR` `-d LINKER` `-e ENV` `-l LIB` | `fakechroot gco` |
 | `ccache` | `-c -C -h -p -s -v -V -x -z` | `-d PATH` `-F NUM` `-k KEY` `-M SIZE` `-o KEY=VAL` `-X LVL` | `ccache gco` |
 | `distcc` | `-j` | — | `distcc gco` |
-| `pkexec` `torify` `tsocks` `dbus-run-session` | — | — | `pkexec gco` |
-| `eatmydata` `catchsegv` `dbus-launch` | — | — | `eatmydata gco` |
+| `pkexec` | — | `-u USER` `--user USER` `--disable-internal-agent` `--keep-cwd` | `pkexec -u admin gco` |
+| `torify` | `-v` | — | `torify gco` |
+| `dbus-run-session` | — | `--config-file FILE` `--dbus-daemon BIN` `--*=VAL` `--` | `dbus-run-session gco` |
+| `dbus-launch` | `--sh-syntax` `--csh-syntax` `--auto-syntax` `--binary-syntax` `--close-stderr` `--exit-with-session` `--exit-with-x11` | `--autolaunch=ID` `--config-file=FILE` | `dbus-launch gco` |
+| `eatmydata` | — | `--` | `eatmydata -- gco` |
+| `tsocks` `catchsegv` | — | — | `tsocks gco` |
 
 All prefixes support `\escaped`, `'single-quoted'`, and `"double-quoted"` forms. `sudo`/`doas`/`env`/`nice`/`time`/`nohup`/`rlwrap` are case-insensitive. Variable assignments (`X=1`, `PATH=/usr/bin`) are stripped automatically at any position:
 
