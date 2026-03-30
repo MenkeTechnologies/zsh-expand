@@ -366,7 +366,7 @@ External wrappers (execvp commands):
 | `setsid` | `-c -f -w` | — | `setsid -f gco` |
 | `chrt` | `-b -f -i -m -o -r` | — | `chrt -f 10 gco` |
 | `taskset` | `-c` | — | `taskset -c 0-3 gco` |
-| `watch` | `-d -g -t -e -c -x -b -p -w` | `-n INTERVAL` | `watch -d -n 1 gco` |
+| `watch` | `-d -g -t -e -c -x -b -p` | `-n INTERVAL` | `watch -d -n 1 gco` |
 | `flock` | `-n -s -u -x` | `-w SEC` `-E N` | `flock -w 5 /tmp/lock gco` |
 | `chroot` | — | — | `chroot /path gco` |
 | `runuser` | `-l` | `-u USER` `-g GRP` `-G GRP` | `runuser -u deploy gco` |
