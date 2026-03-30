@@ -114,8 +114,8 @@ function zpwrExpandParserFindCommandPosition() {
                 while (( pos <= $#words )); do
                     _zpwr_bare "$words[$pos]"
                     case $REPLY in
-                        # sudo combo: -ABbEHkKnPSis, doas combo: -ns
-                        -[ABbEHkKnPSisns]*)  (( pos++ )) ;;
+                        # sudo combo: -ABbEHkKnPSis, doas combo: -Lns
+                        -[ABbEHkKnPSisLns]*)  (( pos++ )) ;;
                         # sudo flag-with-arg: -CghpRrTtu, doas: -uC
                         -[CghpRrTtuC])        (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
                         -[CghpRrTtuC]=*)      (( pos++ )) ;; # -u=root form
