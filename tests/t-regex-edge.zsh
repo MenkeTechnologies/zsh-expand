@@ -1501,3 +1501,104 @@
     assert $state equals 0
     assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
 }
+
+#==============================================================
+# pkexec: -u and long opts
+#==============================================================
+
+@test 'regex: pkexec -u admin' {
+    zpwrExpandParseWords "pkexec -u admin git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: pkexec --user admin --keep-cwd --disable-internal-agent' {
+    zpwrExpandParseWords "pkexec --user admin --keep-cwd --disable-internal-agent git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: pkexec --user=admin' {
+    zpwrExpandParseWords "pkexec --user=admin git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+#==============================================================
+# torify: -v flag
+#==============================================================
+
+@test 'regex: torify -v' {
+    zpwrExpandParseWords "torify -v git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+#==============================================================
+# dbus-run-session: long opts and --
+#==============================================================
+
+@test 'regex: dbus-run-session --config-file /etc/dbus.conf' {
+    zpwrExpandParseWords "dbus-run-session --config-file /etc/dbus.conf git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: dbus-run-session --dbus-daemon=/usr/bin/dbus-daemon --' {
+    zpwrExpandParseWords "dbus-run-session --dbus-daemon=/usr/bin/dbus-daemon -- git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+#==============================================================
+# dbus-launch: long opts
+#==============================================================
+
+@test 'regex: dbus-launch --exit-with-session --config-file=foo.conf' {
+    zpwrExpandParseWords "dbus-launch --exit-with-session --config-file=foo.conf git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: dbus-launch --sh-syntax --close-stderr --autolaunch=abc123' {
+    zpwrExpandParseWords "dbus-launch --sh-syntax --close-stderr --autolaunch=abc123 git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+#==============================================================
+# eatmydata: -- separator
+#==============================================================
+
+@test 'regex: eatmydata --' {
+    zpwrExpandParseWords "eatmydata -- git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+#==============================================================
+# tsocks/catchsegv: bare (no -- support)
+#==============================================================
+
+@test 'regex: tsocks bare' {
+    zpwrExpandParseWords "tsocks git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: catchsegv bare' {
+    zpwrExpandParseWords "catchsegv git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
