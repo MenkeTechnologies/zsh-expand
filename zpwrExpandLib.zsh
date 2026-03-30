@@ -23,6 +23,10 @@ else
     ZPWR_VARS[AP_SPACE]=false
 fi
 
+function zpwrExpandIsCommand(){
+    (( ${+commands[$1]} + ${+functions[$1]} + ${+builtins[$1]} + ${+aliases[$1]} ))
+}
+
 function zpwrExpandGoToTabStopOrEndOfLBuffer(){
 
     local lenToFirstTS
@@ -55,7 +59,7 @@ function zpwrExpandCorrectWord(){
     fi
 
     if (( $#ZPWR_EXPAND_WORDS_PARTITION == 1)); then
-        if type -a $ZPWR_VARS[firstword_partition] &>/dev/null; then
+        if zpwrExpandIsCommand $ZPWR_VARS[firstword_partition]; then
             #zpwrLogDebug "No correction from 1 word => '"'$ZPWR_VARS[firstword_partition]'"'_____ = ""'$ZPWR_VARS[firstword_partition]'"
             # git<space>
             return
@@ -69,7 +73,7 @@ function zpwrExpandCorrectWord(){
 
             word=${ZPWR_EXPAND_PRE_CORRECT[1]}
             if (( $#ZPWR_EXPAND_PRE_CORRECT == 1)); then
-                if type -a $word &>/dev/null; then
+                if zpwrExpandIsCommand $word; then
                     #zpwrLogDebug "No correction from >= 2 words => '"'$word'"'_____ = ""'$word'"
                     # sudo/env pwd<space>
                     return
