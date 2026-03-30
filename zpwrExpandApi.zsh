@@ -258,7 +258,7 @@ function zpwrExpandParserFindCommandPosition() {
                 while (( pos <= $#words )); do
                     _zpwr_bare "$words[$pos]"
                     case $REPLY in
-                        -[dgtecxbpw]*)  (( pos++ )) ;;
+                        -[dgtecxbp]*)  (( pos++ )) ;;
                         -n)             (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
                         -n=*|-n[0-9]*) (( pos++ )) ;;
                         *)              break ;;
