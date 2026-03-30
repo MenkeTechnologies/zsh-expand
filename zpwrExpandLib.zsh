@@ -198,33 +198,6 @@ zpwrExpandTerminateSpace(){
     LBUFFER+=" "
 }
 
-function zpwrExpandNonFileExpansion(){
-    :
-    #DNS lookups
-    #type -a "$lastWord" &> /dev/null || {
-    #print -r -- $lastWord | command grep -qE \
-    #'^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}\.?$'\
-    #&& {
-    ##DNS lookup
-    #A_Record=$(host $lastWord) 2>/dev/null \
-    #&& {
-    #A_Record=$(print -r -- $A_Record | command grep ' address' | head -1 | awk '{print $4}')
-    #} || A_Record=bad
-    #[[ $A_Record != bad ]] && \
-    #LBUFFER="$(print -r -- "$LBUFFER" | sed -E "s@\\b$lastWord@$A_Record@g")"
-    #} || {
-    #print -r -- $lastWord | command grep -qE \
-    #'\b([0-9]{1,3}\.){3}[0-9]{1,3}\b' && {
-    ##reverse DNS lookup
-    #PTR_Record=$(nslookup $lastWord) 2>/dev/null && {
-    #PTR_Record=$(print -r -- $PTR_Record | command grep 'name = ' | tail -1 | awk '{print $4}')
-    #} || PTR_Record=bad
-    #[[ $PTR_Record != bad ]] && \
-    #LBUFFER="$(print -r -- "$LBUFFER" | sed -E "s@\\b$lastWord\\b@${PTR_Record:0:-1}@g")"
-    #}
-    #}
-    #}
-}
 
 function zpwrExpandRegexMatchOnCommandPosition() {
 
@@ -320,9 +293,6 @@ function zpwrExpandSupernaturalSpace() {
                     ZPWR_VARS[LAST_WORD_WAS_AT_COMMAND]=true
                     ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
                 fi
-            fi
-            if [[ ! -f "$ZPWR_VARS[lastword_lbuffer]" ]]; then
-                zpwrExpandNonFileExpansion
             fi
         fi
     fi
