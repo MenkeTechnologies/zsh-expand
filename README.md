@@ -624,6 +624,14 @@ Stress test scaling (Apple Silicon, full prefix chain per loop):
 
 The parser never fails -- it just gets slower on inputs no human would ever type. The bottleneck is zsh's `(z)` word splitter, not the parser itself. Normal command lines are under 1KB and expand in under 1ms.
 
+How deep can you actually chain? The parser handles all of it instantly -- the OS is the limit:
+
+| Command | Max depth | Limiting factor |
+|---|---|---|
+| `sudo sudo sudo ... gco` | ~512 | PTY allocation (`sudo` needs a pseudo-terminal for auth) |
+| `env env env ... gco` | ~50,000-100,000 | `ARG_MAX` (1MB kernel limit on `execve()` argument list) |
+| Parser (LBUFFER) | unlimited | Heap memory only -- no kernel limit on zsh's line editor |
+
 ---
 
 ### // TEST COVERAGE
