@@ -36,6 +36,12 @@ setopt rcquotes
 
 ZPWR_VARS[EXPAND_API]=${0:A:h}/zpwrExpandApi.zsh
 ZPWR_VARS[EXPAND_LIB]=${0:A:h}/zpwrExpandLib.zsh
+ZPWR_VARS[EXPAND_PARSER]=${0:A:h}/zpwrExpandParser.zsh
+
+if ! source $ZPWR_VARS[EXPAND_PARSER];then
+    echo "failed source ZPWR_VARS[EXPAND_PARSER] $ZPWR_VARS[EXPAND_PARSER]" >&2
+    return 1
+fi
 
 if ! source $ZPWR_VARS[EXPAND_API];then
     echo "failed source ZPWR_VARS[EXPAND_API] $ZPWR_VARS[EXPAND_API]" >&2
