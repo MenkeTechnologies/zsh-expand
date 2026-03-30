@@ -656,7 +656,7 @@
 }
 
 #==============================================================
-# new execvp wrappers: simple no-flag
+# new command wrappers: simple no-flag
 #==============================================================
 
 @test 'regex: pkexec' {
@@ -758,7 +758,7 @@
 }
 
 #==============================================================
-# new execvp wrappers: with flags
+# new command wrappers: with flags
 #==============================================================
 
 @test 'regex: watch -n 1' {
