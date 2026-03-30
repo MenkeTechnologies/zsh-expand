@@ -28,6 +28,8 @@ if ! (( $+ZPWR_TABSTOP )) || [[ ${parameters[ZPWR_TABSTOP]} != scalar-export ]];
     export ZPWR_TABSTOP=__________
 fi
 
+export ZPWR_EXPAND_SUFFIX=true
+
 autoload regexp-replace
 setopt extendedglob
 setopt rcquotes
