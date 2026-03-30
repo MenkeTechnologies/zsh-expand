@@ -338,9 +338,16 @@ External wrappers (execvp commands):
 | `runuser` | `-l` | `-u USER` `-g GRP` `-G GRP` | `runuser -u deploy gco` |
 | `unshare` | `-f -m -n -p -u -U -i -r -C` | `--` | `unshare -mn gco` |
 | `cpulimit` | — | `-l LIMIT` | `cpulimit -l 50 gco` |
+| `su` | `-f -l -m -p -P` | `-c CMD` `-s SHELL` `-g GRP` `-G GRP` `-w LIST` `--` | `su -l root gco` |
+| `stdbuf` | — | `-i MODE` `-o MODE` `-e MODE` | `stdbuf -oL gco` |
+| `sg` | — | — | `sg staff gco` |
+| `choom` | — | `-n ADJ` `-p PID` | `choom -n -1000 gco` |
+| `nsenter` | `-m -u -i -n -p -U -C -r -F -G` | `-t PID` `-S UID` | `nsenter -t 1 -m gco` |
+| `numactl` | `-i -H` | `-C CPUS` `-N NODES` `-m NODES` `-p PID` | `numactl -C 0,1 gco` |
+| `prlimit` | `-v` | `-p PID` `--RESOURCE=LIMIT` | `prlimit --nofile=1024 gco` |
 | `pkexec` `fakeroot` `unbuffer` `chronic` `valgrind` | — | — | `valgrind gco` |
 | `torify` `torsocks` `tsocks` `proxychains4` | — | — | `torify gco` |
-| `firejail` `daemonize` `sem` `systemd-run` | — | — | `firejail gco` |
+| `firejail` `daemonize` `sem` `systemd-run` `dbus-run-session` | — | — | `firejail gco` |
 
 All prefixes support `\escaped`, `'single-quoted'`, and `"double-quoted"` forms. `sudo`/`doas`/`env`/`nice`/`time`/`nohup`/`rlwrap` are case-insensitive. Variable assignments (`X=1`, `PATH=/usr/bin`) are stripped automatically at any position:
 

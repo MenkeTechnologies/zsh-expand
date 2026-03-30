@@ -2259,3 +2259,159 @@
     zpwrExpandParseWords "ls  ||  git"
     assert $ZPWR_VARS[firstword_partition] same_as 'git'
 }
+
+#==============================================================
+# su — switch user and exec
+#==============================================================
+
+@test 'su: su root gco lastword' {
+    zpwrExpandParseWords "su root gco"
+    assert $ZPWR_VARS[lastword_lbuffer] same_as 'gco'
+}
+
+@test 'su: su -l root gco lastword' {
+    zpwrExpandParseWords "su -l root gco"
+    assert $ZPWR_VARS[lastword_lbuffer] same_as 'gco'
+}
+
+@test 'su: su -flm root gco lastword' {
+    zpwrExpandParseWords "su -flm root gco"
+    assert $ZPWR_VARS[lastword_lbuffer] same_as 'gco'
+}
+
+@test 'su: su -c cmd root gco lastword' {
+    zpwrExpandParseWords "su -c cmd root gco"
+    assert $ZPWR_VARS[lastword_lbuffer] same_as 'gco'
+}
+
+@test 'su: su -s /bin/zsh -g wheel root gco lastword' {
+    zpwrExpandParseWords "su -s /bin/zsh -g wheel root gco"
+    assert $ZPWR_VARS[lastword_lbuffer] same_as 'gco'
+}
+
+@test 'su: su -- root gco lastword' {
+    zpwrExpandParseWords "su -- root gco"
+    assert $ZPWR_VARS[lastword_lbuffer] same_as 'gco'
+}
+
+@test 'su: sudo su root gco lastword' {
+    zpwrExpandParseWords "sudo su root gco"
+    assert $ZPWR_VARS[lastword_lbuffer] same_as 'gco'
+}
+
+#==============================================================
+# stdbuf — modify stream buffering
+#==============================================================
+
+@test 'stdbuf: stdbuf -oL gco lastword' {
+    zpwrExpandParseWords "stdbuf -oL gco"
+    assert $ZPWR_VARS[lastword_lbuffer] same_as 'gco'
+}
+
+@test 'stdbuf: stdbuf -i 0 -o L -e 0 gco lastword' {
+    zpwrExpandParseWords "stdbuf -i 0 -o L -e 0 gco"
+    assert $ZPWR_VARS[lastword_lbuffer] same_as 'gco'
+}
+
+@test 'stdbuf: stdbuf -o=L gco lastword' {
+    zpwrExpandParseWords "stdbuf -o=L gco"
+    assert $ZPWR_VARS[lastword_lbuffer] same_as 'gco'
+}
+
+#==============================================================
+# sg — run command with different group
+#==============================================================
+
+@test 'sg: sg staff gco lastword' {
+    zpwrExpandParseWords "sg staff gco"
+    assert $ZPWR_VARS[lastword_lbuffer] same_as 'gco'
+}
+
+#==============================================================
+# choom — adjust OOM score
+#==============================================================
+
+@test 'choom: choom -n -1000 gco lastword' {
+    zpwrExpandParseWords "choom -n -1000 gco"
+    assert $ZPWR_VARS[lastword_lbuffer] same_as 'gco'
+}
+
+@test 'choom: choom -n=-500 gco lastword' {
+    zpwrExpandParseWords "choom -n=-500 gco"
+    assert $ZPWR_VARS[lastword_lbuffer] same_as 'gco'
+}
+
+#==============================================================
+# nsenter — enter namespaces
+#==============================================================
+
+@test 'nsenter: nsenter -t 1 gco lastword' {
+    zpwrExpandParseWords "nsenter -t 1 gco"
+    assert $ZPWR_VARS[lastword_lbuffer] same_as 'gco'
+}
+
+@test 'nsenter: nsenter -muinpUCr gco lastword' {
+    zpwrExpandParseWords "nsenter -muinpUCr gco"
+    assert $ZPWR_VARS[lastword_lbuffer] same_as 'gco'
+}
+
+@test 'nsenter: nsenter -t 1 -m -u -i -n -p gco lastword' {
+    zpwrExpandParseWords "nsenter -t 1 -m -u -i -n -p gco"
+    assert $ZPWR_VARS[lastword_lbuffer] same_as 'gco'
+}
+
+#==============================================================
+# numactl — NUMA control
+#==============================================================
+
+@test 'numactl: numactl -C 0,1 -m 0 gco lastword' {
+    zpwrExpandParseWords "numactl -C 0,1 -m 0 gco"
+    assert $ZPWR_VARS[lastword_lbuffer] same_as 'gco'
+}
+
+@test 'numactl: numactl -i all gco lastword' {
+    zpwrExpandParseWords "numactl -i all gco"
+    assert $ZPWR_VARS[lastword_lbuffer] same_as 'gco'
+}
+
+#==============================================================
+# prlimit — resource limits
+#==============================================================
+
+@test 'prlimit: prlimit --nofile=1024 gco lastword' {
+    zpwrExpandParseWords "prlimit --nofile=1024 gco"
+    assert $ZPWR_VARS[lastword_lbuffer] same_as 'gco'
+}
+
+@test 'prlimit: prlimit -p 1234 gco lastword' {
+    zpwrExpandParseWords "prlimit -p 1234 gco"
+    assert $ZPWR_VARS[lastword_lbuffer] same_as 'gco'
+}
+
+#==============================================================
+# dbus-run-session
+#==============================================================
+
+@test 'dbus-run-session: dbus-run-session gco lastword' {
+    zpwrExpandParseWords "dbus-run-session gco"
+    assert $ZPWR_VARS[lastword_lbuffer] same_as 'gco'
+}
+
+#==============================================================
+# combined chains with new wrappers
+#==============================================================
+
+@test 'combined: sudo su root stdbuf -oL gco lastword' {
+    zpwrExpandParseWords "sudo su root stdbuf -oL gco"
+    assert $ZPWR_VARS[lastword_lbuffer] same_as 'gco'
+}
+
+@test 'combined: env FOO=bar su root nice -n 10 nohup gco lastword' {
+    zpwrExpandParseWords "env FOO=bar su root nice -n 10 nohup gco"
+    assert $ZPWR_VARS[lastword_lbuffer] same_as 'gco'
+}
+
+@test 'combined: nocorrect noglob su -l root nsenter -t 1 -m choom -n -500 gco lastword' {
+    zpwrExpandParseWords "nocorrect noglob su -l root nsenter -t 1 -m choom -n -500 gco"
+    assert $ZPWR_VARS[lastword_lbuffer] same_as 'gco'
+}
