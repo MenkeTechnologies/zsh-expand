@@ -33,16 +33,6 @@ function zpwrExpandParseWords(){
     tmp[-1]=${tmp[-1]//[\<\=\$]\(/;}
     # change ` to ; for word splitting
     tmp[-1]=${tmp[-1]:gs/\`/;/}
-    # allow expansion in ""
-    if [[ $ZPWR_EXPAND_QUOTE_DOUBLE == true ]]; then
-        tmp[-1]=${tmp[-1]:gs/\"//}
-    fi
-
-    # allow expansion in ''
-    if [[ $ZPWR_EXPAND_QUOTE_SINGLE == true ]]; then
-        tmp[-1]=${tmp[-1]:gs/\'//}
-    fi
-
     mywordsleft=( ${(Az)tmp} )
     #zpwrLogDebug "my words left = $mywordsleft"
 
@@ -74,6 +64,32 @@ function zpwrExpandParseWords(){
     done
 
     ZPWR_EXPAND_WORDS_LPARTITION=( $mywordsleft[$firstIndex,$#mywordsleft] )
+
+    # strip quotes from last word only in argument position (not command position)
+    # command position includes: first word, or word after sudo/env/builtin/etc prefixes
+    # cache the regex result for zpwrExpandRegexMatchOnCommandPosition to reuse
+    ZPWR_VARS[cachedRegexMatch]=""
+    ZPWR_VARS[cachedRegexMatched]=false
+    local -i isArgPosition=0
+    if (( $#ZPWR_EXPAND_WORDS_LPARTITION > 1 )); then
+        if [[ "$ZPWR_EXPAND_WORDS_LPARTITION" =~ "$ZPWR_VARS[continueFirstPositionRegexNoZpwr]" ]]; then
+            ZPWR_VARS[cachedRegexMatch]=${match[-1]}
+            ZPWR_VARS[cachedRegexMatched]=true
+            local -a tailWords=( ${(z)match[-1]} )
+            # >1 word after prefixes means last word is an argument
+            (( $#tailWords > 1 )) && isArgPosition=1
+        else
+            isArgPosition=1
+        fi
+    fi
+    if (( isArgPosition )); then
+        if [[ $ZPWR_EXPAND_QUOTE_DOUBLE == true ]]; then
+            ZPWR_EXPAND_WORDS_LPARTITION[-1]=${ZPWR_EXPAND_WORDS_LPARTITION[-1]:gs/\"//}
+        fi
+        if [[ $ZPWR_EXPAND_QUOTE_SINGLE == true ]]; then
+            ZPWR_EXPAND_WORDS_LPARTITION[-1]=${ZPWR_EXPAND_WORDS_LPARTITION[-1]:gs/\'//}
+        fi
+    fi
 
     #zpwrLogDebug "lpartition = '$ZPWR_EXPAND_WORDS_LPARTITION'"
 

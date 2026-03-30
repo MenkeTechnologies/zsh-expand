@@ -57,7 +57,7 @@ teh<space>  =>  the
 | **Tabstop Snippets** | Aliases with `$ZPWR_TABSTOP` placeholders act as templates -- cursor jumps to the placeholder on expansion |
 | **Self-Referential Alias Escape** | `alias git="hub"` expands to `\hub` -- backslash-escapes the first word to prevent infinite recursion |
 | **Correct-Then-Expand** | Typo correction chains into alias expansion in a single keypress -- `goc` -> `gco` -> `git checkout` |
-| **Quote-Aware Expansion** | Optionally expands aliases inside `"double"` or `'single'` quoted strings |
+| **Quote-Aware Expansion** | Optionally expands aliases inside `"double"` or `'single'` quoted strings in argument position (not command position) |
 | **Autopair Integration** | Detects [autopair](https://github.com/hlissner/zsh-autopair) and delegates space insertion to preserve bracket/quote auto-pairing |
 | **History Injection** | Optionally writes the fully-expanded form of your command into history |
 
@@ -226,7 +226,7 @@ The spelling corrector fires first, then the corrected word is re-checked for al
 
 ### // EXPAND INSIDE QUOTES
 
-Optionally expand aliases inside quoted strings:
+Optionally expand aliases inside quoted strings in argument position. Quoted words at command position are never expanded.
 
 ```sh
 export ZPWR_EXPAND_QUOTE_DOUBLE=true   # expand inside "double quotes"
@@ -234,7 +234,8 @@ export ZPWR_EXPAND_QUOTE_SINGLE=true   # expand inside 'single quotes'
 ```
 
 ```
-echo "gco<space>"  =>  echo "git checkout "
+echo "gco<space>"  =>  echo "git checkout "   (argument — expanded)
+"gco"<space>       =>  "gco"                  (command position — not expanded)
 ```
 
 ---
