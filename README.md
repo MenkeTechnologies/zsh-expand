@@ -30,6 +30,33 @@
 
 [![CI](https://github.com/MenkeTechnologies/zsh-expand/actions/workflows/ci.yml/badge.svg)](https://github.com/MenkeTechnologies/zsh-expand/actions/workflows/ci.yml)
 
+### // TABLE OF CONTENTS
+
+- [What Is This](#-what-is-this)
+- [Demo](#-demo)
+- [Neural Expansion Core](#-neural-expansion-core)
+- [Expansion Rules](#-expansion-rules)
+- [Supported Prefixes and Flags](#-supported-prefixes-and-flags)
+- [Bypass Protocols](#-bypass-protocols)
+- [Configuration Matrix](#-configuration-matrix)
+- [Key Bindings](#-key-bindings)
+- [Custom Corrections](#-custom-corrections)
+- [Versus the Competition](#-versus-the-competition)
+- [Tabstop Snippets](#-tabstop-snippets)
+- [Self-Referential Alias Escape](#-self-referential-alias-escape)
+- [Correct-Then-Expand](#-correct-then-expand)
+- [Expand Inside Quotes](#-expand-inside-quotes)
+- [Suffix Alias Expansion](#-suffix-alias-expansion)
+- [Autopair Integration](#-autopair-integration)
+- [History Injection](#-history-injection)
+- [Command-Position Parser](#-command-position-parser)
+- [Performance](#-performance)
+- [Test Coverage](#-test-coverage)
+- [Install](#-install)
+- [The Monster Chain](#-the-monster-chain)
+
+---
+
 ### // WHAT IS THIS
 
 **The world's most powerful zsh expansion plugin.** Intercepts your spacebar and expands everything in its path -- regular aliases, global aliases, suffix aliases, misspellings, globs, history, parameters, and more. No pipes. No external commands. Pure zsh. Sub-millisecond. 10,000+ tests.
