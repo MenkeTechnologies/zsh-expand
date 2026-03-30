@@ -289,6 +289,16 @@ export ZPWR_EXPAND_PRE_EXEC_NATIVE=true
 
 Source files can be compiled to `.zwc` bytecode for instant loading (`zcompile` or via your plugin manager). The plugin uses zero external commands -- no `sed`, `awk`, `grep`, or subshells. Every expansion runs in pure zsh builtins and parameter expansion, keeping latency invisible on every keypress.
 
+Benchmarks (Apple Silicon, 10,000 iterations):
+
+| Scenario | Per call |
+|---|---|
+| `file.txt` (suffix alias) | ~175 µs |
+| `sudo file.txt` (prefix + suffix) | ~190 µs |
+| `gco` (regular alias) | ~284 µs |
+
+Human perception threshold is ~100ms -- these are 350-570x below that.
+
 ---
 
 ### // TEST COVERAGE
