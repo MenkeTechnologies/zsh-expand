@@ -224,6 +224,16 @@ function zpwrExpandNonFileExpansion(){
 
 function zpwrExpandRegexMatchOnCommandPosition() {
 
+    # reuse cached regex result from zpwrExpandParseWords when available
+    if [[ $ZPWR_VARS[cachedRegexMatched] == true ]]; then
+        if [[ $1 == "correct" ]]; then
+            ZPWR_EXPAND_PRE_CORRECT=("${(z)ZPWR_VARS[cachedRegexMatch]}")
+        else
+            ZPWR_EXPAND_PRE_EXPAND=("${(z)ZPWR_VARS[cachedRegexMatch]}")
+        fi
+        return 0
+    fi
+
     if [[ "$ZPWR_EXPAND_WORDS_LPARTITION" =~ "$ZPWR_VARS[continueFirstPositionRegexNoZpwr]" ]];then
         if [[ $1 == "correct" ]]; then
             ZPWR_EXPAND_PRE_CORRECT=("${(z)match[-1]}")

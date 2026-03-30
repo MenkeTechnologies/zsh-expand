@@ -246,11 +246,10 @@
 # ZPWR_EXPAND_QUOTE_DOUBLE
 #==============================================================
 
-@test 'config: ZPWR_EXPAND_QUOTE_DOUBLE=true strips double quotes in parseWords' {
+@test 'config: ZPWR_EXPAND_QUOTE_DOUBLE=true preserves quotes at command position' {
     ZPWR_EXPAND_QUOTE_DOUBLE=true
     zpwrExpandParseWords '"git"'
-    assert $ZPWR_VARS[lastword_lbuffer] same_as 'git'
-    ZPWR_EXPAND_QUOTE_DOUBLE=true
+    assert $ZPWR_VARS[lastword_lbuffer] same_as '"git"'
 }
 
 @test 'config: ZPWR_EXPAND_QUOTE_DOUBLE=false preserves double quotes in parseWords' {
@@ -275,11 +274,10 @@
 # ZPWR_EXPAND_QUOTE_SINGLE
 #==============================================================
 
-@test 'config: ZPWR_EXPAND_QUOTE_SINGLE=true strips single quotes in parseWords' {
+@test 'config: ZPWR_EXPAND_QUOTE_SINGLE=true preserves quotes at command position' {
     ZPWR_EXPAND_QUOTE_SINGLE=true
     zpwrExpandParseWords "'git'"
-    assert $ZPWR_VARS[lastword_lbuffer] same_as 'git'
-    ZPWR_EXPAND_QUOTE_SINGLE=true
+    assert $ZPWR_VARS[lastword_lbuffer] same_as "'git'"
 }
 
 @test 'config: ZPWR_EXPAND_QUOTE_SINGLE=false preserves single quotes in parseWords' {
@@ -289,16 +287,28 @@
     ZPWR_EXPAND_QUOTE_SINGLE=true
 }
 
-@test 'config: ZPWR_EXPAND_QUOTE_DOUBLE=true multi-word' {
+@test 'config: ZPWR_EXPAND_QUOTE_DOUBLE=true preserves quotes at command position after sudo' {
     ZPWR_EXPAND_QUOTE_DOUBLE=true
     zpwrExpandParseWords 'sudo "git"'
-    assert $ZPWR_VARS[lastword_lbuffer] same_as 'git'
+    assert $ZPWR_VARS[lastword_lbuffer] same_as '"git"'
 }
 
-@test 'config: ZPWR_EXPAND_QUOTE_SINGLE=true multi-word' {
+@test 'config: ZPWR_EXPAND_QUOTE_SINGLE=true preserves quotes at command position after sudo' {
     ZPWR_EXPAND_QUOTE_SINGLE=true
     zpwrExpandParseWords "sudo 'git'"
-    assert $ZPWR_VARS[lastword_lbuffer] same_as 'git'
+    assert $ZPWR_VARS[lastword_lbuffer] same_as "'git'"
+}
+
+@test 'config: ZPWR_EXPAND_QUOTE_DOUBLE=true strips quotes in argument position' {
+    ZPWR_EXPAND_QUOTE_DOUBLE=true
+    zpwrExpandParseWords 'echo "hello"'
+    assert $ZPWR_VARS[lastword_lbuffer] same_as 'hello'
+}
+
+@test 'config: ZPWR_EXPAND_QUOTE_SINGLE=true strips quotes in argument position' {
+    ZPWR_EXPAND_QUOTE_SINGLE=true
+    zpwrExpandParseWords "echo 'hello'"
+    assert $ZPWR_VARS[lastword_lbuffer] same_as 'hello'
 }
 
 #==============================================================
