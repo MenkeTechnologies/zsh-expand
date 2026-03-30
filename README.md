@@ -32,7 +32,7 @@
 
 ### // WHAT IS THIS
 
-A high-voltage **zsh plugin** that intercepts your spacebar and **expands** everything in its path -- regular aliases, global aliases, misspellings, globs, history, parameters, and more. No pipes. No external commands. Pure zsh. Maximum speed.
+**The world's most powerful zsh expansion plugin.** Intercepts your spacebar and expands everything in its path -- regular aliases, global aliases, suffix aliases, misspellings, globs, history, parameters, and more. No pipes. No external commands. Pure zsh. Sub-millisecond. 9,300+ tests.
 
 ```
 gco<space>  =>  git checkout
