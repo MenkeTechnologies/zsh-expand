@@ -132,7 +132,6 @@ export ZPWR_EXPAND_BLACKLIST=(g gco)      # aliases to never expand
 |---|---|
 | `Space` | Supernatural expand + insert space |
 | `Ctrl+Space` | Insert literal space (bypass) |
-| `Esc Ctrl+E` | Expand all global aliases on line |
 
 ---
 
