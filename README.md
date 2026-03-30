@@ -70,7 +70,7 @@ teh<space>  =>  the
 COMMAND POSITION
   alias in first word position         => expanded
   alias after sudo/env/builtin/etc     => expanded (case-insensitive: SUDO, Sudo, sUdO — works on macOS/Windows)
-  word is a real command/function       => NOT expanded (no clobbering)
+  word is a real command/function       => NOT corrected (valid commands are left alone)
 
 GLOBAL
   global alias anywhere on line         => expanded
@@ -167,7 +167,7 @@ The key is the correct word, the value is a space-separated list of misspellings
 | Expands after `sudo`/`env`/`builtin` combos | **yes** | no | no | no |
 | Spelling correction (300+ built-in) | **yes** | no | no | no |
 | User-extensible corrections | **yes** | no | no | no |
-| Clobber protection | **yes** | n/a | no | no |
+| No correction of valid commands | **yes** | n/a | no | no |
 | Glob / history / param expansion | **yes** | no | no | yes |
 | Suffix alias expansion | **yes** | no | no | no |
 | Tabstop snippets (cursor placement) | **yes** | no | no | no |
