@@ -187,3 +187,28 @@
     zpwrExpandSuffixAlias
     assert $LBUFFER same_as 'builtin command sudo -E env vim file.txt'
 }
+
+#==============================================================
+# suffix alias with tabstop
+#==============================================================
+
+@test 'suffix: tabstop in suffix alias value moves cursor' {
+    alias -s md="vim ${ZPWR_TABSTOP}"
+    LBUFFER="readme.md"
+    ZPWR_VARS[WAS_EXPANDED]=false
+    ZPWR_VARS[NEED_TO_ADD_SPACECHAR]=true
+    zpwrExpandParseWords "$LBUFFER"
+    zpwrExpandSuffixAlias
+    assert $ZPWR_VARS[NEED_TO_ADD_SPACECHAR] same_as 'false'
+    assert $ZPWR_VARS[WAS_EXPANDED] same_as 'true'
+}
+
+@test 'suffix: no tabstop in suffix alias keeps NEED_TO_ADD_SPACECHAR true' {
+    LBUFFER="file.txt"
+    ZPWR_VARS[WAS_EXPANDED]=false
+    ZPWR_VARS[NEED_TO_ADD_SPACECHAR]=true
+    zpwrExpandParseWords "$LBUFFER"
+    zpwrExpandSuffixAlias
+    assert $ZPWR_VARS[NEED_TO_ADD_SPACECHAR] same_as 'true'
+    assert $ZPWR_VARS[WAS_EXPANDED] same_as 'true'
+}
