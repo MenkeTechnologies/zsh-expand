@@ -70,251 +70,6 @@ torify sudo -kE -u root su -l deploy                         \
 
 ---
 
-### // THE MONSTER CHAIN
-
-No other expansion plugin can do this. 12 shell builtin permutations up front, then every one of the 62 command wrapper commands duplicated with different flag combos. `strace` with all 41 flags and `ltrace` with all 25 flags. Variable assignments scattered everywhere. Shell builtins come first (they only exist inside zsh), then command wrappers chain freely. The parser consumes the entire prefix and `gco` expands to `git checkout`:
-
-```
-nocorrect time -p command -p builtin eval noglob coproc       \
-  exec -cl -a p1                                              \
-  nocorrect builtin eval noglob coproc time -l command -p     \
-  nocorrect noglob builtin eval coproc time -v command        \
-  builtin nocorrect eval noglob coproc                        \
-  eval nocorrect noglob builtin coproc                        \
-  noglob nocorrect builtin eval coproc time -p command -p     \
-  exec -c -a p2 builtin eval nocorrect noglob coproc          \
-  coproc nocorrect noglob builtin eval time -l command -p     \
-  builtin eval nocorrect noglob coproc time -v command -p     \
-  eval noglob nocorrect builtin coproc                        \
-  noglob coproc nocorrect builtin eval time -p command        \
-  nocorrect eval noglob builtin coproc                        \
-  torify -v sudo -elNVvkE -D /chdir -U other -u root          \
-    su -flmpPT -c cmd deploy                                  \
-    env -a argv0 -0iv -C /tmp VAR1=a VAR2=b                   \
-  doas -Lns -u ops env FOO=bar BAZ=qux LANG=C                \
-  sudo -ABbEHiKkNnPS -g wheel -h h1 -p pw -R /ch -D /d1     \
-    -T 60 -U deploy -u admin                                  \
-  su -flmT root env -i HOME=/r1 PATH=/b1 TERM=x1             \
-  doas -s -C /etc/d1 env -u DISPLAY TERM=xterm-256           \
-  sudo -kKi -u nobody env -v -C /var CC=gcc CFLAGS=-O2       \
-  sudo -kE -u daemon env -0i -C /opt RUST_LOG=debug          \
-  doas -Ln -u _www env -i SHELL=/bin/zsh EDITOR=vim           \
-  torsocks -diq6 -a 127.0.0.1 -P 9050 -u tor -p pass         \
-    sudo -kE -u test env -i GOPATH=/go                        \
-  proxychains4 -q -f /etc/pc.conf                             \
-  su -s /bin/zsh -g staff root stdbuf -i 0 -o L -e 0         \
-  nice -n 10 -- nohup -- nice -n 5 nohup nice -n 1 nohup     \
-  nice -n 19 nohup nice -n 15 nohup nice -n 12 nohup         \
-  rlwrap -acEhiImnNoRrUvWX -b x -C name -D 2 -e ch           \
-    -f /d1 -g pat -H /h1 -l log -M ext -O re -P inp          \
-    -p red -q ch -s 500 -S p1 -t term -w 50 -z filt --       \
-  timeout -fpv -k 5 -s TERM 30                                \
-  strace -AcCdDfFhiknNqrtTvVwxyYzZ -a 80 -b execve           \
-    -e trace=network -E LD -I 1 -o /t1 -O 50 -p 1 -P /proc  \
-    -s 256 -S time -u strace -U 80 -X raw --                  \
-  ltrace -bcCfhiLrStTV -a 60 -A 10 -D 0xff -e malloc          \
-    -F /etc/ltrace.conf -l libfoo -n 2 -o /t2 -p 2           \
-    -s 128 -u ltrace -w 3 -x dlopen --                        \
-  ionice -t -c 2 -n 7 -- caffeinate -dimsu -t 60 -w 1234     \
-  setsid -cfw -- chrt -adepRv -D 1000 -P 2000 -T 500 -f 10  \
-  taskset -acp 0-3 --                                         \
-  watch -bdCcefgprtwx -n 2 -q 5 -s /shots --                  \
-  nsenter -aceiFmnpruUCTwWZ -t 1 -S 0 -G 0 -N 3 --           \
-  numactl -absHl -C 0-3 -i all -m 0 -N 0 -p 1 -w 0 -P 1     \
-  choom -n -500 -- sg staff                                   \
-  flock -eFnosux -c cmd -w 10 -E 2 /tmp/lk1 chroot -- /nr1   \
-  runuser -fmlpPT -c cmd -g staff -s /bin/bash -G docker      \
-    -u deploy -w 1,2 --                                       \
-  unshare -cfmnpuUirCT -R /root -w /wd -S 1000 -G 1000       \
-    -l /tmp/ns --                                             \
-  prlimit --nofile=4096 -o RES -p 1234                        \
-  cpulimit -viz -e myapp -p 1234 -l 50 --                     \
-  setpriv --reuid=1000 --regid=1000 --clear-groups --         \
-  setarch i386 -vhV3BFILRSTXZ -p 1234 --                      \
-  pkexec -u admin --keep-cwd --disable-internal-agent         \
-  fakeroot -huv -b 10 -i /tmp/save -l /usr/lib/fk.so          \
-    -s /tmp/save --                                           \
-  unbuffer -p chronic -ev --                                   \
-  valgrind -dhqsv --tool=memcheck --log-file=/tmp/vg --       \
-  daemonize -av -c /tmp -e /var/log/err -E FOO=bar            \
-    -l /tmp/lock -o /var/log/out -p /var/run/pid -u www --    \
-  firejail -c cmd --private --net=none --                      \
-  sem -j 4 -P 8 --                                            \
-  systemd-run -dGhPqrRSTtv -C cap -E VAR=val -H host          \
-    -M mach -p prop -u unit --                                \
-  nocache -n 2 --                                              \
-  fakechroot -hsv -b /base -c /cfg -d /ld -e env -l /lib --  \
-  ccache -cChpsvVxz -d /cache -F 1000 -k key -M 5G            \
-    -o opt=val -X 80                                          \
-  distcc -j                                                   \
-  dbus-launch --exit-with-session --config-file=foo.conf --   \
-  dbus-run-session --config-file /etc/dbus.conf --             \
-  torify tsocks catchsegv eatmydata --                         \
-  sudo -kE -u www su root stdbuf -oL --                        \
-    env -a arg -0i -C /v2 PATH=/b2 GOPATH=/go                 \
-  doas -Lns -u _httpd                                         \
-  nice -n 8 -- nohup -- nice -n 3 nohup                       \
-  rlwrap -acEiINoRrUvWX -f /d2 -s 1000 -b y -H /h2           \
-    -p blue -S p2 -C n2 -D 1 -z f2 --                        \
-  timeout -fpv -k 10 -s KILL 60                                \
-  strace -ANnw -e trace=file -s 512 -o /t3 -X raw            \
-  ltrace -L -l libbar -A 5 -n 1 -w 2 -e open -s 64           \
-    -a 40 -o /t4                                              \
-  ionice -t -c 1 -n 3 -- caffeinate -im -t 120                \
-  setsid -f -- chrt -adepRv -r 20 taskset -acp 0-7 --        \
-  watch -bdCcefgprtwx -n 5 -q 3 -s /d2 --                     \
-  nsenter -aceZTwW -t 2 -S 1 -G 1 -N 4 --                     \
-  numactl -absH -i all -w 1 -P 2 choom -n -1000 --            \
-  flock -eFnox -c cmd2 -w 3 -E 3 /tmp/lk2 chroot -- /nr2     \
-  runuser -fmpPT -u op -c cmd2 -g sys -s /bin/zsh -w 3 --    \
-  unshare -cfmnpuUirCT -R /nr -S 500 -G 500 -l /ns --        \
-  prlimit --nproc=512 -o COL -p 5678                          \
-  cpulimit -viz -e app2 -p 5678 -l 75 --                      \
-  pkexec -u op --keep-cwd                                      \
-  fakeroot -u -s /tmp/s2 --                                    \
-  unbuffer -p chronic -v --                                    \
-  valgrind -qv --tool=callgrind --                             \
-  daemonize -v -c /srv -u op --                                \
-  firejail --private --                                        \
-  sem -j 2 -- systemd-run -dGqt -u u2 -p p2 --                \
-  nocache -n 1 -- fakechroot -s -l /lib2 --                    \
-  ccache distcc dbus-launch --exit-with-x11 --                 \
-  dbus-run-session -- torify tsocks catchsegv eatmydata --     \
-  sudo -kE -u root su root stdbuf -o 0 --                      \
-    env -a a2 -0iv -C /final VAR=last FINAL=yes                \
-  doas -Ln -u root                                             \
-  nice -n 0 -- nohup -- time -v gco<space>
-  =>  ...git checkout
-```
-
-Scales to 96,000+ tokens (468KB) and beyond. `ARG_MAX` only matters at `execve()` time -- zsh's line editor is just a string in memory with no kernel limit. Try that with a regex.
-
-And if you want one that looks like it was written by someone who should be institutionalized -- triple-proxied through tor, user-switched twice, namespace-entered, NUMA-pinned, OOM-adjusted, stream-buffered, resource-limited, traced at the syscall AND library level with every flag maxed, CPU limited to 1%, real-time priority 99, pinned to 64 cores, locked, chrooted, jailed, namespaced, sandboxed, daemonized, caffeinated for 24 hours:
-
-```
-nocorrect noglob builtin eval coproc time -p command -p       \
-  exec -cl -a BEAST                                           \
-  nocorrect builtin eval noglob coproc time -v command        \
-  eval nocorrect noglob builtin coproc                        \
-  torify                                                      \
-  sudo -kKEHnPS -g wheel -h fortress -p "password is gco"    \
-    -R /dungeon -r overlord -T 9999 -t unconfined_t -u root  \
-  su -l deploy                                                \
-  env -0iv -C /dev/null                                       \
-    DOOM=eternal FEAR=none PATH=/usr/games LANG=chaos         \
-    CC=gcc CXX=g++ CFLAGS=-O666 LDFLAGS=-lmadness            \
-    RUST_LOG=trace GOPATH=/void NODE_ENV=destruction           \
-    EDITOR=ed VISUAL=ed PAGER=cat SHELL=/bin/zsh              \
-  doas -Ls -C /etc/doas.d/monster -u _chaos                   \
-  torsocks -diq6 -a 127.0.0.1 -P 9050 -u tor -p chaos        \
-  sudo -kE -u daemon su -T root env -i                        \
-    MALLOC_CHECK_=3 LD_PRELOAD=/lib/libevil.so                \
-    ASAN_OPTIONS=detect_leaks=1                               \
-    UBSAN_OPTIONS=print_stacktrace=1                          \
-  proxychains4 -q -f /etc/proxychains.conf                    \
-  stdbuf -i 0 -o L -e 0 --                                    \
-  nice -n -20 -- nohup -- nice -n 19 nohup                    \
-  nice -n 0 nohup                                             \
-  strace -AcCdDfFhiknNqrtTvVwxyYzZ                            \
-    -a 132 -b execve -e trace=all                             \
-    -E LD_LIBRARY_PATH -I 1                                   \
-    -o /tmp/strace.nightmare.log -O 999                       \
-    -p 1 -P /proc/self/exe                                    \
-    -s 1048576 -S calls                                       \
-    -u strace -U 132 -X raw --                                \
-  ltrace -bcCfhiLrStTV                                        \
-    -a 132 -A 999 -D 0xff -e '*'                              \
-    -F /etc/ltrace.conf -l libc                               \
-    -n 4 -o /tmp/ltrace.abyss.log                             \
-    -p 1 -s 1048576 -u ltrace -w 8 -x dlopen --               \
-  ionice -c 1 -n 0 --                                         \
-  caffeinate -dimsu -t 86400 -w 1                             \
-  setsid -cfw --                                              \
-  chrt -adepRv -D 1000 -P 2000 -T 500 -f 99                  \
-  taskset -acp 0-63 --                                        \
-  nsenter -aceiFmnpruUCTwWZ -t 1 -S 0 -G 0 -N 3 --           \
-  numactl -absHl -C 0-63 -i all -m all -N 0 -p 1 -w 0 -P 1  \
-  choom -n -1000 --                                           \
-  sg nogroup                                                  \
-  watch -bdCcefgprtwx -n 1 -q 10 -s /dir --                   \
-  flock -eFnosux -c cmd -w 3600 -E 42 /tmp/lock.of.ages --   \
-  chroot -- /newroot/of/all/evil                              \
-  runuser -fmlpPT -c cmd -g nogroup -s /bin/sh -G wheel       \
-    -u nobody -w 1,2 --                                       \
-  unshare -cfmnpuUirCT -R /root -w /wd -S 0 -G 0 -l /ns --  \
-  prlimit --nofile=1048576 --nproc=unlimited -o RES -p 1      \
-  cpulimit -viz -e doom -p 1 -l 1 --                          \
-  setpriv --reuid=0 --regid=0 --clear-groups --               \
-  setarch x86_64 -vhV3BFILRSTXZ -p 1 --                       \
-  rlwrap -acEhiImnNoRrUvWX                                    \
-    -b '(){}[]<>' -C BEAST -D 2 -e ch                         \
-    -f /usr/share/dict/words -g pat                           \
-    -H /tmp/history.of.madness -l /tmp/rl.log                 \
-    -M ext -O re -P inp -p magenta -q ch                      \
-    -s 999999 -S 'MONSTER> ' -t term -w 50 -z filt --         \
-  timeout -fpv -k 1 -s KILL 86400                             \
-  pkexec -u admin --keep-cwd --disable-internal-agent         \
-  fakeroot -huv -b 10 -i /tmp/save -l /usr/lib/fk.so          \
-    -s /tmp/save --                                           \
-  unbuffer -p chronic -ev --                                   \
-  valgrind -dhqsv --tool=memcheck --log-file=/tmp/vg --       \
-  daemonize -av -c /tmp -e /var/log/err -E FOO=bar            \
-    -l /tmp/lock -o /var/log/out -p /var/run/pid -u www --    \
-  firejail -c cmd --private --net=none --                      \
-  sem -j 4 -P 8 --                                            \
-  systemd-run -dGhPqrRSTtv -C cap -E VAR=val -H host          \
-    -M mach -p prop -u unit --                                \
-  nocache -n 2 --                                              \
-  fakechroot -hsv -b /base -c /cfg -d /ld -e env -l /lib --  \
-  ccache -cChpsvVxz -d /cache -F 1000 -k key -M 5G            \
-    -o opt=val -X 80                                          \
-  distcc -j                                                   \
-  dbus-launch --exit-with-session --config-file=db.conf --    \
-  dbus-run-session --config-file /etc/dbus.conf --             \
-  torify tsocks catchsegv eatmydata --                         \
-  sudo -kE -u www-data su -lT app stdbuf -oL --               \
-    env -a arg -0iv -C /srv                                    \
-    DATABASE_URL=postgres://doom:fire@localhost/inferno        \
-    REDIS_URL=redis://localhost:6379/0                         \
-    SECRET_KEY=hunter2 API_KEY=sk-AAAA                        \
-  doas -Ln -u _deploy                                         \
-  nice -n -10 -- nohup --                                      \
-  strace -ANnwcfkqrTvV -e trace=network -s 4096               \
-    -o /tmp/net.log -X raw                                    \
-  ltrace -bcCfhiLrStTV -l libssl -A 5 -n 1 -w 2               \
-    -e 'ssl_*' -s 4096 -o /tmp/ssl.log                        \
-  ionice -t -c 2 -n 7 --                                      \
-  caffeinate -im -t 3600                                      \
-  setsid -f --                                                \
-  chrt -adepRv -r 50                                          \
-  taskset -acp 0 --                                            \
-  nsenter -aceZTwW -t 2 -S 1 -G 1 -N 4 --                     \
-  numactl -absH -i all -w 1 -P 2 choom -n 500 --              \
-  flock -eFx -c cmd -w 60 -E 1 /tmp/final.lock --             \
-  chroot -- /srv/jail                                         \
-  runuser -fmpPT -u app -c cmd -g app -s /bin/zsh -w 1 --    \
-  unshare -cfmnpuUirCT -R /jail -S 500 -G 500 -l /ns --      \
-  prlimit --memlock=unlimited -o COL -p 2                     \
-  cpulimit -viz -e app -p 2 -l 100 --                          \
-  pkexec -u root --keep-cwd                                    \
-  fakeroot -u -s /tmp/s2 --                                    \
-  unbuffer -p chronic -v --                                    \
-  valgrind -qv --tool=callgrind --                             \
-  daemonize -v -c /srv -u root --                              \
-  firejail --private --                                        \
-  sem -j 2 -- systemd-run -dGqt -u u2 -p p2 --                \
-  nocache -n 1 -- fakechroot -s -l /lib2 --                    \
-  ccache distcc dbus-launch --exit-with-x11 --                 \
-  dbus-run-session -- torify tsocks eatmydata --               \
-  sudo -kE -u root su root stdbuf -o 0 --                      \
-    env -a a2 -i PATH=/usr/bin LAST_WORDS=goodbye              \
-  doas -Ln -u root                                             \
-  nice -n 0 -- nohup -- time -v gco<space>
-  =>  ...git checkout
-```
-
----
-
 ### // NEURAL EXPANSION CORE
 
 | Layer | What It Does |
@@ -762,4 +517,248 @@ Source `zsh-expand.plugin.zsh` in `~/.zshrc`.
 
 ---
 
+### // THE MONSTER CHAIN
+
+No other expansion plugin can do this. 12 shell builtin permutations up front, then every one of the 62 command wrapper commands duplicated with different flag combos. `strace` with all 41 flags and `ltrace` with all 25 flags. Variable assignments scattered everywhere. Shell builtins come first (they only exist inside zsh), then command wrappers chain freely. The parser consumes the entire prefix and `gco` expands to `git checkout`:
+
+```
+nocorrect time -p command -p builtin eval noglob coproc       \
+  exec -cl -a p1                                              \
+  nocorrect builtin eval noglob coproc time -l command -p     \
+  nocorrect noglob builtin eval coproc time -v command        \
+  builtin nocorrect eval noglob coproc                        \
+  eval nocorrect noglob builtin coproc                        \
+  noglob nocorrect builtin eval coproc time -p command -p     \
+  exec -c -a p2 builtin eval nocorrect noglob coproc          \
+  coproc nocorrect noglob builtin eval time -l command -p     \
+  builtin eval nocorrect noglob coproc time -v command -p     \
+  eval noglob nocorrect builtin coproc                        \
+  noglob coproc nocorrect builtin eval time -p command        \
+  nocorrect eval noglob builtin coproc                        \
+  torify -v sudo -elNVvkE -D /chdir -U other -u root          \
+    su -flmpPT -c cmd deploy                                  \
+    env -a argv0 -0iv -C /tmp VAR1=a VAR2=b                   \
+  doas -Lns -u ops env FOO=bar BAZ=qux LANG=C                \
+  sudo -ABbEHiKkNnPS -g wheel -h h1 -p pw -R /ch -D /d1     \
+    -T 60 -U deploy -u admin                                  \
+  su -flmT root env -i HOME=/r1 PATH=/b1 TERM=x1             \
+  doas -s -C /etc/d1 env -u DISPLAY TERM=xterm-256           \
+  sudo -kKi -u nobody env -v -C /var CC=gcc CFLAGS=-O2       \
+  sudo -kE -u daemon env -0i -C /opt RUST_LOG=debug          \
+  doas -Ln -u _www env -i SHELL=/bin/zsh EDITOR=vim           \
+  torsocks -diq6 -a 127.0.0.1 -P 9050 -u tor -p pass         \
+    sudo -kE -u test env -i GOPATH=/go                        \
+  proxychains4 -q -f /etc/pc.conf                             \
+  su -s /bin/zsh -g staff root stdbuf -i 0 -o L -e 0         \
+  nice -n 10 -- nohup -- nice -n 5 nohup nice -n 1 nohup     \
+  nice -n 19 nohup nice -n 15 nohup nice -n 12 nohup         \
+  rlwrap -acEhiImnNoRrUvWX -b x -C name -D 2 -e ch           \
+    -f /d1 -g pat -H /h1 -l log -M ext -O re -P inp          \
+    -p red -q ch -s 500 -S p1 -t term -w 50 -z filt --       \
+  timeout -fpv -k 5 -s TERM 30                                \
+  strace -AcCdDfFhiknNqrtTvVwxyYzZ -a 80 -b execve           \
+    -e trace=network -E LD -I 1 -o /t1 -O 50 -p 1 -P /proc  \
+    -s 256 -S time -u strace -U 80 -X raw --                  \
+  ltrace -bcCfhiLrStTV -a 60 -A 10 -D 0xff -e malloc          \
+    -F /etc/ltrace.conf -l libfoo -n 2 -o /t2 -p 2           \
+    -s 128 -u ltrace -w 3 -x dlopen --                        \
+  ionice -t -c 2 -n 7 -- caffeinate -dimsu -t 60 -w 1234     \
+  setsid -cfw -- chrt -adepRv -D 1000 -P 2000 -T 500 -f 10  \
+  taskset -acp 0-3 --                                         \
+  watch -bdCcefgprtwx -n 2 -q 5 -s /shots --                  \
+  nsenter -aceiFmnpruUCTwWZ -t 1 -S 0 -G 0 -N 3 --           \
+  numactl -absHl -C 0-3 -i all -m 0 -N 0 -p 1 -w 0 -P 1     \
+  choom -n -500 -- sg staff                                   \
+  flock -eFnosux -c cmd -w 10 -E 2 /tmp/lk1 chroot -- /nr1   \
+  runuser -fmlpPT -c cmd -g staff -s /bin/bash -G docker      \
+    -u deploy -w 1,2 --                                       \
+  unshare -cfmnpuUirCT -R /root -w /wd -S 1000 -G 1000       \
+    -l /tmp/ns --                                             \
+  prlimit --nofile=4096 -o RES -p 1234                        \
+  cpulimit -viz -e myapp -p 1234 -l 50 --                     \
+  setpriv --reuid=1000 --regid=1000 --clear-groups --         \
+  setarch i386 -vhV3BFILRSTXZ -p 1234 --                      \
+  pkexec -u admin --keep-cwd --disable-internal-agent         \
+  fakeroot -huv -b 10 -i /tmp/save -l /usr/lib/fk.so          \
+    -s /tmp/save --                                           \
+  unbuffer -p chronic -ev --                                   \
+  valgrind -dhqsv --tool=memcheck --log-file=/tmp/vg --       \
+  daemonize -av -c /tmp -e /var/log/err -E FOO=bar            \
+    -l /tmp/lock -o /var/log/out -p /var/run/pid -u www --    \
+  firejail -c cmd --private --net=none --                      \
+  sem -j 4 -P 8 --                                            \
+  systemd-run -dGhPqrRSTtv -C cap -E VAR=val -H host          \
+    -M mach -p prop -u unit --                                \
+  nocache -n 2 --                                              \
+  fakechroot -hsv -b /base -c /cfg -d /ld -e env -l /lib --  \
+  ccache -cChpsvVxz -d /cache -F 1000 -k key -M 5G            \
+    -o opt=val -X 80                                          \
+  distcc -j                                                   \
+  dbus-launch --exit-with-session --config-file=foo.conf --   \
+  dbus-run-session --config-file /etc/dbus.conf --             \
+  torify tsocks catchsegv eatmydata --                         \
+  sudo -kE -u www su root stdbuf -oL --                        \
+    env -a arg -0i -C /v2 PATH=/b2 GOPATH=/go                 \
+  doas -Lns -u _httpd                                         \
+  nice -n 8 -- nohup -- nice -n 3 nohup                       \
+  rlwrap -acEiINoRrUvWX -f /d2 -s 1000 -b y -H /h2           \
+    -p blue -S p2 -C n2 -D 1 -z f2 --                        \
+  timeout -fpv -k 10 -s KILL 60                                \
+  strace -ANnw -e trace=file -s 512 -o /t3 -X raw            \
+  ltrace -L -l libbar -A 5 -n 1 -w 2 -e open -s 64           \
+    -a 40 -o /t4                                              \
+  ionice -t -c 1 -n 3 -- caffeinate -im -t 120                \
+  setsid -f -- chrt -adepRv -r 20 taskset -acp 0-7 --        \
+  watch -bdCcefgprtwx -n 5 -q 3 -s /d2 --                     \
+  nsenter -aceZTwW -t 2 -S 1 -G 1 -N 4 --                     \
+  numactl -absH -i all -w 1 -P 2 choom -n -1000 --            \
+  flock -eFnox -c cmd2 -w 3 -E 3 /tmp/lk2 chroot -- /nr2     \
+  runuser -fmpPT -u op -c cmd2 -g sys -s /bin/zsh -w 3 --    \
+  unshare -cfmnpuUirCT -R /nr -S 500 -G 500 -l /ns --        \
+  prlimit --nproc=512 -o COL -p 5678                          \
+  cpulimit -viz -e app2 -p 5678 -l 75 --                      \
+  pkexec -u op --keep-cwd                                      \
+  fakeroot -u -s /tmp/s2 --                                    \
+  unbuffer -p chronic -v --                                    \
+  valgrind -qv --tool=callgrind --                             \
+  daemonize -v -c /srv -u op --                                \
+  firejail --private --                                        \
+  sem -j 2 -- systemd-run -dGqt -u u2 -p p2 --                \
+  nocache -n 1 -- fakechroot -s -l /lib2 --                    \
+  ccache distcc dbus-launch --exit-with-x11 --                 \
+  dbus-run-session -- torify tsocks catchsegv eatmydata --     \
+  sudo -kE -u root su root stdbuf -o 0 --                      \
+    env -a a2 -0iv -C /final VAR=last FINAL=yes                \
+  doas -Ln -u root                                             \
+  nice -n 0 -- nohup -- time -v gco<space>
+  =>  ...git checkout
+```
+
+Scales to 96,000+ tokens (468KB) and beyond. `ARG_MAX` only matters at `execve()` time -- zsh's line editor is just a string in memory with no kernel limit. Try that with a regex.
+
+And if you want one that looks like it was written by someone who should be institutionalized -- triple-proxied through tor, user-switched twice, namespace-entered, NUMA-pinned, OOM-adjusted, stream-buffered, resource-limited, traced at the syscall AND library level with every flag maxed, CPU limited to 1%, real-time priority 99, pinned to 64 cores, locked, chrooted, jailed, namespaced, sandboxed, daemonized, caffeinated for 24 hours:
+
+```
+nocorrect noglob builtin eval coproc time -p command -p       \
+  exec -cl -a BEAST                                           \
+  nocorrect builtin eval noglob coproc time -v command        \
+  eval nocorrect noglob builtin coproc                        \
+  torify                                                      \
+  sudo -kKEHnPS -g wheel -h fortress -p "password is gco"    \
+    -R /dungeon -r overlord -T 9999 -t unconfined_t -u root  \
+  su -l deploy                                                \
+  env -0iv -C /dev/null                                       \
+    DOOM=eternal FEAR=none PATH=/usr/games LANG=chaos         \
+    CC=gcc CXX=g++ CFLAGS=-O666 LDFLAGS=-lmadness            \
+    RUST_LOG=trace GOPATH=/void NODE_ENV=destruction           \
+    EDITOR=ed VISUAL=ed PAGER=cat SHELL=/bin/zsh              \
+  doas -Ls -C /etc/doas.d/monster -u _chaos                   \
+  torsocks -diq6 -a 127.0.0.1 -P 9050 -u tor -p chaos        \
+  sudo -kE -u daemon su -T root env -i                        \
+    MALLOC_CHECK_=3 LD_PRELOAD=/lib/libevil.so                \
+    ASAN_OPTIONS=detect_leaks=1                               \
+    UBSAN_OPTIONS=print_stacktrace=1                          \
+  proxychains4 -q -f /etc/proxychains.conf                    \
+  stdbuf -i 0 -o L -e 0 --                                    \
+  nice -n -20 -- nohup -- nice -n 19 nohup                    \
+  nice -n 0 nohup                                             \
+  strace -AcCdDfFhiknNqrtTvVwxyYzZ                            \
+    -a 132 -b execve -e trace=all                             \
+    -E LD_LIBRARY_PATH -I 1                                   \
+    -o /tmp/strace.nightmare.log -O 999                       \
+    -p 1 -P /proc/self/exe                                    \
+    -s 1048576 -S calls                                       \
+    -u strace -U 132 -X raw --                                \
+  ltrace -bcCfhiLrStTV                                        \
+    -a 132 -A 999 -D 0xff -e '*'                              \
+    -F /etc/ltrace.conf -l libc                               \
+    -n 4 -o /tmp/ltrace.abyss.log                             \
+    -p 1 -s 1048576 -u ltrace -w 8 -x dlopen --               \
+  ionice -c 1 -n 0 --                                         \
+  caffeinate -dimsu -t 86400 -w 1                             \
+  setsid -cfw --                                              \
+  chrt -adepRv -D 1000 -P 2000 -T 500 -f 99                  \
+  taskset -acp 0-63 --                                        \
+  nsenter -aceiFmnpruUCTwWZ -t 1 -S 0 -G 0 -N 3 --           \
+  numactl -absHl -C 0-63 -i all -m all -N 0 -p 1 -w 0 -P 1  \
+  choom -n -1000 --                                           \
+  sg nogroup                                                  \
+  watch -bdCcefgprtwx -n 1 -q 10 -s /dir --                   \
+  flock -eFnosux -c cmd -w 3600 -E 42 /tmp/lock.of.ages --   \
+  chroot -- /newroot/of/all/evil                              \
+  runuser -fmlpPT -c cmd -g nogroup -s /bin/sh -G wheel       \
+    -u nobody -w 1,2 --                                       \
+  unshare -cfmnpuUirCT -R /root -w /wd -S 0 -G 0 -l /ns --  \
+  prlimit --nofile=1048576 --nproc=unlimited -o RES -p 1      \
+  cpulimit -viz -e doom -p 1 -l 1 --                          \
+  setpriv --reuid=0 --regid=0 --clear-groups --               \
+  setarch x86_64 -vhV3BFILRSTXZ -p 1 --                       \
+  rlwrap -acEhiImnNoRrUvWX                                    \
+    -b '(){}[]<>' -C BEAST -D 2 -e ch                         \
+    -f /usr/share/dict/words -g pat                           \
+    -H /tmp/history.of.madness -l /tmp/rl.log                 \
+    -M ext -O re -P inp -p magenta -q ch                      \
+    -s 999999 -S 'MONSTER> ' -t term -w 50 -z filt --         \
+  timeout -fpv -k 1 -s KILL 86400                             \
+  pkexec -u admin --keep-cwd --disable-internal-agent         \
+  fakeroot -huv -b 10 -i /tmp/save -l /usr/lib/fk.so          \
+    -s /tmp/save --                                           \
+  unbuffer -p chronic -ev --                                   \
+  valgrind -dhqsv --tool=memcheck --log-file=/tmp/vg --       \
+  daemonize -av -c /tmp -e /var/log/err -E FOO=bar            \
+    -l /tmp/lock -o /var/log/out -p /var/run/pid -u www --    \
+  firejail -c cmd --private --net=none --                      \
+  sem -j 4 -P 8 --                                            \
+  systemd-run -dGhPqrRSTtv -C cap -E VAR=val -H host          \
+    -M mach -p prop -u unit --                                \
+  nocache -n 2 --                                              \
+  fakechroot -hsv -b /base -c /cfg -d /ld -e env -l /lib --  \
+  ccache -cChpsvVxz -d /cache -F 1000 -k key -M 5G            \
+    -o opt=val -X 80                                          \
+  distcc -j                                                   \
+  dbus-launch --exit-with-session --config-file=db.conf --    \
+  dbus-run-session --config-file /etc/dbus.conf --             \
+  torify tsocks catchsegv eatmydata --                         \
+  sudo -kE -u www-data su -lT app stdbuf -oL --               \
+    env -a arg -0iv -C /srv                                    \
+    DATABASE_URL=postgres://doom:fire@localhost/inferno        \
+    REDIS_URL=redis://localhost:6379/0                         \
+    SECRET_KEY=hunter2 API_KEY=sk-AAAA                        \
+  doas -Ln -u _deploy                                         \
+  nice -n -10 -- nohup --                                      \
+  strace -ANnwcfkqrTvV -e trace=network -s 4096               \
+    -o /tmp/net.log -X raw                                    \
+  ltrace -bcCfhiLrStTV -l libssl -A 5 -n 1 -w 2               \
+    -e 'ssl_*' -s 4096 -o /tmp/ssl.log                        \
+  ionice -t -c 2 -n 7 --                                      \
+  caffeinate -im -t 3600                                      \
+  setsid -f --                                                \
+  chrt -adepRv -r 50                                          \
+  taskset -acp 0 --                                            \
+  nsenter -aceZTwW -t 2 -S 1 -G 1 -N 4 --                     \
+  numactl -absH -i all -w 1 -P 2 choom -n 500 --              \
+  flock -eFx -c cmd -w 60 -E 1 /tmp/final.lock --             \
+  chroot -- /srv/jail                                         \
+  runuser -fmpPT -u app -c cmd -g app -s /bin/zsh -w 1 --    \
+  unshare -cfmnpuUirCT -R /jail -S 500 -G 500 -l /ns --      \
+  prlimit --memlock=unlimited -o COL -p 2                     \
+  cpulimit -viz -e app -p 2 -l 100 --                          \
+  pkexec -u root --keep-cwd                                    \
+  fakeroot -u -s /tmp/s2 --                                    \
+  unbuffer -p chronic -v --                                    \
+  valgrind -qv --tool=callgrind --                             \
+  daemonize -v -c /srv -u root --                              \
+  firejail --private --                                        \
+  sem -j 2 -- systemd-run -dGqt -u u2 -p p2 --                \
+  nocache -n 1 -- fakechroot -s -l /lib2 --                    \
+  ccache distcc dbus-launch --exit-with-x11 --                 \
+  dbus-run-session -- torify tsocks eatmydata --               \
+  sudo -kE -u root su root stdbuf -o 0 --                      \
+    env -a a2 -i PATH=/usr/bin LAST_WORDS=goodbye              \
+  doas -Ln -u root                                             \
+  nice -n 0 -- nohup -- time -v gco<space>
+  =>  ...git checkout
+```
+
+---
 <p align="center"><sub>// end of line</sub></p>
