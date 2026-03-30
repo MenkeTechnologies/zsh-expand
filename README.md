@@ -72,7 +72,7 @@ torify sudo -kE -u root su -l deploy                         \
 
 ### // THE MONSTER CHAIN
 
-No other expansion plugin can do this. 12 shell builtin permutations up front, then every one of the 62 command wrapper commands duplicated with different flag combos. `strace` and `ltrace` with all 26 flags maxed out. Variable assignments scattered everywhere. Shell builtins come first (they only exist inside zsh), then command wrappers chain freely. The parser consumes the entire prefix and `gco` expands to `git checkout`:
+No other expansion plugin can do this. 12 shell builtin permutations up front, then every one of the 62 command wrapper commands duplicated with different flag combos. `strace` and `ltrace` with all 41 flags maxed out. Variable assignments scattered everywhere. Shell builtins come first (they only exist inside zsh), then command wrappers chain freely. The parser consumes the entire prefix and `gco` expands to `git checkout`:
 
 ```
 nocorrect time -p command -p builtin eval noglob coproc       \
@@ -352,46 +352,47 @@ External prefix commands:
 
 | Prefix | Combo flags | Flag-with-arg | Example |
 |---|---|---|---|
-| `sudo` | `-A -B -b -E -H -k -K -n -P -S -i -s` | `-C N` `-g GRP` `-h HOST` `-p PROMPT` `-R DIR` `-r ROLE` `-T SEC` `-t TYPE` `-u USER` `--` | `sudo -kE -u root gco` |
-| `doas` | `-n -s` | `-u USER` `-C CFG` `--` | `doas -n -u root gco` |
-| `env` | `-0 -i -v` | `-C DIR` `-P PATH` `-S STR` `-u VAR` `--` | `env -0iv -C /tmp -u HOME gco` |
+| `sudo` | `-A -B -b -E -e -H -i -K -k -l -L -N -n -P -S -s -V -v` | `-C N` `-D DIR` `-g GRP` `-h HOST` `-p PROMPT` `-R DIR` `-T SEC` `-U USER` `-u USER` `--` | `sudo -kE -u root gco` |
+| `doas` | `-L -n -s` | `-u USER` `-C CFG` `--` | `doas -n -u root gco` |
+| `env` | `-0 -i -v` | `-a ARG` `-C DIR` `-P PATH` `-S STR` `-u VAR` `--` | `env -0iv -C /tmp -u HOME gco` |
 | `nice` | — | `-n ADJ` `-ADJ` | `nice -n 10 gco` |
 | `time` | `-p -l -v` | — | `time -v gco` |
 | `nohup` | — | — | `nohup gco` |
-| `rlwrap` | `-a -c -i -N -r` | `-b CHARS` `-f FILE` `-H FILE` `-p COLOR` `-s N` `-S PROMPT` | `rlwrap -acN -f comp -s 500 gco` |
-| `timeout` | — | `-k DUR` `-s SIG` | `timeout -k 10 30 gco` |
-| `strace` `ltrace` | `-c -C -d -D -f -F -h -i -k -q -r -t -T -v -V -w -x -X -y -Y -z -Z` | `-a COL` `-b SZ` `-e EXPR` `-E VAR` `-I N` `-o FILE` `-O N` `-p PID` `-P PATH` `-s SZ` `-S BY` `-u COL` `-U COL` | `strace -cf -s 256 gco` |
+| `rlwrap` | `-a -c -E -h -i -I -m -n -N -o -R -r -U -v -W -X` | `-b CHARS` `-C NAME` `-D N` `-e CHAR` `-f FILE` `-g REGEX` `-H FILE` `-l FILE` `-M EXT` `-O REGEX` `-p COLOR` `-P INPUT` `-q CHARS` `-s N` `-S PROMPT` `-t NAME` `-w MS` `-z FILTER` | `rlwrap -acN -f comp -s 500 gco` |
+| `timeout` | `-f -p -v` | `-k DUR` `-s SIG` | `timeout -k 10 30 gco` |
+| `strace` `ltrace` | `-c -C -d -D -f -h -i -k -L -N -n -q -r -t -T -v -V -y -Y -z -Z` | `-a COL` `-A N` `-b SZ` `-B SZ` `-e EXPR` `-E VAR` `-F LIST` `-I N` `-l LIB` `-n N` `-o FILE` `-O N` `-p PID` `-P PATH` `-s SZ` `-S BY` `-u USER` `-U COL` `-w N` `-X FMT` | `strace -cf -s 256 gco` |
 | `ionice` | `-t` | `-c CLASS` `-n LEVEL` | `ionice -c 2 -n 7 gco` |
 | `caffeinate` | `-d -i -m -s -u` | `-t SEC` `-w PID` | `caffeinate -i gco` |
 | `setsid` | `-c -f -w` | — | `setsid -f gco` |
-| `chrt` | `-b -f -i -m -o -r` | — | `chrt -f 10 gco` |
-| `taskset` | `-c` | — | `taskset -c 0-3 gco` |
-| `watch` | `-d -g -t -e -c -x -b -p` | `-n INTERVAL` | `watch -d -n 1 gco` |
-| `flock` | `-n -s -u -x` | `-w SEC` `-E N` | `flock -w 5 /tmp/lock gco` |
+| `chrt` | `-a -b -d -e -f -i -m -o -p -r -R -v` | `-D NS` `-P NS` `-T NS` | `chrt -f 10 gco` |
+| `taskset` | `-a -c -p` | — | `taskset -c 0-3 gco` |
+| `watch` | `-b -C -c -d -e -f -g -p -r -t -w -x` | `-n INTERVAL` `-q CYCLES` `-s DIR` | `watch -d -n 1 gco` |
+| `flock` | `-e -F -n -o -s -u -x` | `-c CMD` `-w SEC` `-E N` | `flock -w 5 /tmp/lock gco` |
 | `chroot` | — | — | `chroot /path gco` |
-| `runuser` | `-l` | `-u USER` `-g GRP` `-G GRP` | `runuser -u deploy gco` |
-| `unshare` | `-f -m -n -p -u -U -i -r -C` | `--` | `unshare -mn gco` |
-| `cpulimit` | — | `-l LIMIT` | `cpulimit -l 50 gco` |
-| `su` | `-f -l -m -p -P` | `-c CMD` `-s SHELL` `-g GRP` `-G GRP` `-w LIST` `--` | `su -l root gco` |
+| `runuser` | `-f -l -m -p -P -T` | `-c CMD` `-g GRP` `-s SHELL` `-G GRP` `-u USER` `-w LIST` | `runuser -u deploy gco` |
+| `unshare` | `-c -C -f -i -m -n -p -r -T -u -U` | `-R DIR` `-w DIR` `-S UID` `-G GID` `-l FILE` `--` | `unshare -mn gco` |
+| `cpulimit` | `-v -i -z` | `-e EXE` `-l LIMIT` `-p PID` | `cpulimit -l 50 gco` |
+| `su` | `-f -l -m -p -P -T` | `-c CMD` `-s SHELL` `-g GRP` `-G GRP` `-w LIST` `--` | `su -l root gco` |
 | `stdbuf` | — | `-i MODE` `-o MODE` `-e MODE` | `stdbuf -oL gco` |
 | `sg` | — | — | `sg staff gco` |
 | `choom` | — | `-n ADJ` `-p PID` | `choom -n -1000 gco` |
-| `nsenter` | `-m -u -i -n -p -U -C -r -F -G` | `-t PID` `-S UID` | `nsenter -t 1 -m gco` |
-| `numactl` | `-l` | `-i NODES` `-C CPUS` `-N NODES` `-m NODES` `-p PID` | `numactl -C 0,1 gco` |
-| `prlimit` | `-v` | `-p PID` `--RESOURCE=LIMIT` | `prlimit --nofile=1024 gco` |
+| `nsenter` | `-a -c -C -e -F -i -m -n -p -r -T -u -U -w -W -Z` | `-t PID` `-S UID` `-G GID` `-N FD` | `nsenter -t 1 -m gco` |
+| `numactl` | `-a -b -l -s -H` | `-i NODES` `-C CPUS` `-N NODES` `-m NODES` `-p PID` `-w NODES` `-P NODES` | `numactl -C 0,1 gco` |
+| `prlimit` | — | `-o COLS` `-p PID` `--RESOURCE=LIMIT` | `prlimit --nofile=1024 gco` |
 | `setpriv` | `-d` | `--reuid UID` `--regid GID` `--groups LIST` `--inh-caps CAPS` `--ambient-caps CAPS` `--bounding-set CAPS` `--securebits BITS` `--selinux-label LBL` `--apparmor-profile PRF` `--pdeathsig SIG` `--no-new-privs` `--clear-groups` `--keep-groups` `--init-groups` `--reset-env` | `setpriv --reuid=1000 --inh-caps=-all gco` |
-| `setarch` | `-v -3 -B -F -I -L -R -S -T -X -Z` | — | `setarch i386 -R gco` |
-| `linux32` `linux64` | `-v -3 -B -F -I -L -R -S -T -X -Z` | — | `linux32 -R gco` |
+| `setarch` | `-v -3 -B -F -I -L -R -S -T -X -Z` | `-p PID` | `setarch i386 -R gco` |
+| `linux32` `linux64` | `-v -3 -B -F -I -L -R -S -T -X -Z` | `-p PID` | `linux32 -R gco` |
 | `runcon` | `-c` | `-u USER` `-r ROLE` `-t TYPE` `-l RANGE` `--` | `runcon -t httpd_t gco` |
 | `xvfb-run` | `-a -l` | `-e FILE` `-f FILE` `-n NUM` `-p PROTO` `-s ARGS` `-w SEC` `--` | `xvfb-run -a gco` |
-| `chpst` | `-v -V -P -0 -1 -2` | `-u USER` `-U USER` `-b ARGV0` `-e DIR` `-/ ROOT` `-C N` `-n INC` `-l LOCK` `-L LOCK` `-m BYTES` `-d BYTES` `-o N` `-p N` `-f BYTES` `-c BYTES` `-r BYTES` `-t SEC` | `chpst -u www -m 200000 gco` |
+| `chpst` | `-v -V -P -0 -1 -2` | `-u USER` `-U USER` `-b ARGV0` `-e DIR` `-/ ROOT` `-n INC` `-l LOCK` `-L LOCK` `-m BYTES` `-d BYTES` `-o N` `-p N` `-f BYTES` `-c BYTES` `-t SEC` | `chpst -u www -m 200000 gco` |
 | `cgexec` | — | `-g CTRL:PATH` `--sticky` | `cgexec -g cpu:mygroup gco` |
 | `trickle` | `-s -v` | `-d RATE` `-u RATE` `-w LEN` `-t SEC` `-l LEN` `-n PATH` `-P PATH` | `trickle -d 100 -u 50 gco` |
-| `faketime` | `-f -m` | — | `faketime '2020-01-01' gco` |
-| `proot` | `-0 -n` | `-r PATH` `-b SRC:DST` `-q CMD` `-w DIR` `-v LVL` `-k REL` `-i UID:GID` `-p MAP` `-R PATH` `-S PATH` | `proot -0 -r /jail gco` |
+| `faketime` | `-f -m` | `-p PID` | `faketime '2020-01-01' gco` |
+| `proot` | `-0` | `-r PATH` `-b SRC:DST` `-m SRC:DST` `-q CMD` `-w DIR` `-v LVL` `-k REL` `-i UID:GID` `-R PATH` `-S PATH` | `proot -0 -r /jail gco` |
 | `bwrap` | `--unshare-* --clearenv --new-session --die-with-parent --as-pid-1` | `--bind SRC DST` `--ro-bind SRC DST` `--dev-bind SRC DST` `--setenv VAR VAL` `--tmpfs DST` `--proc DST` `--dev DST` `--uid UID` `--gid GID` | `bwrap --ro-bind / / --unshare-net gco` |
 | `capsh` | `--print --noamb --noenv --quiet` | `--caps=TXT` `--drop=LIST` `--uid=UID` `--gid=GID` `--user=NAME` `--chroot=PATH` `--shell=PATH` `--` | `capsh --drop=cap_net_raw -- gco` |
-| `pkexec` `fakeroot` `unbuffer` `chronic` `valgrind` | — | — | `valgrind gco` |
+| `valgrind` | `-d -h -q -s -v` | `--tool=NAME` `--log-file=FILE` `--*=VAL` | `valgrind --tool=memcheck gco` |
+| `pkexec` `fakeroot` `unbuffer` `chronic` | — | — | `fakeroot gco` |
 | `torify` `torsocks` `tsocks` `proxychains4` | — | — | `torify gco` |
 | `firejail` `daemonize` `sem` `systemd-run` `dbus-run-session` | — | — | `firejail gco` |
 | `eatmydata` `catchsegv` `nocache` `fakechroot` | — | — | `eatmydata gco` |
