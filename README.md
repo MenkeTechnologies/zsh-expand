@@ -72,7 +72,7 @@ torify sudo -kE -u root su -l deploy                         \
 
 ### // THE MONSTER CHAIN
 
-No other expansion plugin can do this. 12 shell builtin permutations up front, then every one of the 62 execvp wrapper commands duplicated with different flag combos. `strace` and `ltrace` with all 26 flags maxed out. Variable assignments scattered everywhere. Shell builtins come first (they only exist inside zsh), then execvp wrappers chain freely. The parser consumes the entire prefix and `gco` expands to `git checkout`:
+No other expansion plugin can do this. 12 shell builtin permutations up front, then every one of the 62 command wrapper commands duplicated with different flag combos. `strace` and `ltrace` with all 26 flags maxed out. Variable assignments scattered everywhere. Shell builtins come first (they only exist inside zsh), then command wrappers chain freely. The parser consumes the entire prefix and `gco` expands to `git checkout`:
 
 ```
 nocorrect time -p command -p builtin eval noglob coproc       \
@@ -348,7 +348,7 @@ Shell builtins/keywords (must precede external wrappers):
 | `noglob` | — | `noglob gco` |
 | `coproc` | — | `coproc gco` |
 
-External wrappers (execvp commands):
+External prefix commands:
 
 | Prefix | Combo flags | Flag-with-arg | Example |
 |---|---|---|---|
@@ -614,7 +614,7 @@ The current architecture uses a **left-to-right parser** (`zpwrExpandParserFindC
 
 ```
 Phase 1: consume shell keywords (nocorrect, time -p, builtin, command -p, exec -cl, eval, noglob, coproc, -)
-Phase 2: consume execvp wrappers (sudo, doas, env, nice, strace, timeout, ionice, caffeinate, ...)
+Phase 2: consume privilege-escalation prefixes (sudo, doas, su, ...) and command wrappers (env, nice, strace, timeout, ionice, caffeinate, ...)
 Result:  everything remaining is the command + arguments
 ```
 

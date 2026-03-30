@@ -2645,7 +2645,7 @@
 
 
 #==============================================================
-# Monster chain — 12 builtin perms, all 38 execvp wrappers
+# Monster chain — 12 builtin perms, all 38 command wrappers
 # with different flag combos including su, stdbuf, sg, choom,
 # nsenter, numactl, prlimit, dbus-run-session
 #==============================================================

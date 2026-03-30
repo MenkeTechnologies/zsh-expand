@@ -97,7 +97,7 @@ function zpwrExpandParserFindCommandPosition() {
         esac
     done
 
-    # Phase 2: consume execvp wrappers (case-insensitive for sudo/doas/env/nice/time/nohup/rlwrap)
+    # Phase 2: consume command wrappers (case-insensitive for sudo/doas/env/nice/time/nohup/rlwrap)
     while (( pos <= $#words )); do
         # skip assignments between wrappers (env FOO=bar, sudo VAR=val, etc)
         if _zpwr_is_assignment "$words[$pos]"; then
@@ -657,7 +657,7 @@ function zpwrExpandParseWords(){
     ZPWR_EXPAND_WORDS_LPARTITION=( $mywordsleft[$firstIndex,$#mywordsleft] )
 
     # use parser to find command position — strips assignments contextually,
-    # consumes shell keywords and execvp wrappers with their flags
+    # consumes shell keywords and command wrappers with their flags
     ZPWR_VARS[cachedRegexMatch]=""
     ZPWR_VARS[cachedRegexMatched]=false
     local -i isArgPosition=0
