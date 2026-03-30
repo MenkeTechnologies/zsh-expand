@@ -1620,3 +1620,35 @@
     assert $state equals 0
     assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
 }
+
+#==============================================================
+# unshare: long options (--fork, --mount-proc, etc.)
+#==============================================================
+
+@test 'regex: unshare -p --fork --mount-proc' {
+    zpwrExpandParseWords "unshare -p --fork --mount-proc git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: unshare --mount-proc=/newproc --kill-child=SIGTERM --propagation private' {
+    zpwrExpandParseWords "unshare --mount-proc=/newproc --kill-child=SIGTERM --propagation private git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: unshare -Ur --map-users auto --setgroups deny --fork' {
+    zpwrExpandParseWords "unshare -Ur --map-users auto --setgroups deny --fork git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
+
+@test 'regex: unshare -mnpf --map-auto --keep-caps --mount-proc --propagation shared' {
+    zpwrExpandParseWords "unshare -mnpf --map-auto --keep-caps --mount-proc --propagation shared git"
+    zpwrExpandRegexMatchOnCommandPosition
+    assert $state equals 0
+    assert "$ZPWR_EXPAND_PRE_EXPAND" same_as 'git'
+}
