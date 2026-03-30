@@ -54,6 +54,7 @@ teh<space>  =>  the
 | **Global Alias Expansion** | Expands global aliases anywhere on the command line |
 | **Spelling Correction** | 300+ built-in misspelling/abbreviation corrections -- `teh` -> `the`, `cmd` -> `command`, `bg` -> `background` -- user-extensible via associative array |
 | **Native Expansion** | Globs, `$parameters`, `$(command substitution)`, `=(process substitution)`, `!history` expansion via zle `expand-word` |
+| **Tabstop Snippets** | Aliases with `$ZPWR_TABSTOP` placeholders act as templates -- cursor jumps to the placeholder on expansion |
 | **History Injection** | Optionally writes the fully-expanded form of your command into history |
 
 ---
@@ -160,11 +161,29 @@ The key is the correct word, the value is a space-separated list of misspellings
 | User-extensible corrections | **yes** | no | no | no |
 | Clobber protection | **yes** | n/a | no | no |
 | Glob / history / param expansion | **yes** | no | no | yes |
+| Tabstop snippets (cursor placement) | **yes** | no | no | no |
 | History injection | **yes** | no | no | no |
 | Blacklist / filter | **yes** | n/a | no | yes |
 | Test suite | **9,300+** | yes | no | no |
 | Pure zsh (no external deps) | **yes** | yes | yes | ohmyzsh |
 | Active (2026) | **yes** | yes | slow (2024) | stale (2020) |
+
+---
+
+### // TABSTOP SNIPPETS
+
+Define aliases with `$ZPWR_TABSTOP` placeholders to turn them into IDE-style snippets. On expansion, the cursor jumps to the placeholder instead of the end of the line:
+
+```sh
+alias gc="git commit -m ${ZPWR_TABSTOP}"
+alias gca="git commit --amend -m ${ZPWR_TABSTOP}"
+```
+
+```
+gc<space>  =>  git commit -m |    (cursor here)
+```
+
+No other zsh expansion plugin supports cursor placement on expansion.
 
 ---
 
