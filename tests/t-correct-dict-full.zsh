@@ -24,6 +24,7 @@
     ZPWR_EXPAND_TO_HISTORY=false
     ZPWR_CORRECT=false
     ZPWR_CORRECT_EXPAND=false
+    ZPWR_EXPAND_SUFFIX=false
     ZPWR_TRACE=false
 
     function correct_word() {
