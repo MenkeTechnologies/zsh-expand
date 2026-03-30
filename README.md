@@ -177,6 +177,16 @@ export ZPWR_EXPAND_PRE_EXEC_NATIVE=true
 
 ---
 
+### // TEST COVERAGE
+
+9,300+ tests across 27 test files using [zunit](https://github.com/zunit-zsh/zunit). Covers alias expansion, global aliases, spelling correction, command-position regex matching, word parsing, native expansion, config flags, tab stops, integration flows, and edge cases.
+
+```sh
+zunit
+```
+
+---
+
 ### // INSTALL
 
 #### Zinit
