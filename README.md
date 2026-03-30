@@ -261,7 +261,7 @@ export ZPWR_EXPAND_PRE_EXEC_NATIVE=true
 
 ### // PERFORMANCE
 
-All source files ship with pre-compiled `.zwc` bytecode for instant loading. The plugin uses zero external commands -- no `sed`, `awk`, `grep`, or subshells. Every expansion runs in pure zsh builtins and parameter expansion, keeping latency invisible on every keypress.
+Source files can be compiled to `.zwc` bytecode for instant loading (`zcompile` or via your plugin manager). The plugin uses zero external commands -- no `sed`, `awk`, `grep`, or subshells. Every expansion runs in pure zsh builtins and parameter expansion, keeping latency invisible on every keypress.
 
 ---
 
