@@ -377,6 +377,21 @@ ZPWR_EXPAND_CORRECT_WORDS[XML]="xml"
 ZPWR_EXPAND_CORRECT_WORDS[YAML]="yaml"
 ZPWR_EXPAND_CORRECT_WORDS[your]="yuor ur"
 ZPWR_EXPAND_CORRECT_WORDS[zsh]="zhs zshh zzsh zssh"
+
+# reverse lookup: misspelling -> correct word (O(1) correction)
+typeset -Ag ZPWR_EXPAND_CORRECT_REVERSE
+
+function zpwrExpandRebuildCorrectReverse(){
+    ZPWR_EXPAND_CORRECT_REVERSE=()
+    local key misspelling
+    for key in ${(k)ZPWR_EXPAND_CORRECT_WORDS}; do
+        for misspelling in ${(z)ZPWR_EXPAND_CORRECT_WORDS[$key]}; do
+            ZPWR_EXPAND_CORRECT_REVERSE[$misspelling]=$key
+        done
+    done
+}
+
+zpwrExpandRebuildCorrectReverse
 #}}}***********************************************************
 
 #{{{                    MARK:keybind

@@ -35,6 +35,7 @@
 
 @test 'user extend: custom single misspelling corrects' {
     ZPWR_EXPAND_CORRECT_WORDS[kubernetes]="k8ss"
+    zpwrExpandRebuildCorrectReverse
     LBUFFER="echo k8ss"
     ZPWR_VARS[foundIncorrect]=false
     zpwrExpandParseWords "$LBUFFER"
@@ -44,6 +45,7 @@
 
 @test 'user extend: custom multiple misspellings correct first variant' {
     ZPWR_EXPAND_CORRECT_WORDS[terraform]="terrafrom terrafomr"
+    zpwrExpandRebuildCorrectReverse
     LBUFFER="echo terrafrom"
     ZPWR_VARS[foundIncorrect]=false
     zpwrExpandParseWords "$LBUFFER"
@@ -53,6 +55,7 @@
 
 @test 'user extend: custom multiple misspellings correct second variant' {
     ZPWR_EXPAND_CORRECT_WORDS[terraform]="terrafrom terrafomr"
+    zpwrExpandRebuildCorrectReverse
     LBUFFER="echo terrafomr"
     ZPWR_VARS[foundIncorrect]=false
     zpwrExpandParseWords "$LBUFFER"
@@ -62,6 +65,7 @@
 
 @test 'user extend: custom correction in first position single word' {
     ZPWR_EXPAND_CORRECT_WORDS[podman]="podmna"
+    zpwrExpandRebuildCorrectReverse
     LBUFFER="podmna"
     ZPWR_VARS[foundIncorrect]=false
     zpwrExpandParseWords "$LBUFFER"
@@ -71,6 +75,7 @@
 
 @test 'user extend: custom correction after sudo' {
     ZPWR_EXPAND_CORRECT_WORDS[podman]="podmna"
+    zpwrExpandRebuildCorrectReverse
     LBUFFER="sudo podmna"
     ZPWR_VARS[foundIncorrect]=false
     zpwrExpandParseWords "$LBUFFER"
@@ -80,6 +85,7 @@
 
 @test 'user extend: custom correction sets foundIncorrect true' {
     ZPWR_EXPAND_CORRECT_WORDS[kubernetes]="k8ss"
+    zpwrExpandRebuildCorrectReverse
     LBUFFER="echo k8ss"
     ZPWR_VARS[foundIncorrect]=false
     zpwrExpandParseWords "$LBUFFER"
@@ -89,6 +95,7 @@
 
 @test 'user extend: non-matching custom entry does not trigger' {
     ZPWR_EXPAND_CORRECT_WORDS[kubernetes]="k8ss"
+    zpwrExpandRebuildCorrectReverse
     LBUFFER="echo kubectl"
     ZPWR_VARS[foundIncorrect]=false
     zpwrExpandParseWords "$LBUFFER"
@@ -105,6 +112,7 @@
     # user overrides to map bg -> backstage
     ZPWR_EXPAND_CORRECT_WORDS[backstage]="bg"
     unset 'ZPWR_EXPAND_CORRECT_WORDS[background]'
+    zpwrExpandRebuildCorrectReverse
     LBUFFER="echo bg"
     ZPWR_VARS[foundIncorrect]=false
     zpwrExpandParseWords "$LBUFFER"
@@ -116,6 +124,7 @@
     # built-in has: ZPWR_EXPAND_CORRECT_WORDS[echo]="ehco ecoh ..."
     # user appends a new misspelling
     ZPWR_EXPAND_CORRECT_WORDS[echo]+=" oech"
+    zpwrExpandRebuildCorrectReverse
     LBUFFER="echo oech"
     ZPWR_VARS[foundIncorrect]=false
     zpwrExpandParseWords "$LBUFFER"
@@ -129,6 +138,7 @@
 
 @test 'user extend: unset entry disables that correction' {
     unset 'ZPWR_EXPAND_CORRECT_WORDS[echo]'
+    zpwrExpandRebuildCorrectReverse
     LBUFFER="echo ehco"
     ZPWR_VARS[foundIncorrect]=false
     zpwrExpandParseWords "$LBUFFER"
@@ -142,6 +152,7 @@
 
 @test 'user extend: underscore in key becomes space in expansion' {
     ZPWR_EXPAND_CORRECT_WORDS[hello_world]="hworl"
+    zpwrExpandRebuildCorrectReverse
     LBUFFER="echo hworl"
     ZPWR_VARS[foundIncorrect]=false
     zpwrExpandParseWords "$LBUFFER"
