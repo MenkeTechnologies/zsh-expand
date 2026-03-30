@@ -309,6 +309,7 @@ function zpwrExpandSupernaturalSpace() {
                     ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
                 elif [[ $ZPWR_EXPAND_SUFFIX == true ]] && (( $#ZPWR_EXPAND_WORDS_LPARTITION == 1 )); then
                     # suffix alias expansion at command position
+                    zpwrExpandRightTrim
                     zpwrExpandSuffixAlias
                 fi
             fi

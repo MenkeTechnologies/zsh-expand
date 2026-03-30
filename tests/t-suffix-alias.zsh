@@ -124,3 +124,25 @@
     zpwrExpandSuffixAlias
     assert $LBUFFER same_as 'jq /tmp/data.json'
 }
+
+#==============================================================
+# trailing space from menuselect/tab completion
+#==============================================================
+
+@test 'suffix: trailing space from tab completion is trimmed before expand' {
+    LBUFFER="file.txt "
+    ZPWR_VARS[WAS_EXPANDED]=false
+    zpwrExpandParseWords "$LBUFFER"
+    zpwrExpandRightTrim
+    zpwrExpandSuffixAlias
+    assert $LBUFFER same_as 'vim file.txt'
+}
+
+@test 'suffix: double trailing space does not expand' {
+    LBUFFER="file.txt  "
+    ZPWR_VARS[WAS_EXPANDED]=false
+    zpwrExpandParseWords "$LBUFFER"
+    zpwrExpandRightTrim
+    zpwrExpandSuffixAlias
+    assert $LBUFFER same_as 'file.txt  '
+}
