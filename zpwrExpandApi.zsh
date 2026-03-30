@@ -318,7 +318,88 @@ function zpwrExpandParserFindCommandPosition() {
                     esac
                 done
                 ;;
-            pkexec|fakeroot|unbuffer|chronic|torify|torsocks|tsocks|proxychains4|daemonize|firejail|sem|valgrind|systemd-run)
+            su)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[flmpP]*)     (( pos++ )) ;;
+                        -[csgGw])      (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -[csgGw]=*)    (( pos++ )) ;;
+                        --)            (( pos++ )); break ;;
+                        *)             break ;;
+                    esac
+                done
+                # consume optional USER (only if not the last word)
+                (( pos < $#words )) && (( pos++ ))
+                ;;
+            stdbuf)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[ioe])        (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -[ioe]=*)      (( pos++ )) ;;
+                        *)             break ;;
+                    esac
+                done
+                ;;
+            sg)
+                (( pos++ ))
+                # consume mandatory GROUP (only if not the last word)
+                (( pos < $#words )) && (( pos++ ))
+                ;;
+            choom)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -n)            (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -n=*)          (( pos++ )) ;;
+                        -p)            (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -p=*)          (( pos++ )) ;;
+                        *)             break ;;
+                    esac
+                done
+                ;;
+            nsenter)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[muinpUCrFG]*)  (( pos++ )) ;;
+                        -[tS])         (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -[tS]=*)       (( pos++ )) ;;
+                        *)             break ;;
+                    esac
+                done
+                ;;
+            numactl)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[iH]*)        (( pos++ )) ;;
+                        -[CNmp])       (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -[CNmp]=*)     (( pos++ )) ;;
+                        *)             break ;;
+                    esac
+                done
+                ;;
+            prlimit)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[v]*)         (( pos++ )) ;;
+                        -[p])          (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -[p]=*)        (( pos++ )) ;;
+                        --*)           (( pos++ )) ;;
+                        *)             break ;;
+                    esac
+                done
+                ;;
+            pkexec|fakeroot|unbuffer|chronic|torify|torsocks|tsocks|proxychains4|daemonize|firejail|sem|valgrind|systemd-run|dbus-run-session)
                 (( pos++ ))
                 ;;
             *)
