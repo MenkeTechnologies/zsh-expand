@@ -12,6 +12,17 @@
     0="${${(M)0:#/*}:-$PWD/$0}"
     pluginDir="${0:h:A}"
     load "$pluginDir/zsh-expand.plugin.zsh"
+    # reset config to defaults so local env vars do not leak into tests
+    ZPWR_EXPAND_QUOTE_DOUBLE=false
+    ZPWR_EXPAND_QUOTE_SINGLE=false
+    ZPWR_EXPAND_SECOND_POSITION=false
+    ZPWR_EXPAND_NATIVE=false
+    ZPWR_EXPAND_PRE_EXEC_NATIVE=false
+    ZPWR_EXPAND_PRE_EXEC_SECOND_POSITION=false
+    ZPWR_EXPAND_TO_HISTORY=false
+    ZPWR_CORRECT=false
+    ZPWR_CORRECT_EXPAND=false
+    ZPWR_TRACE=false
 
     function printLBUFFER() {
         print -r "LBUFFER=_____'${(q)LBUFFER}'_____"
@@ -364,4 +375,163 @@
         matched=true
     fi
     assert $matched same_as 'false'
+}
+
+#==============================================================
+# ZPWR_EXPAND_QUOTE_SINGLE: path with spaces contrast
+#==============================================================
+
+@test 'config: ZPWR_EXPAND_QUOTE_SINGLE=false path with spaces is one token' {
+    ZPWR_EXPAND_QUOTE_SINGLE=false
+    zpwrExpandParseWords "cd '/path with spaces'"
+    assert "$ZPWR_VARS[lastword_lbuffer]" same_as "'/path with spaces'"
+}
+
+@test 'config: ZPWR_EXPAND_QUOTE_SINGLE=true path with spaces splits into words' {
+    ZPWR_EXPAND_QUOTE_SINGLE=true
+    zpwrExpandParseWords "cd '/path with spaces'"
+    assert "$ZPWR_VARS[lastword_lbuffer]" same_as 'spaces'
+}
+
+@test 'config: ZPWR_EXPAND_QUOTE_SINGLE=false preserves quotes on simple path' {
+    ZPWR_EXPAND_QUOTE_SINGLE=false
+    zpwrExpandParseWords "cat '/etc/hosts'"
+    assert "$ZPWR_VARS[lastword_lbuffer]" same_as "'/etc/hosts'"
+}
+
+@test 'config: ZPWR_EXPAND_QUOTE_SINGLE=true strips quotes on simple path' {
+    ZPWR_EXPAND_QUOTE_SINGLE=true
+    zpwrExpandParseWords "cat '/etc/hosts'"
+    assert "$ZPWR_VARS[lastword_lbuffer]" same_as '/etc/hosts'
+}
+
+@test 'config: ZPWR_EXPAND_QUOTE_SINGLE=true allows alias expansion in single quoted context' {
+    alias __zexptest_qs1='git status'
+    ZPWR_EXPAND_QUOTE_SINGLE=true
+    LBUFFER="echo '__zexptest_qs1"
+    zpwrExpandParseWords "$LBUFFER"
+    zpwrExpandGetAliasValue
+    zpwrExpandAlias
+    assert "$LBUFFER" same_as "echo 'git status"
+    unalias __zexptest_qs1
+}
+
+@test 'config: ZPWR_EXPAND_QUOTE_SINGLE=false preserves quotes in lastword' {
+    ZPWR_EXPAND_QUOTE_SINGLE=false
+    zpwrExpandParseWords "echo '__zexptest_qs2"
+    # with quotes preserved, lastword includes the quote
+    assert "$ZPWR_VARS[lastword_lbuffer]" same_as "'__zexptest_qs2"
+}
+
+#==============================================================
+# ZPWR_EXPAND_QUOTE_DOUBLE: path with spaces contrast
+#==============================================================
+
+@test 'config: ZPWR_EXPAND_QUOTE_DOUBLE=false path with spaces is one token' {
+    ZPWR_EXPAND_QUOTE_DOUBLE=false
+    zpwrExpandParseWords 'cd "/path with spaces"'
+    assert "$ZPWR_VARS[lastword_lbuffer]" same_as '"/path with spaces"'
+}
+
+@test 'config: ZPWR_EXPAND_QUOTE_DOUBLE=true path with spaces splits into words' {
+    ZPWR_EXPAND_QUOTE_DOUBLE=true
+    zpwrExpandParseWords 'cd "/path with spaces"'
+    assert "$ZPWR_VARS[lastword_lbuffer]" same_as 'spaces'
+}
+
+@test 'config: ZPWR_EXPAND_QUOTE_DOUBLE=false preserves quotes on simple path' {
+    ZPWR_EXPAND_QUOTE_DOUBLE=false
+    zpwrExpandParseWords 'cat "/etc/hosts"'
+    assert "$ZPWR_VARS[lastword_lbuffer]" same_as '"/etc/hosts"'
+}
+
+@test 'config: ZPWR_EXPAND_QUOTE_DOUBLE=true strips quotes on simple path' {
+    ZPWR_EXPAND_QUOTE_DOUBLE=true
+    zpwrExpandParseWords 'cat "/etc/hosts"'
+    assert "$ZPWR_VARS[lastword_lbuffer]" same_as '/etc/hosts'
+}
+
+#==============================================================
+# ZPWR_EXPAND_SECOND_POSITION=false contrast
+#==============================================================
+
+@test 'config: ZPWR_EXPAND_SECOND_POSITION=false lastword is still parsed but not at command position' {
+    ZPWR_EXPAND_SECOND_POSITION=false
+    zpwrExpandParseWords "sudo somecmd"
+    # parsing still works, but the partition has 2 words so first-position expansion won't fire
+    assert "$ZPWR_VARS[lastword_lbuffer]" same_as 'somecmd'
+    assert "$ZPWR_VARS[firstword_partition]" same_as 'sudo'
+    # with SECOND_POSITION=false, the caller would skip expansion for non-first-position words
+    assert $(( $#ZPWR_EXPAND_WORDS_LPARTITION >= 2 )) equals 1
+}
+
+@test 'config: ZPWR_EXPAND_SECOND_POSITION=false still expands first position' {
+    alias __zexptest_sp4='git status'
+    ZPWR_EXPAND_SECOND_POSITION=false
+    LBUFFER="__zexptest_sp4"
+    zpwrExpandParseWords "$LBUFFER"
+    zpwrExpandGetAliasValue
+    zpwrExpandAlias
+    assert "$LBUFFER" same_as 'git status'
+    unalias __zexptest_sp4
+}
+
+#==============================================================
+# ZPWR_CORRECT contrast: correction in full flow
+#==============================================================
+
+@test 'config: ZPWR_CORRECT=true corrects ehco to echo' {
+    ZPWR_CORRECT=true
+    LBUFFER="echo ehco"
+    ZPWR_VARS[foundIncorrect]=false
+    zpwrExpandParseWords "$LBUFFER"
+    zpwrExpandCorrectWord
+    assert "$LBUFFER" same_as 'echo echo'
+    assert "$ZPWR_VARS[foundIncorrect]" same_as 'true'
+}
+
+@test 'config: ZPWR_CORRECT=true corrects teh to the after pipe' {
+    ZPWR_CORRECT=true
+    LBUFFER="cat file | grep teh"
+    ZPWR_VARS[foundIncorrect]=false
+    zpwrExpandParseWords "$LBUFFER"
+    zpwrExpandCorrectWord
+    assert "$LBUFFER" same_as 'cat file | grep the'
+}
+
+@test 'config: ZPWR_CORRECT=true corrects fales to false' {
+    ZPWR_CORRECT=true
+    LBUFFER="echo fales"
+    ZPWR_VARS[foundIncorrect]=false
+    zpwrExpandParseWords "$LBUFFER"
+    zpwrExpandCorrectWord
+    assert "$LBUFFER" same_as 'echo false'
+}
+
+@test 'config: ZPWR_CORRECT=true does not correct valid command names' {
+    ZPWR_CORRECT=true
+    LBUFFER="git"
+    ZPWR_VARS[foundIncorrect]=false
+    zpwrExpandParseWords "$LBUFFER"
+    zpwrExpandCorrectWord
+    assert "$ZPWR_VARS[foundIncorrect]" same_as 'false'
+}
+
+#==============================================================
+# combined quote flags
+#==============================================================
+
+@test 'config: both quote flags true strips all quotes' {
+    ZPWR_EXPAND_QUOTE_SINGLE=true
+    ZPWR_EXPAND_QUOTE_DOUBLE=true
+    zpwrExpandParseWords "echo '\"nested\"'"
+    # single quotes stripped, then double quotes stripped
+    assert "$ZPWR_VARS[lastword_lbuffer]" same_as 'nested'
+}
+
+@test 'config: both quote flags false preserves all quotes' {
+    ZPWR_EXPAND_QUOTE_SINGLE=false
+    ZPWR_EXPAND_QUOTE_DOUBLE=false
+    zpwrExpandParseWords 'echo "hello"'
+    assert "$ZPWR_VARS[lastword_lbuffer]" same_as '"hello"'
 }
