@@ -303,7 +303,7 @@ nocorrect noglob builtin eval coproc time -p command -p       \
 | **Native Expansion** | Globs, `$parameters`, `$(command substitution)`, `=(process substitution)`, `!history` expansion via zle `expand-word` |
 | **Tabstop Snippets** | Aliases with `$ZPWR_TABSTOP` placeholders act as templates -- cursor jumps to the placeholder on expansion |
 | **Self-Referential Alias Escape** | `alias git="hub"` expands to `\hub` -- backslash-escapes the first word to prevent infinite recursion |
-| **Correct-Then-Expand** | Typo correction chains into alias expansion in a single keypress -- `goc` -> `gco` -> `git checkout` |
+| **Correct-Then-Expand** | Typo correction chains into alias expansion in a single keypress |
 | **Quote-Aware Expansion** | Optionally expands aliases inside `"double"` or `'single'` quoted strings in argument position (not command position) |
 | **Suffix Alias Expansion** | `file.txt<space>` -> `vim file.txt` -- expands suffix aliases (`alias -s`) at command position |
 | **Autopair Integration** | Detects [autopair](https://github.com/hlissner/zsh-autopair) and delegates space insertion to preserve bracket/quote auto-pairing |
@@ -531,10 +531,6 @@ Other plugins either infinite-loop or silently break on this.
 ### // CORRECT-THEN-EXPAND
 
 When `ZPWR_CORRECT_EXPAND=true`, typo correction chains into alias expansion in a single keypress:
-
-```
-goc<space>  =>  gco  =>  git checkout    (corrected, then expanded)
-```
 
 The spelling corrector fires first, then the corrected word is re-checked for alias expansion -- all before the space character is inserted.
 
