@@ -371,7 +371,7 @@ External prefix commands:
 | `flock` | `-e -F -n -o -s -u -x` | `-c CMD` `-w SEC` `-E N` | `flock -w 5 /tmp/lock gco` |
 | `chroot` | — | — | `chroot /path gco` |
 | `runuser` | `-f -l -m -p -P -T` | `-c CMD` `-g GRP` `-s SHELL` `-G GRP` `-u USER` `-w LIST` | `runuser -u deploy gco` |
-| `unshare` | `-c -C -f -i -m -n -p -r -T -u -U` | `-R DIR` `-w DIR` `-S UID` `-G GID` `-l FILE` `--` | `unshare -mn gco` |
+| `unshare` | `-c -C -f -i -m -n -p -r -T -u -U` `--fork` `--map-root-user` `--map-current-user` `--map-auto` `--map-subids` `--keep-caps` `--mount-proc[=MP]` `--mount-binfmt[=MP]` `--kill-child[=SIG]` `--mount[=F]` `--uts[=F]` `--ipc[=F]` `--net[=F]` `--pid[=F]` `--user[=F]` `--cgroup[=F]` `--time[=F]` | `-R DIR` `-w DIR` `-S UID` `-G GID` `-l FILE` `--propagation MODE` `--setgroups ALLOW\|DENY` `--map-user UID` `--map-users MAP` `--map-group GID` `--map-groups MAP` `--owner UID:GID` `--monotonic OFF` `--boottime OFF` `--` | `unshare -p --fork --mount-proc gco` |
 | `cpulimit` | `-v -i -z` | `-e EXE` `-l LIMIT` `-p PID` | `cpulimit -l 50 gco` |
 | `su` | `-f -l -m -p -P -T` | `-c CMD` `-s SHELL` `-g GRP` `-G GRP` `-w LIST` `--` | `su -l root gco` |
 | `stdbuf` | — | `-i MODE` `-o MODE` `-e MODE` | `stdbuf -oL gco` |

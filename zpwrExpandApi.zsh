@@ -330,6 +330,12 @@ function zpwrExpandParserFindCommandPosition() {
                         -[cfmnpuUirCT]*) (( pos++ )) ;;
                         -[RwSGl])      (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
                         -[RwSGl]=*)    (( pos++ )) ;;
+                        # long opts with required arg (space-separated)
+                        --map-user|--map-users|--map-group|--map-groups|--owner|--propagation|--setgroups|--setuid|--setgid|--root|--wd|--monotonic|--boottime|--load-interp)
+                                       (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        --*=*)         (( pos++ )) ;;
+                        # boolean and optional-arg long opts (--fork, --mount-proc, --kill-child, etc.)
+                        --*)           (( pos++ )) ;;
                         --)            (( pos++ )); break ;;
                         *)             break ;;
                     esac
