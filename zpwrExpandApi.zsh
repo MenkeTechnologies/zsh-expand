@@ -399,7 +399,171 @@ function zpwrExpandParserFindCommandPosition() {
                     esac
                 done
                 ;;
-            pkexec|fakeroot|unbuffer|chronic|torify|torsocks|tsocks|proxychains4|daemonize|firejail|sem|valgrind|systemd-run|dbus-run-session)
+            setpriv)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[dhV]*)       (( pos++ )) ;;
+                        --clear-groups|--keep-groups|--init-groups|--no-new-privs|--reset-env|--nnp)
+                                       (( pos++ )) ;;
+                        --reuid|--regid|--groups|--inh-caps|--ambient-caps|--bounding-set|--securebits|--selinux-label|--apparmor-profile|--pdeathsig)
+                                       (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        --*=*)         (( pos++ )) ;;
+                        *)             break ;;
+                    esac
+                done
+                ;;
+            setarch)
+                (( pos++ ))
+                # consume positional ARCH (only if not the last word)
+                (( pos <= $#words )) && (( pos++ ))
+                # consume boolean flags
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[vhV3BFILRSTXZ]*) (( pos++ )) ;;
+                        --*)               (( pos++ )) ;;
+                        *)                 break ;;
+                    esac
+                done
+                ;;
+            linux32|linux64)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[vhV3BFILRSTXZ]*) (( pos++ )) ;;
+                        --*)               (( pos++ )) ;;
+                        *)                 break ;;
+                    esac
+                done
+                ;;
+            runcon)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[c]*)         (( pos++ )) ;;
+                        -[urtl])       (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -[urtl]=*)     (( pos++ )) ;;
+                        --)            (( pos++ )); break ;;
+                        *)             break ;;
+                    esac
+                done
+                ;;
+            xvfb-run)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[alh]*)       (( pos++ )) ;;
+                        -[efnpsw])     (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -[efnpsw]=*)   (( pos++ )) ;;
+                        --)            (( pos++ )); break ;;
+                        *)             break ;;
+                    esac
+                done
+                ;;
+            chpst)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[vVP012]*)            (( pos++ )) ;;
+                        -[uUbeCnlLmdopfcrt/])  (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -[uUbeCnlLmdopfcrt/]=*) (( pos++ )) ;;
+                        *)                     break ;;
+                    esac
+                done
+                ;;
+            cgexec)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[h]*)         (( pos++ )) ;;
+                        -g)            (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -g=*)          (( pos++ )) ;;
+                        --sticky)      (( pos++ )) ;;
+                        *)             break ;;
+                    esac
+                done
+                ;;
+            trickle)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[hvVs]*)      (( pos++ )) ;;
+                        -[duwtnlP])    (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -[duwtnlP]=*)  (( pos++ )) ;;
+                        *)             break ;;
+                    esac
+                done
+                ;;
+            faketime)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[fm]*)        (( pos++ )) ;;
+                        --*)           (( pos++ )) ;;
+                        *)             break ;;
+                    esac
+                done
+                # consume mandatory TIMESTAMP (only if not the last word)
+                (( pos <= $#words )) && (( pos++ ))
+                ;;
+            proot)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        -[Vh0n]*)          (( pos++ )) ;;
+                        -[rbqwvkipRS])     (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -[rbqwvkipRS]=*)   (( pos++ )) ;;
+                        *)                 break ;;
+                    esac
+                done
+                ;;
+            bwrap)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        # 2-arg flags: --bind SRC DEST, --setenv VAR VAL, etc.
+                        --bind|--dev-bind|--ro-bind|--bind-try|--dev-bind-try|--ro-bind-try|--symlink|--file|--bind-data|--ro-bind-data|--setenv|--chmod)
+                            (( pos++ )); (( pos <= $#words )) && (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        # 3-arg: --overlay RWDIR WORKDIR DEST
+                        --overlay)
+                            (( pos++ )); (( pos <= $#words )) && (( pos++ )); (( pos <= $#words )) && (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        # boolean flags (0 args)
+                        --unshare-*|--share-net|--clearenv|--new-session|--die-with-parent|--as-pid-1|--assert-userns-disabled|--disable-userns)
+                            (( pos++ )) ;;
+                        # 1-arg catch-all for remaining --flags
+                        --*)
+                            (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        *)
+                            break ;;
+                    esac
+                done
+                ;;
+            capsh)
+                (( pos++ ))
+                while (( pos <= $#words )); do
+                    _zpwr_bare "$words[$pos]"
+                    case $REPLY in
+                        --)            (( pos++ )); break ;;
+                        --*=*)         (( pos++ )) ;;
+                        --print|--current|--mode|--modes|--strict|--noamb|--noenv|--quiet|--has-ambient|--has-p|--has-no-new-privs)
+                                       (( pos++ )) ;;
+                        --*)           (( pos++ )) ;;
+                        *)             break ;;
+                    esac
+                done
+                ;;
+            pkexec|fakeroot|unbuffer|chronic|torify|torsocks|tsocks|proxychains4|daemonize|firejail|sem|valgrind|systemd-run|dbus-run-session|eatmydata|catchsegv|nocache|fakechroot|ccache|distcc|dbus-launch)
                 (( pos++ ))
                 ;;
             *)
