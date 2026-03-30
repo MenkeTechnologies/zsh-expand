@@ -72,7 +72,7 @@ torify sudo -kE -u root su -l deploy                         \
 
 ### // THE MONSTER CHAIN
 
-No other expansion plugin can do this. 12 shell builtin permutations up front, then every one of the 38 execvp wrapper commands duplicated with different flag combos. `strace` and `ltrace` with all 26 flags maxed out. Variable assignments scattered everywhere. Shell builtins come first (they only exist inside zsh), then execvp wrappers chain freely. The parser consumes the entire prefix and `gco` expands to `git checkout`:
+No other expansion plugin can do this. 12 shell builtin permutations up front, then every one of the 62 execvp wrapper commands duplicated with different flag combos. `strace` and `ltrace` with all 26 flags maxed out. Variable assignments scattered everywhere. Shell builtins come first (they only exist inside zsh), then execvp wrappers chain freely. The parser consumes the entire prefix and `gco` expands to `git checkout`:
 
 ```
 nocorrect time -p command -p builtin eval noglob coproc       \
@@ -379,9 +379,23 @@ External wrappers (execvp commands):
 | `nsenter` | `-m -u -i -n -p -U -C -r -F -G` | `-t PID` `-S UID` | `nsenter -t 1 -m gco` |
 | `numactl` | `-l` | `-i NODES` `-C CPUS` `-N NODES` `-m NODES` `-p PID` | `numactl -C 0,1 gco` |
 | `prlimit` | `-v` | `-p PID` `--RESOURCE=LIMIT` | `prlimit --nofile=1024 gco` |
+| `setpriv` | `-d` | `--reuid UID` `--regid GID` `--groups LIST` `--inh-caps CAPS` `--ambient-caps CAPS` `--bounding-set CAPS` `--securebits BITS` `--selinux-label LBL` `--apparmor-profile PRF` `--pdeathsig SIG` `--no-new-privs` `--clear-groups` `--keep-groups` `--init-groups` `--reset-env` | `setpriv --reuid=1000 --inh-caps=-all gco` |
+| `setarch` | `-v -3 -B -F -I -L -R -S -T -X -Z` | — | `setarch i386 -R gco` |
+| `linux32` `linux64` | `-v -3 -B -F -I -L -R -S -T -X -Z` | — | `linux32 -R gco` |
+| `runcon` | `-c` | `-u USER` `-r ROLE` `-t TYPE` `-l RANGE` `--` | `runcon -t httpd_t gco` |
+| `xvfb-run` | `-a -l` | `-e FILE` `-f FILE` `-n NUM` `-p PROTO` `-s ARGS` `-w SEC` `--` | `xvfb-run -a gco` |
+| `chpst` | `-v -V -P -0 -1 -2` | `-u USER` `-U USER` `-b ARGV0` `-e DIR` `-/ ROOT` `-C N` `-n INC` `-l LOCK` `-L LOCK` `-m BYTES` `-d BYTES` `-o N` `-p N` `-f BYTES` `-c BYTES` `-r BYTES` `-t SEC` | `chpst -u www -m 200000 gco` |
+| `cgexec` | — | `-g CTRL:PATH` `--sticky` | `cgexec -g cpu:mygroup gco` |
+| `trickle` | `-s -v` | `-d RATE` `-u RATE` `-w LEN` `-t SEC` `-l LEN` `-n PATH` `-P PATH` | `trickle -d 100 -u 50 gco` |
+| `faketime` | `-f -m` | — | `faketime '2020-01-01' gco` |
+| `proot` | `-0 -n` | `-r PATH` `-b SRC:DST` `-q CMD` `-w DIR` `-v LVL` `-k REL` `-i UID:GID` `-p MAP` `-R PATH` `-S PATH` | `proot -0 -r /jail gco` |
+| `bwrap` | `--unshare-* --clearenv --new-session --die-with-parent --as-pid-1` | `--bind SRC DST` `--ro-bind SRC DST` `--dev-bind SRC DST` `--setenv VAR VAL` `--tmpfs DST` `--proc DST` `--dev DST` `--uid UID` `--gid GID` | `bwrap --ro-bind / / --unshare-net gco` |
+| `capsh` | `--print --noamb --noenv --quiet` | `--caps=TXT` `--drop=LIST` `--uid=UID` `--gid=GID` `--user=NAME` `--chroot=PATH` `--shell=PATH` `--` | `capsh --drop=cap_net_raw -- gco` |
 | `pkexec` `fakeroot` `unbuffer` `chronic` `valgrind` | — | — | `valgrind gco` |
 | `torify` `torsocks` `tsocks` `proxychains4` | — | — | `torify gco` |
 | `firejail` `daemonize` `sem` `systemd-run` `dbus-run-session` | — | — | `firejail gco` |
+| `eatmydata` `catchsegv` `nocache` `fakechroot` | — | — | `eatmydata gco` |
+| `ccache` `distcc` `dbus-launch` | — | — | `ccache gco` |
 
 All prefixes support `\escaped`, `'single-quoted'`, and `"double-quoted"` forms. `sudo`/`doas`/`env`/`nice`/`time`/`nohup`/`rlwrap` are case-insensitive. Variable assignments (`X=1`, `PATH=/usr/bin`) are stripped automatically at any position:
 
@@ -472,7 +486,7 @@ The key is the correct word, the value is a space-separated list of misspellings
 | Feature | zsh-expand | [zsh-abbr](https://github.com/olets/zsh-abbr) | [zsh-abbrev-alias](https://github.com/momo-lab/zsh-abbrev-alias) | [globalias](https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/globalias) |
 |---|---|---|---|---|
 | Uses native `alias` / `global alias` | **yes** | no (own `abbr` cmd) | no (own `abbrev-alias` cmd) | yes |
-| Expands after 38 prefix commands with flags | **yes** | no | no | no |
+| Expands after 62 prefix commands with flags | **yes** | no | no | no |
 | Full parser for prefix/flag/arg stripping | **yes** | no | no | no |
 | Context-aware `VAR=val` vs flag-arg handling | **yes** | no | no | no |
 | Positional arg depth limits (`su gco` != command) | **yes** | no | no | no |
