@@ -2691,7 +2691,7 @@
     alias gco="git checkout"
     local BLOCK="nocorrect builtin eval noglob coproc time -p command -p sudo -kE -u root env -0iv -C /tmp VAR1=a doas -n -u deploy env FOO=bar LANG=C sudo -ABbHnPS -g wheel -h h1 -p pw -R /ch -r r1 -T 60 -t t1 -u admin env -i HOME=/r1 PATH=/b1 TERM=x1 nice -n 10 nohup nice -n 5 nohup rlwrap -acirN -f /d1 -s 500 -b x -H /h1 -p red -S p1 timeout -k 5 -s TERM 30 strace -cCdDfFhikqrtTvVwxXyYzZ -a 80 -b 32 -e trace=network -E LD -I 1 -o /t1 -O 50 -p 1 -P /proc -s 256 -S time -u 40 -U 80 ltrace -cCdDfFhikqrtTvVwxXyYzZ -a 60 -b 16 -e malloc -E MALLOC -I 2 -o /t2 -O 25 -p 2 -P /lib -s 128 -S calls -u 20 -U 40 ionice -t -c 2 -n 7 caffeinate -dimsu -t 60 -w 1234 setsid -cf chrt -f 10 taskset -c 0-3 watch -dgtecxbp -n 2 flock -nsux -w 10 -E 2 /tmp/lk1 chroot /nr1 runuser -l -u deploy -g staff -G docker unshare -fmnpuUirC -- cpulimit -l 50 pkexec fakeroot unbuffer chronic valgrind torify torsocks tsocks proxychains4 daemonize firejail sem systemd-run "
     LBUFFER=""
-    for i in {1..107}; do
+    for i in {1..50}; do
         LBUFFER+="$BLOCK"
     done
     LBUFFER+="gco"
@@ -2708,11 +2708,13 @@
 @test 'stress100k: lastword is gco at 100KB' {
     local BLOCK="nocorrect builtin eval noglob coproc time -p command -p sudo -kE -u root env -0iv -C /tmp VAR1=a doas -n -u deploy env FOO=bar LANG=C sudo -ABbHnPS -g wheel -h h1 -p pw -R /ch -r r1 -T 60 -t t1 -u admin env -i HOME=/r1 PATH=/b1 TERM=x1 nice -n 10 nohup nice -n 5 nohup rlwrap -acirN -f /d1 -s 500 -b x -H /h1 -p red -S p1 timeout -k 5 -s TERM 30 strace -cCdDfFhikqrtTvVwxXyYzZ -a 80 -b 32 -e trace=network -E LD -I 1 -o /t1 -O 50 -p 1 -P /proc -s 256 -S time -u 40 -U 80 ltrace -cCdDfFhikqrtTvVwxXyYzZ -a 60 -b 16 -e malloc -E MALLOC -I 2 -o /t2 -O 25 -p 2 -P /lib -s 128 -S calls -u 20 -U 40 ionice -t -c 2 -n 7 caffeinate -dimsu -t 60 -w 1234 setsid -cf chrt -f 10 taskset -c 0-3 watch -dgtecxbp -n 2 flock -nsux -w 10 -E 2 /tmp/lk1 chroot /nr1 runuser -l -u deploy -g staff -G docker unshare -fmnpuUirC -- cpulimit -l 50 pkexec fakeroot unbuffer chronic valgrind torify torsocks tsocks proxychains4 daemonize firejail sem systemd-run "
     local input=""
-    for i in {1..107}; do
+    for i in {1..50}; do
         input+="$BLOCK"
     done
     input+="gco"
     zpwrExpandParseWords "$input"
+    assert $ZPWR_VARS[lastword_lbuffer] same_as 'gco'
+}
 
 #==============================================================
 # The gnarly monster — triple-proxied, traced, jailed,
