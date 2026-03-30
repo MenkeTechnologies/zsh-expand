@@ -63,7 +63,7 @@ torify sudo -kE -u root env -0iv -C /tmp                     \
 
 ### // THE MONSTER CHAIN
 
-No other expansion plugin can do this. 1,180 tokens. 5 full loops through the entire wrapper stack. 12 builtin permutations in every possible order. Every one of the 30 supported prefix commands duplicated with different flag combos. `strace` and `ltrace` with all 26 flags maxed out. Variable assignments scattered everywhere. The parser chews through all of it and `gco` still expands to `git checkout`:
+No other expansion plugin can do this. 757 tokens. 12 shell builtin permutations up front, then every one of the 30 execvp wrapper commands duplicated with different flag combos. `strace` and `ltrace` with all 26 flags maxed out. Variable assignments scattered everywhere. Shell builtins come first (they only exist inside zsh), then execvp wrappers chain freely. The parser consumes the entire prefix and `gco` expands to `git checkout`:
 
 ```
 nocorrect time -p command -p builtin eval noglob coproc       \
@@ -79,7 +79,7 @@ nocorrect time -p command -p builtin eval noglob coproc       \
   eval noglob nocorrect builtin coproc                        \
   noglob coproc nocorrect builtin eval time -p command        \
   nocorrect eval noglob builtin coproc                        \
-  sudo -kE -u root env -0iv -C /tmp VAR1=a VAR2=b            \
+  torify sudo -kE -u root env -0iv -C /tmp VAR1=a VAR2=b     \
   doas -n -u deploy env FOO=bar BAZ=qux LANG=C               \
   sudo -ABbHnPS -g wheel -h h1 -p pw -R /ch -r r1 -T 60     \
     -t t1 -u admin                                            \
@@ -88,6 +88,8 @@ nocorrect time -p command -p builtin eval noglob coproc       \
   sudo -kKi -u nobody env -v -C /var CC=gcc CFLAGS=-O2       \
   sudo -kE -u daemon env -0i -C /opt RUST_LOG=debug          \
   doas -n -u _www env -i SHELL=/bin/zsh EDITOR=vim            \
+  torsocks sudo -kE -u test env -i GOPATH=/go                 \
+  proxychains4                                                \
   nice -n 10 nohup nice -n 5 nohup nice -n 1 nohup           \
   nice -n 19 nohup nice -n 15 nohup nice -n 12 nohup         \
   rlwrap -acirN -f /d1 -s 500 -b x -H /h1 -p red -S p1      \
@@ -107,7 +109,6 @@ nocorrect time -p command -p builtin eval noglob coproc       \
   pkexec fakeroot unbuffer chronic valgrind                   \
   torify torsocks tsocks proxychains4                         \
   daemonize firejail sem systemd-run                          \
-  nocorrect builtin eval noglob coproc time -p command -p     \
   sudo -kE -u www env -0i -C /v2 PATH=/b2 GOPATH=/go         \
   doas -n -u _httpd                                           \
   nice -n 8 nohup nice -n 3 nohup                             \
@@ -123,8 +124,6 @@ nocorrect time -p command -p builtin eval noglob coproc       \
   pkexec fakeroot unbuffer chronic valgrind                   \
   torify torsocks proxychains4                                \
   daemonize firejail sem systemd-run                          \
-  nocorrect noglob builtin eval coproc time -v command        \
-  exec -l -a p3                                               \
   sudo -kE -u test env -i RUST_LOG=trace NODE_ENV=prod        \
   doas -n -u _test                                            \
   nice -n 7 nohup nice -n 2 nohup                             \
@@ -140,8 +139,6 @@ nocorrect time -p command -p builtin eval noglob coproc       \
   pkexec fakeroot unbuffer chronic valgrind                   \
   torify torsocks tsocks proxychains4                         \
   daemonize firejail sem systemd-run                          \
-  builtin eval nocorrect noglob coproc time -l command -p     \
-  exec -c -a p4                                               \
   sudo -kKnP -u op -T 120 -r mgr -t user_t                   \
     env -0iv -C /run DB=pg REDIS=6379                         \
   doas -s -C /etc/d2                                          \
@@ -163,8 +160,6 @@ nocorrect time -p command -p builtin eval noglob coproc       \
   pkexec fakeroot unbuffer chronic valgrind                   \
   torify torsocks tsocks proxychains4                         \
   daemonize firejail sem systemd-run                          \
-  nocorrect builtin eval noglob coproc time -p command -p     \
-  exec -cl -a p5                                              \
   sudo -kE -u root env -0iv -C /final VAR=last FINAL=yes     \
   doas -n -u root                                             \
   nice -n 0 nohup time -v gco<space>
@@ -235,7 +230,6 @@ nocorrect noglob builtin eval coproc time -p command -p       \
   valgrind                                                    \
   daemonize firejail sem systemd-run                          \
   tsocks                                                      \
-  nocorrect builtin eval noglob coproc time -l command -p     \
   sudo -kE -u www-data env -0iv -C /srv                       \
     DATABASE_URL=postgres://doom:fire@localhost/inferno        \
     REDIS_URL=redis://localhost:6379/0                         \
@@ -257,8 +251,6 @@ nocorrect noglob builtin eval coproc time -p command -p       \
   pkexec fakeroot unbuffer chronic valgrind                   \
   torify torsocks tsocks proxychains4                         \
   daemonize firejail sem systemd-run                          \
-  nocorrect noglob builtin eval coproc time -p command        \
-  exec -l -a FINAL_FORM                                       \
   sudo -kE -u root env -i PATH=/usr/bin LAST_WORDS=goodbye   \
   doas -n -u root                                             \
   nice -n 0 nohup time -v gco<space>
