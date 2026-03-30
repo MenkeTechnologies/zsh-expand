@@ -201,6 +201,7 @@ function zpwrExpandSuffixAlias(){
             res1=${match[1]}
             LBUFFER="$res1$saliases[$ext] $word"
             ZPWR_VARS[WAS_EXPANDED]=true
+            zpwrExpandGoToTabStopOrEndOfLBuffer
         fi
     fi
 }
