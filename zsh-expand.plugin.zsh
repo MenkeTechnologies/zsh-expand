@@ -58,6 +58,8 @@ if (( $#ZPWR_EXPAND_BLACKLIST )); then
 fi
 
 (){
+    'builtin' emulate -L zsh
+    setopt RC_QUOTES
     local ws='[:space:]'
     local l='[:graph:]'
     ZPWR_VARS[startQuoteRegex]='(\$''|[\\"''])*'
