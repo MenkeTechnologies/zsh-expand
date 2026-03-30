@@ -39,18 +39,27 @@ gco<space>  =>  git checkout
 sudo gco<space>  =>  sudo git checkout
 teh<space>  =>  the
 
+# su, stdbuf, and friends — all parsed:
+su -l root gco<space>  =>  su -l root git checkout
+stdbuf -oL gco<space>  =>  stdbuf -oL git checkout
+su root nice -n 10 nohup gco<space>  =>  ...git checkout
+
 # deep prefix chain — all flags parsed, alias still expanded:
 nocorrect time -p command sudo -kE -u root env -0iv -C /tmp \
   nice -n 10 rlwrap -acN -f comp nohup gco<space>
   =>  ...git checkout
 
 # extreme stack — proxy, auth, env, debug, scheduling, sandbox,
-# process control, wrapper, all with flags:
-torify sudo -kE -u root env -0iv -C /tmp                     \
-  strace -f -e trace=network ionice -c 2 chrt -f 10          \
+# process control, namespace, NUMA, OOM, buffering, all with flags:
+torify sudo -kE -u root su -l deploy                         \
+  env -0iv -C /tmp                                            \
+  strace -f -e trace=network stdbuf -oL                       \
+  nsenter -t 1 -m -n numactl -C 0-3                           \
+  ionice -c 2 chrt -f 10 choom -n -500                        \
   taskset -c 0 nice -n 10 caffeinate -i setsid -f            \
   flock /tmp/lock timeout 30 unbuffer rlwrap -acN             \
-  cpulimit -l 50 nohup time -v gco<space>
+  prlimit --nofile=4096 cpulimit -l 50                        \
+  nohup time -v gco<space>
   =>  ...git checkout
 
 ```
