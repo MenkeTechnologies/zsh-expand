@@ -113,6 +113,7 @@ Shell builtins/keywords (must precede external wrappers):
 | `exec` | `-c` `-l` `-a NAME` | `exec -cl -a name gco` |
 | `eval` | — | `eval gco` |
 | `noglob` | — | `noglob gco` |
+| `coproc` | — | `coproc gco` |
 
 External wrappers (execvp commands):
 
@@ -126,7 +127,7 @@ External wrappers (execvp commands):
 | `nohup` | — | — | `nohup gco` |
 | `rlwrap` | `-a -c -i -N -r` | `-b CHARS` `-f FILE` `-H FILE` `-p COLOR` `-s N` `-S PROMPT` | `rlwrap -acN -f comp -s 500 gco` |
 | `timeout` | — | `-k DUR` `-s SIG` | `timeout -k 10 30 gco` |
-| `strace` | `-c -C -d -D -f -F -h -i -k -q -r -t -T -v -V -w -x -X -y -Y -z -Z` | `-a COL` `-b SZ` `-e EXPR` `-E VAR` `-I N` `-o FILE` `-O N` `-p PID` `-P PATH` `-s SZ` `-S BY` `-u COL` `-U COL` | `strace -cf -s 256 gco` |
+| `strace` `ltrace` | `-c -C -d -D -f -F -h -i -k -q -r -t -T -v -V -w -x -X -y -Y -z -Z` | `-a COL` `-b SZ` `-e EXPR` `-E VAR` `-I N` `-o FILE` `-O N` `-p PID` `-P PATH` `-s SZ` `-S BY` `-u COL` `-U COL` | `strace -cf -s 256 gco` |
 | `ionice` | `-t` | `-c CLASS` `-n LEVEL` | `ionice -c 2 -n 7 gco` |
 | `caffeinate` | `-d -i -m -s -u` | `-t SEC` `-w PID` | `caffeinate -i gco` |
 | `setsid` | `-c -f -w` | — | `setsid -f gco` |
@@ -138,7 +139,7 @@ External wrappers (execvp commands):
 | `runuser` | `-l` | `-u USER` `-g GRP` `-G GRP` | `runuser -u deploy gco` |
 | `unshare` | `-f -m -n -p -u -U -i -r -C` | `--` | `unshare -mn gco` |
 | `cpulimit` | — | `-l LIMIT` | `cpulimit -l 50 gco` |
-| `pkexec` `fakeroot` `unbuffer` `chronic` `valgrind` `ltrace` | — | — | `valgrind gco` |
+| `pkexec` `fakeroot` `unbuffer` `chronic` `valgrind` | — | — | `valgrind gco` |
 | `torify` `torsocks` `tsocks` `proxychains4` | — | — | `torify gco` |
 | `firejail` `daemonize` `sem` `systemd-run` | — | — | `firejail gco` |
 
@@ -150,16 +151,6 @@ sudo X=1 env Y=2 gco            =>  sudo X=1 env Y=2 git checkout
 env FOO=bar BAZ=qux gco         =>  env FOO=bar BAZ=qux git checkout
 PATH=/usr/bin LANG=C sudo gco   =>  PATH=/usr/bin LANG=C sudo git checkout
 ```
-
-**Known limitation:** flag arguments containing `=` are also stripped, which can cause expansion to fail:
-
-```
-strace -e trace=network gco     =>  no expansion (trace=network stripped)
-strace -e trace=open -o out gco =>  no expansion (cascading misparse)
-env -S echo=hello gco           =>  no expansion (echo=hello stripped)
-```
-
-Workaround: use the space form instead of `=` where possible (`strace -e network gco`), or accept that these rare cases won't expand.
 
 ---
 

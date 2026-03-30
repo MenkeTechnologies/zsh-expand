@@ -65,7 +65,10 @@ function zpwrExpandCorrectWord(){
         #zpwrLogDebug "${ZPWR_EXPAND_PRE_CORRECT[@]}"
 
         word=${ZPWR_EXPAND_PRE_CORRECT[1]}
-        if (( $#ZPWR_EXPAND_PRE_CORRECT == 1)); then
+        if [[ -z $word && $#ZPWR_EXPAND_PRE_CORRECT -le 1 ]]; then
+            # all words consumed as prefixes (e.g. "env" alone) — nothing to correct
+            return
+        elif (( $#ZPWR_EXPAND_PRE_CORRECT == 1)); then
             if zpwrExpandIsCommand $word; then
                 #zpwrLogDebug "No correction from >= 2 words => '"'$word'"'_____ = ""'$word'"
                 # sudo/env pwd<space>
