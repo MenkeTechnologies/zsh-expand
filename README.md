@@ -53,11 +53,19 @@ torify sudo -kE -u root env -0iv -C /tmp                     \
   cpulimit -l 50 nohup time -v gco<space>
   =>  ...git checkout
 
-# 1,180-token monster chain — 5 full loops through the entire
-# wrapper stack, 12 builtin permutations, every execvp command
-# duplicated with different flag combos, strace/ltrace with all
-# 26 flags, variable assignments scattered everywhere.
-# The parser chews through all of it. gco still expands.
+```
+
+### // DEMO
+
+[![asciicast](https://asciinema.org/a/FbFsuMCSLtooqkB5ZZbBZeiEg.svg)](https://asciinema.org/a/FbFsuMCSLtooqkB5ZZbBZeiEg)
+
+---
+
+### // THE MONSTER CHAIN
+
+No other expansion plugin can do this. 1,180 tokens. 5 full loops through the entire wrapper stack. 12 builtin permutations in every possible order. Every one of the 30 supported prefix commands duplicated with different flag combos. `strace` and `ltrace` with all 26 flags maxed out. Variable assignments scattered everywhere. The parser chews through all of it and `gco` still expands to `git checkout`:
+
+```
 nocorrect time -p command -p builtin eval noglob coproc       \
   exec -cl -a p1                                              \
   nocorrect builtin eval noglob coproc time -l command -p     \
@@ -160,12 +168,10 @@ nocorrect time -p command -p builtin eval noglob coproc       \
   sudo -kE -u root env -0iv -C /final VAR=last FINAL=yes     \
   doas -n -u root                                             \
   nice -n 0 nohup time -v gco<space>
-  =>  ...git checkout   (1,180 tokens, all 30 prefix commands, expanded)
+  =>  ...git checkout
 ```
 
-### // DEMO
-
-[![asciicast](https://asciinema.org/a/FbFsuMCSLtooqkB5ZZbBZeiEg.svg)](https://asciinema.org/a/FbFsuMCSLtooqkB5ZZbBZeiEg)
+Scales to 96,000+ tokens (468KB) before hitting the OS `ARG_MAX` ceiling. Try that with a regex.
 
 ---
 
