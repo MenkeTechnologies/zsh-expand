@@ -72,7 +72,7 @@ torify sudo -kE -u root su -l deploy                         \
 
 ### // THE MONSTER CHAIN
 
-No other expansion plugin can do this. 12 shell builtin permutations up front, then every one of the 62 command wrapper commands duplicated with different flag combos. `strace` and `ltrace` with all 40 flags maxed out. Variable assignments scattered everywhere. Shell builtins come first (they only exist inside zsh), then command wrappers chain freely. The parser consumes the entire prefix and `gco` expands to `git checkout`:
+No other expansion plugin can do this. 12 shell builtin permutations up front, then every one of the 62 command wrapper commands duplicated with different flag combos. `strace` with all 41 flags and `ltrace` with all 25 flags. Variable assignments scattered everywhere. Shell builtins come first (they only exist inside zsh), then command wrappers chain freely. The parser consumes the entire prefix and `gco` expands to `git checkout`:
 
 ```
 nocorrect time -p command -p builtin eval noglob coproc       \
@@ -360,7 +360,8 @@ External prefix commands:
 | `nohup` | — | — | `nohup gco` |
 | `rlwrap` | `-a -c -E -h -i -I -m -n -N -o -R -r -U -v -W -X` | `-b CHARS` `-C NAME` `-D N` `-e CHAR` `-f FILE` `-g REGEX` `-H FILE` `-l FILE` `-M EXT` `-O REGEX` `-p COLOR` `-P INPUT` `-q CHARS` `-s N` `-S PROMPT` `-t NAME` `-w MS` `-z FILTER` | `rlwrap -acN -f comp -s 500 gco` |
 | `timeout` | `-f -p -v` | `-k DUR` `-s SIG` | `timeout -k 10 30 gco` |
-| `strace` `ltrace` | `-c -C -d -D -f -h -i -k -L -N -n -q -r -t -T -v -V -y -Y -z -Z` | `-a COL` `-A N` `-b SZ` `-e EXPR` `-E VAR` `-F LIST` `-I N` `-l LIB` `-n N` `-o FILE` `-O N` `-p PID` `-P PATH` `-s SZ` `-S BY` `-u USER` `-U COL` `-w N` `-X FMT` | `strace -cf -s 256 gco` |
+| `strace` | `-A -c -C -d -D -f -F -h -i -k -n -N -q -r -t -T -v -V -w -x -y -Y -z -Z` | `-a COL` `-b SYS` `-e EXPR` `-E VAR` `-I N` `-o FILE` `-O N` `-p PID` `-P PATH` `-s SZ` `-S BY` `-u USER` `-U COL` `-X FMT` | `strace -cf -s 256 gco` |
+| `ltrace` | `-b -c -C -f -h -i -L -r -S -t -T -V` | `-a COL` `-A N` `-D MASK` `-e FILTER` `-F PATH` `-l LIB` `-n NR` `-o FILE` `-p PID` `-s SZ` `-u USER` `-w NR` `-x FILTER` | `ltrace -f -l libfoo gco` |
 | `ionice` | `-t` | `-c CLASS` `-n LEVEL` | `ionice -c 2 -n 7 gco` |
 | `caffeinate` | `-d -i -m -s -u` | `-t SEC` `-w PID` | `caffeinate -i gco` |
 | `setsid` | `-c -f -w` | — | `setsid -f gco` |
