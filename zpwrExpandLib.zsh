@@ -274,7 +274,6 @@ function zpwrExpandSupernaturalSpace() {
     ZPWR_VARS[foundIncorrect]=false
     ZPWR_VARS[NEED_TO_ADD_SPACECHAR]=true
     ZPWR_VARS[LAST_WORD_WAS_AT_COMMAND]=false
-    ZPWR_VARS[finished]=false
     ZPWR_VARS[WAS_EXPANDED]=false
 
     zpwrExpandParseWords "$LBUFFER"
