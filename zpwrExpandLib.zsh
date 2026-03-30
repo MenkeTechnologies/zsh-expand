@@ -193,6 +193,21 @@ function zpwrExpandRightTrim() {
 
 }
 
+function zpwrExpandSuffixAlias(){
+
+    local word=$ZPWR_VARS[lastword_lbuffer]
+    local ext=${word:e}
+    local res1
+
+    if [[ -n $ext ]] && (( ${+saliases[$ext]} )); then
+        if [[ $LBUFFER == (#b)(*[[:space:]]#)($word) ]]; then
+            res1=${match[1]}
+            LBUFFER="$res1$saliases[$ext] $word"
+            ZPWR_VARS[WAS_EXPANDED]=true
+        fi
+    fi
+}
+
 zpwrExpandTerminateSpace(){
 
     LBUFFER+=" "
@@ -292,6 +307,9 @@ function zpwrExpandSupernaturalSpace() {
                     zpwrExpandGlobalAliases "$ZPWR_VARS[lastword_lbuffer]"
                     ZPWR_VARS[LAST_WORD_WAS_AT_COMMAND]=true
                     ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
+                elif [[ $ZPWR_EXPAND_SUFFIX == true ]] && (( $#ZPWR_EXPAND_WORDS_LPARTITION == 1 )); then
+                    # suffix alias expansion at command position
+                    zpwrExpandSuffixAlias
                 fi
             fi
         fi
