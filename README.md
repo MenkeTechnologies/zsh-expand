@@ -58,6 +58,7 @@ teh<space>  =>  the
 | **Self-Referential Alias Escape** | `alias git="hub"` expands to `\hub` -- backslash-escapes the first word to prevent infinite recursion |
 | **Correct-Then-Expand** | Typo correction chains into alias expansion in a single keypress -- `goc` -> `gco` -> `git checkout` |
 | **Quote-Aware Expansion** | Optionally expands aliases inside `"double"` or `'single'` quoted strings in argument position (not command position) |
+| **Suffix Alias Expansion** | `file.txt<space>` -> `vim file.txt` -- expands suffix aliases (`alias -s`) at command position |
 | **Autopair Integration** | Detects [autopair](https://github.com/hlissner/zsh-autopair) and delegates space insertion to preserve bracket/quote auto-pairing |
 | **History Injection** | Optionally writes the fully-expanded form of your command into history |
 
@@ -116,6 +117,9 @@ export ZPWR_EXPAND_QUOTE_SINGLE=false     # expand inside 'single quotes'
 export ZPWR_EXPAND_TO_HISTORY=false       # inject expanded form into history
 export ZPWR_EXPAND_PRE_EXEC_NATIVE=true   # expand globs on accept-line
 
+# -- SUFFIX --
+export ZPWR_EXPAND_SUFFIX=true            # expand suffix aliases (alias -s)
+
 # -- BLACKLIST --
 export ZPWR_EXPAND_BLACKLIST=(g gco)      # aliases to never expand
 ```
@@ -165,6 +169,7 @@ The key is the correct word, the value is a space-separated list of misspellings
 | User-extensible corrections | **yes** | no | no | no |
 | Clobber protection | **yes** | n/a | no | no |
 | Glob / history / param expansion | **yes** | no | no | yes |
+| Suffix alias expansion | **yes** | no | no | no |
 | Tabstop snippets (cursor placement) | **yes** | no | no | no |
 | Self-referential alias escape | **yes** | no | no | no |
 | Correct-then-expand chaining | **yes** | no | no | no |
@@ -237,6 +242,26 @@ export ZPWR_EXPAND_QUOTE_SINGLE=true   # expand inside 'single quotes'
 echo "gco<space>"  =>  echo "git checkout "   (argument — expanded)
 "gco"<space>       =>  "gco"                  (command position — not expanded)
 ```
+
+---
+
+### // SUFFIX ALIAS EXPANSION
+
+When `ZPWR_EXPAND_SUFFIX=true`, suffix aliases (`alias -s`) are expanded at command position:
+
+```sh
+alias -s txt=vim
+alias -s py=python
+alias -s json=jq
+```
+
+```
+file.txt<space>       =>  vim file.txt
+script.py<space>      =>  python script.py
+./data.json<space>    =>  jq ./data.json
+```
+
+Works with history injection -- the expanded form is saved to history on accept-line.
 
 ---
 
