@@ -103,7 +103,7 @@ torify sudo -kE -u root su -l deploy                         \
 |---|---|
 | **Alias Expansion** | Expands regular aliases in command position and after `sudo`, `env`, `builtin`, `command`, `exec`, `eval`, `noglob`, `nocorrect`, `nice`, `nohup`, `rlwrap`, `time` and arbitrary combos of these with full flag support |
 | **Global Alias Expansion** | Expands global aliases anywhere on the command line |
-| **Spelling Correction** | 300+ built-in misspelling/abbreviation corrections -- `teh` -> `the`, `cmd` -> `command`, `bg` -> `background` -- user-extensible via associative array |
+| **Spelling Correction** | 290+ built-in misspelling/abbreviation corrections -- `teh` -> `the`, `cmd` -> `command`, `bg` -> `background` -- user-extensible via associative array |
 | **Native Expansion** | Globs, `$parameters`, `$(command substitution)`, `=(process substitution)`, `!history` expansion via zle `expand-word` |
 | **Tabstop Snippets** | Aliases with `$ZPWR_TABSTOP` placeholders act as templates -- cursor jumps to the placeholder on expansion |
 | **Self-Referential Alias Escape** | `alias git="hub"` expands to `\hub` -- backslash-escapes the first word to prevent infinite recursion |
@@ -310,7 +310,7 @@ The key is the correct word, the value is a space-separated list of misspellings
 | Full parser for prefix/flag/arg stripping | **yes** | no | no | no |
 | Context-aware `VAR=val` vs flag-arg handling | **yes** | no | no | no |
 | Positional arg depth limits (`su gco` != command) | **yes** | no | no | no |
-| Spelling correction (300+ built-in) | **yes** | no | no | no |
+| Spelling correction (290+ built-in) | **yes** | no | no | no |
 | User-extensible corrections | **yes** | no | no | no |
 | No correction of valid commands | **yes** | n/a | no | no |
 | Glob / history / param expansion | **yes** | no | no | yes |
@@ -546,7 +546,7 @@ Source `zsh-expand.plugin.zsh` in `~/.zshrc`.
 
 ### // THE MONSTER CHAIN
 
-No other expansion plugin can do this. 12 shell builtin permutations up front, then every one of the 62 command wrapper commands duplicated with different flag combos. `strace` with all 41 flags and `ltrace` with all 25 flags. Variable assignments scattered everywhere. Shell builtins come first (they only exist inside zsh), then command wrappers chain freely. The parser consumes the entire prefix and `gco` expands to `git checkout`:
+No other expansion plugin can do this. 12 shell builtin permutations up front, then every one of the 62 command wrapper commands duplicated with different flag combos. `strace` with all 38 flags and `ltrace` with all 25 flags. Variable assignments scattered everywhere. Shell builtins come first (they only exist inside zsh), then command wrappers chain freely. The parser consumes the entire prefix and `gco` expands to `git checkout`:
 
 ```
 nocorrect time -p command -p builtin eval noglob coproc       \
