@@ -479,11 +479,11 @@ Benchmarks (Apple Silicon, 10,000 iterations):
 
 | Scenario | Per call |
 |---|---|
-| `file.txt` (suffix alias) | ~175 µs |
-| `sudo file.txt` (prefix + suffix) | ~190 µs |
-| `gco` (regular alias) | ~284 µs |
+| `file.txt` (suffix alias) | ~31 µs |
+| `sudo file.txt` (prefix + suffix) | ~130 µs |
+| `gco` (regular alias) | ~36 µs |
 
-Human perception threshold is ~100ms -- these are 350-570x below that.
+Human perception threshold is ~100ms -- these are 770-3200x below that.
 
 Stress test scaling (Apple Silicon, full prefix chain per loop):
 

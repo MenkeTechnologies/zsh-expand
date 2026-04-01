@@ -112,10 +112,7 @@ function zpwrExpandCorrectWord(){
 
 function zpwrExpandGetAliasValue(){
 
-    ZPWR_VARS[EXPANDED]="${$(alias -r $ZPWR_VARS[lastword_lbuffer])#*=}"
-    # deal with ansi quotes $'
-    [[ $ZPWR_VARS[EXPANDED][1] == \$ ]] && ZPWR_VARS[EXPANDED]=${ZPWR_VARS[EXPANDED]:1}
-    ZPWR_VARS[EXPANDED]=${(Q)ZPWR_VARS[EXPANDED]}
+    ZPWR_VARS[EXPANDED]="${aliases[$ZPWR_VARS[lastword_lbuffer]]}"
 }
 
 function zpwrExpandAliasEscape(){
