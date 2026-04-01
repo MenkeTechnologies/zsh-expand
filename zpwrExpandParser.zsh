@@ -852,42 +852,30 @@ function zpwrExpandParserFindCommandPosition() {
     done
 
     # Build prefix string (everything consumed) and tail string (remaining words)
-    local -a prefix_words=()
-    for (( i = 1; i < pos && i <= $#words; i++ )); do
-        prefix_words+=("$words[$i]")
-    done
-    ZPWR_VARS[cachedParserPrefix]="${prefix_words[*]}"
+    if (( pos > 1 )); then
+        ZPWR_VARS[cachedParserPrefix]="${words[1,pos-1]}"
+    else
+        ZPWR_VARS[cachedParserPrefix]=""
+    fi
 
     if (( pos <= $#words )); then
-        local -a tail=()
-        for (( i = pos; i <= $#words; i++ )); do
-            tail+=("$words[$i]")
-        done
-        ZPWR_VARS[cachedRegexMatch]="${tail[*]}"
+        ZPWR_VARS[cachedRegexMatch]="${words[pos,-1]}"
         ZPWR_VARS[cachedRegexMatched]=true
-
-        # also update ZPWR_EXPAND_WORDS_LPARTITION to have assignments stripped
-        # (downstream code expects this)
-        local -a cleaned=()
-        for (( i = 1; i <= $#words; i++ )); do
-            if ! _zpwr_is_assignment "$words[$i]"; then
-                cleaned+=("$words[$i]")
-            fi
-        done
-        ZPWR_EXPAND_WORDS_LPARTITION=("${cleaned[@]}")
     else
         # all words consumed as prefixes — still a valid parse, just no command yet
         ZPWR_VARS[cachedRegexMatch]=""
         ZPWR_VARS[cachedRegexMatched]=true
-
-        local -a cleaned=()
-        for (( i = 1; i <= $#words; i++ )); do
-            if ! _zpwr_is_assignment "$words[$i]"; then
-                cleaned+=("$words[$i]")
-            fi
-        done
-        ZPWR_EXPAND_WORDS_LPARTITION=("${cleaned[@]}")
     fi
+
+    # update ZPWR_EXPAND_WORDS_LPARTITION to have assignments stripped
+    # (downstream code expects this)
+    local -a cleaned=()
+    for (( i = 1; i <= $#words; i++ )); do
+        if ! _zpwr_is_assignment "$words[$i]"; then
+            cleaned+=("$words[$i]")
+        fi
+    done
+    ZPWR_EXPAND_WORDS_LPARTITION=("${cleaned[@]}")
 
     unfunction _zpwr_bare _zpwr_is_assignment 2>/dev/null
 }
