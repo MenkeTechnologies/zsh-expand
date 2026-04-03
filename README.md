@@ -516,7 +516,7 @@ A large [zunit](https://github.com/zunit-zsh/zunit) suite (10,000+ discrete `@te
 zsh scripts/count-tests.zsh
 ```
 
-Coverage includes alias expansion, global aliases, suffix aliases, spelling correction, command-position parsing, word parsing, native expansion, config flags, tab stops, prefix chains, command existence checks, integration flows, and edge cases (including parser regressions such as `ltrace -n` / `-b` flag arguments). Dedicated files exercise assignment stripping, `--` end-of-options, and long prefix chains (`tests/t-parser-assignments-and-wrappers.zsh`, `tests/t-ltrace-parser-regression.zsh`).
+Coverage includes alias expansion, global aliases, suffix aliases, spelling correction, command-position parsing, word parsing, native expansion, config flags, tab stops, prefix chains, command existence checks, integration flows, and edge cases (including parser regressions such as `ltrace -n` / `-b` flag arguments). Dedicated files exercise assignment stripping, `--` end-of-options, phase-1 shell keywords (`nocorrect`, `time`, `command`, `exec`, …), and long prefix chains (`tests/t-parser-assignments-and-wrappers.zsh`, `tests/t-parser-phase1-keywords.zsh`, `tests/t-ltrace-parser-regression.zsh`).
 
 ```sh
 zunit
