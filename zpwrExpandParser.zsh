@@ -205,9 +205,15 @@ function zpwrExpandParserFindCommandPosition() {
                 while (( pos <= $#words )); do
                     _zpwr_bare "$words[$pos]"
                     case $REPLY in
-                        -[bcCfhiLrStTV]*) (( pos++ )) ;;
-                        -[aADeFlnopsuwx])   (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
-                        -[aADeFlnopsuwx]=*) (( pos++ )) ;;
+                        # --indent / -n always takes an argument (NR); match before combo flags so
+                        # it cannot be mistaken for a no-arg flag on any zsh build.
+                        -n)                 (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        # Standalone -b syscall mask takes the next word; bundled -bc... (one token)
+                        # must still match the combo branch below.
+                        -b)                 (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -[bcCfhiLrStTV]*)   (( pos++ )) ;;
+                        -[aADeFlopsuwx])    (( pos++ )); (( pos <= $#words )) && (( pos++ )) ;;
+                        -[aADeFlopsuwx]=*)  (( pos++ )) ;;
                         --)                 (( pos++ )); break ;;
                         *)                  break ;;
                     esac

@@ -6,25 +6,32 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     strategy:
       matrix:
         zsh-version: ['default']
       fail-fast: true
 
     steps:
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y zsh vim python3 curl git
-
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           path: zsh-expand
 
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y zsh vim python3 curl git
 
       - name: Set terminal size variables
         run: |
@@ -34,17 +41,19 @@ jobs:
 
       - name: Set up zunit
         run: |
-          mkdir .bin
-          curl -L https://raw.githubusercontent.com/molovo/revolver/master/revolver > .bin/revolver
+          set -euo pipefail
+          mkdir -p .bin
+          curl -fsSL -o .bin/revolver https://raw.githubusercontent.com/molovo/revolver/master/revolver
           chmod u+x .bin/revolver
           export PATH="$PWD/.bin:$PATH"
-          git clone https://github.com/MenkeTechnologies/zunit
-          cd zunit && ./build.zsh
-          echo "$PWD" >> "$GITHUB_PATH"
-          cd ..
+          git clone --depth 1 https://github.com/MenkeTechnologies/zunit
+          (cd zunit && ./build.zsh)
+          echo "$PWD/zunit" >> "$GITHUB_PATH"
           echo "$PWD/.bin" >> "$GITHUB_PATH"
 
       - name: Run tests
         run: |
+          set -euo pipefail
           cd zsh-expand
+          zsh scripts/count-tests.zsh
           zunit --verbose tests/*.zsh
