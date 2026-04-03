@@ -510,7 +510,13 @@ How deep can you actually chain? The parser handles all of it instantly -- the O
 
 ### // TEST COVERAGE
 
-10,000+ tests across 31 test files using [zunit](https://github.com/zunit-zsh/zunit). Covers alias expansion, global aliases, suffix aliases, spelling correction, command-position regex matching, word parsing, native expansion, config flags, tab stops, prefix chains, command existence checks, integration flows, and edge cases.
+A large [zunit](https://github.com/zunit-zsh/zunit) suite (10,000+ discrete `@test` blocks). Exact totals change frequently — print them from the repo root with:
+
+```sh
+zsh scripts/count-tests.zsh
+```
+
+Coverage includes alias expansion, global aliases, suffix aliases, spelling correction, command-position parsing, word parsing, native expansion, config flags, tab stops, prefix chains, command existence checks, integration flows, and edge cases (including parser regressions such as `ltrace -n` / `-b` flag arguments).
 
 ```sh
 zunit
