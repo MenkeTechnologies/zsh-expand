@@ -61,7 +61,7 @@
 
 ### // WHAT IS THIS
 
-**The world's most powerful zsh expansion plugin.** Intercepts your spacebar and expands everything in its path -- regular aliases, global aliases, suffix aliases, misspellings, globs, history, parameters, and more. No pipes. No external commands. Pure zsh. Sub-millisecond. 10,000+ tests.
+**The world's most powerful zsh expansion plugin.** Intercepts your spacebar and expands everything in its path -- regular aliases, global aliases, suffix aliases, misspellings, globs, history, parameters, and more. No pipes. No external commands. Pure zsh. Sub-millisecond. 11,000+ tests.
 
 ```
 gco<space>  =>  git checkout
@@ -333,7 +333,7 @@ The key is the correct word, the value is a space-separated list of misspellings
 | Autopair integration | **yes** | no | no | no |
 | Case-insensitive prefix matching | **yes** | no | no | no |
 | Blacklist / filter | **yes** | n/a | no | yes |
-| Test suite | **10,000+** | yes | no | no |
+| Test suite | **11,000+** | yes | no | no |
 | Pure zsh (no external deps) | **yes** | yes | yes | ohmyzsh |
 | Active (2026) | **yes** | yes | slow (2024) | stale (2020) |
 
@@ -438,7 +438,7 @@ export ZPWR_EXPAND_PRE_EXEC_NATIVE=true
 
 ### // DEBUG WIDGET
 
-Press `Esc Ctrl+D` to inspect the parser's view of the current line without expanding anything:
+Press `Ctrl+\` to inspect the parser's view of the current line without expanding anything:
 
 ```
 ┌── zsh-expand debug ────────────────┐
@@ -524,7 +524,7 @@ The parser exposes two results for downstream consumers:
 
 ### // PERFORMANCE
 
-Source files can be compiled to `.zwc` bytecode for instant loading (`zcompile` or via your plugin manager). The plugin uses zero external commands -- no `sed`, `awk`, `grep`, or subshells. Every expansion runs in pure zsh builtins and parameter expansion, keeping latency invisible on every keypress.
+Source files can be compiled to `.zwc` bytecode for instant loading (`zcompile` or via your plugin manager). The expansion hot path uses zero external commands and zero subshells -- no `sed`, `awk`, `grep`, or `$(...)`. Every spacebar expansion runs in pure zsh builtins and parameter expansion, keeping latency invisible on every keypress.
 
 Benchmarks (Apple Silicon, 10,000 iterations):
 
@@ -561,7 +561,7 @@ How deep can you actually chain? The parser handles all of it instantly -- the O
 
 ### // TEST COVERAGE
 
-A large [zunit](https://github.com/zunit-zsh/zunit) suite (10,000+ discrete `@test` blocks). Exact totals change frequently — print them from the repo root with:
+A large [zunit](https://github.com/zunit-zsh/zunit) suite (11,000+ discrete `@test` blocks). Exact totals change frequently — print them from the repo root with:
 
 ```sh
 zsh scripts/count-tests.zsh
