@@ -477,3 +477,110 @@ line2   spaced'
     unalias __zpr_mline
     command rm -f "$tmp"
 }
+
+#==============================================================
+# glob chars must not falsely match aliases
+#==============================================================
+
+@test 'glob: * is not treated as alias even when aliases exist' {
+    alias __zpr_real='echo real'
+    # ${+aliases[*]} would return 1 without (e) flag
+    [[ -z ${aliases[(e)*]} ]]
+    assert $? equals 0
+    # the (e) flag must be used in the expansion path
+    (( ! ${+aliases[(e)*]} ))
+    assert $? equals 0
+    unalias __zpr_real
+}
+
+@test 'glob: ? is not treated as alias' {
+    alias __zpr_q='echo q'
+    (( ! ${+aliases[(e)?]} ))
+    assert $? equals 0
+    unalias __zpr_q
+}
+
+@test 'glob: [abc] is not treated as alias' {
+    alias a='echo a'
+    (( ! ${+aliases[(e)[abc]]} ))
+    assert $? equals 0
+}
+
+@test 'glob: * not treated as global alias even when galiases exist' {
+    alias -g __ZPR_G='| head'
+    (( ! ${+galiases[(e)*]} ))
+    assert $? equals 0
+    unalias __ZPR_G
+}
+
+@test 'glob: previewResolve does not resolve star as alias' {
+    alias __zpr_star_test='echo star'
+    run zpwrExpandPreviewResolve '*'
+    assert $state equals 1
+    unalias __zpr_star_test
+}
+
+@test 'glob: previewResolve does not resolve question mark as alias' {
+    alias __zpr_q2='echo q2'
+    run zpwrExpandPreviewResolve '?'
+    assert $state equals 1
+    unalias __zpr_q2
+}
+
+@test 'stats: echo * records as native not alias' {
+    local tmp out
+    tmp=$(mktemp "${TMPDIR:-/tmp}/zunit-zpwr-stats-glob-type.XXXXXX")
+    ZPWR_EXPAND_STATS_FILE=$tmp
+    # simulate what should happen: native expansion, not alias
+    zpwrExpandStatsRecord 'S:native:*'
+    out=$(zpwrExpandStats 2>&1)
+    assert "$out" contains 'NATIVE'
+    # should NOT have alias count for *
+    [[ $out != *"S:alias:*"* ]]
+    assert $? equals 0
+    command rm -f "$tmp"
+}
+
+@test 'stats: * does not produce double records' {
+    local tmp
+    tmp=$(mktemp "${TMPDIR:-/tmp}/zunit-zpwr-stats-glob-double.XXXXXX")
+    ZPWR_EXPAND_STATS_FILE=$tmp
+    zpwrExpandStatsRecord 'S:native:*'
+    local -i lineCount
+    lineCount=$(wc -l < "$tmp")
+    assert $lineCount equals 1
+    command rm -f "$tmp"
+}
+
+@test 'stats: glob chars in keys do not cause bad math' {
+    local tmp out
+    tmp=$(mktemp "${TMPDIR:-/tmp}/zunit-zpwr-stats-glob-math.XXXXXX")
+    ZPWR_EXPAND_STATS_FILE=$tmp
+    zpwrExpandStatsRecord 'S:native:*'
+    zpwrExpandStatsRecord 'S:native:?'
+    zpwrExpandStatsRecord 'S:native:[abc]'
+    zpwrExpandStatsRecord 'S:alias:normal'
+    out=$(zpwrExpandStats 2>&1)
+    [[ $out != *"bad math"* ]]
+    assert $? equals 0
+    assert "$out" contains 'normal'
+    command rm -f "$tmp"
+}
+
+@test 'glob: actual alias named literally is still found' {
+    # an alias whose name has no glob meaning should still work
+    alias __zpr_noglobname='echo works'
+    (( ${+aliases[(e)__zpr_noglobname]} ))
+    assert $? equals 0
+    assert "${aliases[(e)__zpr_noglobname]}" same_as 'echo works'
+    unalias __zpr_noglobname
+}
+
+@test 'glob: previewResolve still resolves normal aliases' {
+    alias __zpr_norm='echo normal'
+    zpwrExpandPreviewResolve '__zpr_norm'
+    local rc=$?
+    assert $rc equals 0
+    assert "$REPLY" same_as 'echo normal'
+    unalias __zpr_norm
+}
