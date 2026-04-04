@@ -671,6 +671,46 @@ function zpwrExpandStats() {
     setopt extendedglob
 
     local statsFile=${ZPWR_EXPAND_STATS_FILE:-${ZPWR_LOCAL:-${XDG_CACHE_HOME:-$HOME/.cache}}/zpwr-expand-stats.dat}
+    local -i topN=${ZPWR_EXPAND_STATS_TOP:-15}
+    local -i boxWidth=70
+    local doReset=false doColor=false
+
+    # parse flags
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            -h|--help)
+                cat <<'HELP'
+zpwrExpandStats — expansion stats dashboard
+
+  -h, --help          Show this help
+  -t, --top N         Show top N aliases (default: 15)
+  -w, --width N       Box width (default: 70)
+  -c, --color         Force ANSI colors
+  -r, --reset         Clear all stats
+  -f, --file PATH     Stats file path
+HELP
+                return 0
+                ;;
+            -t|--top)   topN=$2; shift 2 ;;
+            -w|--width) boxWidth=$2; shift 2 ;;
+            -c|--color) doColor=true; shift ;;
+            -r|--reset)
+                doReset=true; shift ;;
+            -f|--file)  statsFile=$2; shift 2 ;;
+            --)         shift; break ;;
+            *)          print "zpwrExpandStats: unknown option: $1" >&2; return 1 ;;
+        esac
+    done
+
+    if [[ $doReset == true ]]; then
+        if [[ -f $statsFile ]]; then
+            command rm -f "$statsFile"
+            print "Stats cleared: $statsFile"
+        else
+            print "No stats file to clear."
+        fi
+        return 0
+    fi
 
     if [[ ! -f $statsFile ]]; then
         zpwrExpandBox -t "EXPANSION STATS" "No expansions recorded yet."
@@ -775,7 +815,7 @@ function zpwrExpandStats() {
 
     for entry in "${sorted[@]}"; do
         (( rank++ ))
-        (( rank > ${ZPWR_EXPAND_STATS_TOP:-15} )) && break
+        (( rank > topN )) && break
         cnt=${entry%% *}
         name=${entry#* }
 
@@ -792,7 +832,7 @@ function zpwrExpandStats() {
             expanded=${expanded//$'\t'/ }
             expanded=${expanded//  ##/ }
             # truncate to fit within box width (prefix + "  // " + expansion)
-            maxExpand=$((70 - ${#rankStr} - 6))
+            maxExpand=$((boxWidth - ${#rankStr} - 6))
             (( maxExpand < 10 )) && maxExpand=10
             (( ${#expanded} > maxExpand )) && expanded="${expanded:0:$((maxExpand - 3))}..."
             lines+=("$rankStr  // $expanded")
@@ -804,6 +844,8 @@ function zpwrExpandStats() {
     lines+=("")
     lines+=(">>> YOUR ALIASES ARE WORKING FOR YOU <<<")
 
-    zpwrExpandBox -t "EXPANSION STATS" -w 70 "${lines[@]}"
+    local -a boxArgs=(-t "EXPANSION STATS" -w $boxWidth)
+    [[ $doColor == true ]] && boxArgs+=(--color)
+    zpwrExpandBox "${boxArgs[@]}" "${lines[@]}"
 }
 #}}}*********************************************************** 
