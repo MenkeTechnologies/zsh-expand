@@ -319,3 +319,41 @@
     assert "$out" contains '░'
     command rm -f "$tmp"
 }
+
+@test 'stats: ZPWR_EXPAND_STATS_TOP limits TOP ALIASES rows' {
+    local tmp out
+    tmp=$(mktemp "${TMPDIR:-/tmp}/zunit-zpwr-stats-top.XXXXXX")
+    ZPWR_EXPAND_STATS_FILE=$tmp
+    local -i i
+    ZPWR_EXPAND_STATS_TOP=3
+    for (( i = 1; i <= 10; i++ )); do zpwrExpandStatsRecord 'S:alias:zst_rank1'; done
+    for (( i = 1; i <= 8; i++ )); do zpwrExpandStatsRecord 'S:alias:zst_rank2'; done
+    for (( i = 1; i <= 6; i++ )); do zpwrExpandStatsRecord 'S:alias:zst_rank3'; done
+    for (( i = 1; i <= 4; i++ )); do zpwrExpandStatsRecord 'S:alias:zst_rank4_dropped'; done
+    out=$(zpwrExpandStats)
+    assert "$out" contains 'zst_rank1'
+    assert "$out" contains 'zst_rank2'
+    assert "$out" contains 'zst_rank3'
+    [[ $out != *zst_rank4_dropped* ]]
+    assert $? equals 0
+    command rm -f "$tmp"
+    unset ZPWR_EXPAND_STATS_TOP
+}
+
+@test 'stats: unset ZPWR_EXPAND_STATS_TOP uses default 15' {
+    local tmp out
+    tmp=$(mktemp "${TMPDIR:-/tmp}/zunit-zpwr-stats-top-default.XXXXXX")
+    ZPWR_EXPAND_STATS_FILE=$tmp
+    unset ZPWR_EXPAND_STATS_TOP
+    local -i r
+    for (( r = 1; r <= 16; r++ )); do
+        zpwrExpandStatsRecord "S:alias:zst_def_${(l:2::0:)r}"
+    done
+    out=$(zpwrExpandStats)
+    # Tied counts sort with zst_def_16 … zst_def_02 in the top 15; zst_def_01 is rank 16.
+    assert "$out" contains 'zst_def_16'
+    assert "$out" contains 'zst_def_02'
+    [[ $out != *zst_def_01* ]]
+    assert $? equals 0
+    command rm -f "$tmp"
+}
