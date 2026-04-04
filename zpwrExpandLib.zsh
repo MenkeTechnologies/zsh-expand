@@ -443,12 +443,79 @@ function zpwrExpandDebugWidget() {
 }
 #}}}***********************************************************
 
+function zpwrExpandPreviewResolve() {
+    # resolve what the last word would expand to, return via REPLY
+    # does not modify LBUFFER or any global state
+    REPLY=""
+    local lastword=$1
+    [[ -z $lastword ]] && return 1
+
+    if (( ${+aliases[$lastword]} )); then
+        REPLY=${aliases[$lastword]}
+    elif (( ${+galiases[$lastword]} )); then
+        REPLY=${galiases[$lastword]}
+    elif [[ -n ${lastword:e} ]] && (( ${+saliases[${lastword:e}]} )); then
+        REPLY="$saliases[${lastword:e}] $lastword"
+    elif [[ -n ${ZPWR_EXPAND_CORRECT_REVERSE[$lastword]} ]]; then
+        REPLY=${ZPWR_EXPAND_CORRECT_REVERSE[$lastword]}
+    fi
+
+    [[ -n $REPLY ]] && return 0
+    return 1
+}
+
+function zpwrExpandPreview() {
+    # called on zle-line-pre-redraw — show ghost text for pending expansion
+
+    # bail if preview disabled or expand disabled
+    [[ $ZPWR_EXPAND_PREVIEW != true || $ZPWR_EXPAND == false ]] && { POSTDISPLAY=""; return; }
+
+    # bail if empty or ends with space (already expanded)
+    if [[ -z $LBUFFER || $LBUFFER[-1] == " " ]]; then
+        POSTDISPLAY=""
+        return
+    fi
+
+    # get the last word cheaply — no full parse, just grab trailing non-space
+    local lastword=${LBUFFER##*[[:space:]]}
+
+    # check blacklist
+    if [[ -n $ZPWR_VARS[blacklistUser] ]] && [[ $lastword =~ $ZPWR_VARS[blacklistUser] ]]; then
+        POSTDISPLAY=""
+        return
+    fi
+
+    # skip if same as last check (avoid re-resolving on cursor movement within same word)
+    if [[ $lastword == $ZPWR_VARS[previewLastWord] ]]; then
+        return
+    fi
+    ZPWR_VARS[previewLastWord]=$lastword
+
+    local expanded
+    if zpwrExpandPreviewResolve "$lastword"; then
+        expanded=$REPLY
+        # don't preview if expansion equals the word itself
+        if [[ $expanded == "$lastword" ]]; then
+            POSTDISPLAY=""
+            return
+        fi
+        POSTDISPLAY=" → $expanded"
+    else
+        POSTDISPLAY=""
+    fi
+}
+#}}}***********************************************************
+
 #{{{                    MARK:main fn
 #**************************************************************
 function zpwrExpandSupernaturalSpace() {
 
     'builtin' emulate -L zsh
     setopt rcquotes extended_glob zle
+
+    # clear expansion preview ghost text
+    POSTDISPLAY=""
+    ZPWR_VARS[previewLastWord]=""
 
     if [[ $ZPWR_TRACE == true ]]; then
         set -x
