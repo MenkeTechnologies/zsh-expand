@@ -143,8 +143,8 @@ function zpwrExpandWordStopHistoryExpansion(){
         local _pre_expand=$LBUFFER
         zle expand-word
         ZPWR_VARS[WAS_EXPANDED]=true
-        # track native expansion only if buffer actually changed
-        if [[ $LBUFFER != $_pre_expand ]]; then
+        # track native expansion only if buffer actually changed and no prior expansion recorded
+        if [[ $LBUFFER != $_pre_expand && -z $ZPWR_VARS[ORIGINAL_LAST_COMMAND] ]]; then
             ZPWR_VARS[EXPAND_TYPE]=native
             ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
         fi
