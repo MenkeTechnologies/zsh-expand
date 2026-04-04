@@ -255,10 +255,11 @@ function zpwrExpandBox() {
     done
 
     # collect lines from args and/or stdin, expand tabs
+    # when positional lines are given, do not read stdin — a non-tty stdin may
+    # never close (e.g. test runners), which would block forever after filling rawLines
     if (( $# )); then
         rawLines=("$@")
-    fi
-    if [[ ! -t 0 ]]; then
+    elif [[ ! -t 0 ]]; then
         local stdinLine
         while IFS= read -r stdinLine || [[ -n $stdinLine ]]; do
             rawLines+=("$stdinLine")

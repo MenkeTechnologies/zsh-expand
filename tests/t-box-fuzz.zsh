@@ -60,6 +60,15 @@
     _assert_box "$out"
 }
 
+@test 'box: positional args do not read stdin (non-tty may not EOF)' {
+    local out
+    out=$(builtin printf 'stdin-line\n' | zpwrExpandBox "only-args")
+    _assert_box "$out"
+    assert "$out" contains 'only-args'
+    [[ $out != *stdin-line* ]]
+    assert $? equals 0
+}
+
 @test 'box: single line with title' {
     local out=$(zpwrExpandBox -t "title" "hello")
     _assert_box "$out"
