@@ -679,38 +679,43 @@ function zpwrExpandStats() {
     while [[ $# -gt 0 ]]; do
         case $1 in
             -h|--help)
-                cat <<'HELP'
- ███████╗██╗  ██╗██████╗  █████╗ ███╗   ██╗██████╗
- ██╔════╝╚██╗██╔╝██╔══██╗██╔══██╗████╗  ██║██╔══██╗
- █████╗   ╚███╔╝ ██████╔╝███████║██╔██╗ ██║██║  ██║
- ██╔══╝   ██╔██╗ ██╔═══╝ ██╔══██║██║╚██╗██║██║  ██║
- ███████╗██╔╝ ██╗██║     ██║  ██║██║ ╚████║██████╔╝
- ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝╚═╝  ╚═══╝╚═════╝
- ┌──────────────────────────────────────────────────────┐
- │ STATUS: TRACKING  // SIGNAL: ████████░░ // STATS  │
- └──────────────────────────────────────────────────────┘
-  >> EXPANSION STATS DASHBOARD // FULL SPECTRUM <<
+                local _r=$'\e[0m'
+                local _c=$'\e[38;5;51m'    # cyan neon
+                local _m=$'\e[1m\e[38;5;207m' # bold magenta
+                local _g=$'\e[38;5;48m'    # green neon
+                local _y=$'\e[38;5;226m'   # yellow
+                local _d=$'\e[38;5;236m'   # dark gray
+                local _w=$'\e[1m\e[38;5;255m' # bold white
+                print -r -- "${_c} ███████╗██╗  ██╗██████╗  █████╗ ███╗   ██╗██████╗${_r}
+${_c} ██╔════╝╚██╗██╔╝██╔══██╗██╔══██╗████╗  ██║██╔══██╗${_r}
+${_c} █████╗   ╚███╔╝ ██████╔╝███████║██╔██╗ ██║██║  ██║${_r}
+${_c} ██╔══╝   ██╔██╗ ██╔═══╝ ██╔══██║██║╚██╗██║██║  ██║${_r}
+${_c} ███████╗██╔╝ ██╗██║     ██║  ██║██║ ╚████║██████╔╝${_r}
+${_c} ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝╚═╝  ╚═══╝╚═════╝${_r}
+${_g} ┌────────────────────────────────────────────────────┐${_r}
+${_g} │${_r} ${_w}STATUS:${_r} ${_g}TRACKING${_r}  ${_d}//${_r} ${_w}SIGNAL:${_r} ${_g}████████${_d}░░${_r}  ${_d}//${_r} ${_m}STATS${_r}  ${_g}│${_r}
+${_g} └────────────────────────────────────────────────────┘${_r}
+  ${_m}>>${_r} ${_w}EXPANSION STATS DASHBOARD${_r} ${_d}//${_r} ${_y}FULL SPECTRUM${_r} ${_m}<<${_r}
 
-  USAGE: zpwrExpandStats [OPTIONS]
+  ${_w}USAGE:${_r} ${_g}zpwrExpandStats${_r} ${_d}[OPTIONS]${_r}
 
-  ── OPTIONS ────────────────────────────────────────────
-  -h, --help                                     // Show this help
-  -t, --top <N>                                  // Top N aliases (default: 15)
-  -w, --width <N>                                // Box width (default: 70)
-  -c, --color                                    // Force ANSI colors
-  -r, --reset                                    // Clear all stats
-  -f, --file <PATH>                              // Override stats file path
+  ${_c}── OPTIONS ────────────────────────────────────────────${_r}
+  ${_g}-h${_r}, ${_g}--help${_r}                                     ${_d}//${_r} Show this help
+  ${_g}-t${_r}, ${_g}--top${_r} ${_y}<N>${_r}                                  ${_d}//${_r} Top N aliases (default: 15)
+  ${_g}-w${_r}, ${_g}--width${_r} ${_y}<N>${_r}                                ${_d}//${_r} Box width (default: 70)
+  ${_g}-c${_r}, ${_g}--color${_r}                                    ${_d}//${_r} Force ANSI colors
+  ${_g}-r${_r}, ${_g}--reset${_r}                                    ${_d}//${_r} Clear all stats
+  ${_g}-f${_r}, ${_g}--file${_r} ${_y}<PATH>${_r}                              ${_d}//${_r} Override stats file path
 
-  ── CONFIG ─────────────────────────────────────────────
-  ZPWR_EXPAND_STATS_FILE                         // Stats file location
-  ZPWR_EXPAND_STATS_TOP                          // Default top N
+  ${_c}── CONFIG ─────────────────────────────────────────────${_r}
+  ${_g}ZPWR_EXPAND_STATS_FILE${_r}                         ${_d}//${_r} Stats file location
+  ${_g}ZPWR_EXPAND_STATS_TOP${_r}                          ${_d}//${_r} Default top N
 
-  ── SYSTEM ─────────────────────────────────────────
-  (c) MenkeTechnologies
-  Your keystrokes are currency. Spend them wisely.
-  >>> JACK IN. TRACK YOUR EXPANSIONS. OWN YOUR ALIASES. <<<
- ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
-HELP
+  ${_c}── SYSTEM ─────────────────────────────────────────${_r}
+  ${_d}(c) MenkeTechnologies${_r}
+  ${_w}Your keystrokes are currency. Spend them wisely.${_r}
+  ${_m}>>>${_r} ${_y}JACK IN. TRACK YOUR EXPANSIONS. OWN YOUR ALIASES.${_r} ${_m}<<<${_r}
+${_d} ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░${_r}"
                 return 0
                 ;;
             -t|--top)   topN=$2; shift 2 ;;
