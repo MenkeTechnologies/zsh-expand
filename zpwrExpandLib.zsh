@@ -322,20 +322,37 @@ function zpwrExpandBox() {
 
     # build box
     local -i boxW=$((w + 4))
-    local msg
+    local msg hbar pad
+    hbar=${(l:boxW-2::─:)}
+
+    # color support: ANSI 256-color when outputting to terminal, plain for zle -M / pipes
+    local useColor=false
+    [[ -t 1 ]] && useColor=true
+
+    local RST="" cBorder="" cTitle="" cContent="" cShadow=""
+    if [[ $useColor == true ]]; then
+        RST=$'\e[0m'
+        cBorder=$'\e[38;5;51m'       # cyan neon
+        cTitle=$'\e[1m\e[38;5;207m'  # bold magenta neon
+        cContent=$'\e[38;5;48m'      # green neon
+        cShadow=$'\e[38;5;236m'      # dark gray
+    fi
+
     if [[ -n $title ]]; then
-        local -i titlePad=$((boxW - titleW - 5))
-        msg="╭─ $title ${(l:titlePad::─:)}╮"
+        local -i titlePad=$((boxW - titleW - 6))
+        msg="${cBorder}┌── ${cTitle}$title${cBorder} ${(l:titlePad::─:)}┐${RST}"
     else
-        msg="╭${(l:boxW-2::─:)}╮"
+        msg="${cBorder}┌${hbar}┐${RST}"
     fi
     for line in "${lines[@]}"; do
         # truncate if still wider than w (e.g. single word longer than wrapW)
         (( ${#line} > w )) && line=${line:0:$w}
         len=${#line}
-        msg+=$'\n'"│ $line${(l:w-len+1:: :)}│"
+        pad=${(l:w-len+1:: :)}
+        msg+=$'\n'"${cBorder}│${RST} ${cContent}$line${RST}${pad}${cBorder}│${RST}"
     done
-    msg+=$'\n'"╰${(l:boxW-2::─:)}╯"
+    msg+=$'\n'"${cBorder}└${hbar}┘${RST}"
+    msg+=$'\n'"${cShadow}${(l:boxW::░:)}${RST}"
     print -r -- "$msg"
 }
 
