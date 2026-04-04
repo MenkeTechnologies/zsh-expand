@@ -668,6 +668,7 @@ function zpwrExpandStatsRecord() {
 
 function zpwrExpandStats() {
     'builtin' emulate -L zsh
+    setopt extendedglob
 
     local statsFile=${ZPWR_EXPAND_STATS_FILE:-${ZPWR_LOCAL:-${XDG_CACHE_HOME:-$HOME/.cache}}/zpwr-expand-stats.dat}
 
@@ -763,8 +764,8 @@ function zpwrExpandStats() {
     lines+=("")
     lines+=("── TOP ALIASES ──────────────────")
 
-    local -i rank=0
-    local entry cnt name bar barLen maxBar
+    local -i rank=0 maxExpand=0
+    local entry cnt name bar barLen maxBar rankStr
     maxBar=20
     local -i topCount=0
     if (( $#sorted )); then
@@ -784,16 +785,25 @@ function zpwrExpandStats() {
         bar=${(l:barLen::█:)}${(l:maxBar-barLen::░:)}
 
         expanded=${aliases[$name]}
+        printf -v rankStr '  %2d. %-12s %s %3d' $rank "$name" "$bar" $cnt
         if [[ -n $expanded ]]; then
-            lines+=("$(printf '  %2d. %-12s %s %3d  // %s' $rank $name $bar $cnt $expanded)")
+            # collapse newlines/tabs/multi-spaces
+            expanded=${expanded//$'\n'/ }
+            expanded=${expanded//$'\t'/ }
+            expanded=${expanded//  ##/ }
+            # truncate to fit within box width (prefix + "  // " + expansion)
+            maxExpand=$((70 - ${#rankStr} - 6))
+            (( maxExpand < 10 )) && maxExpand=10
+            (( ${#expanded} > maxExpand )) && expanded="${expanded:0:$((maxExpand - 3))}..."
+            lines+=("$rankStr  // $expanded")
         else
-            lines+=("$(printf '  %2d. %-12s %s %3d' $rank $name $bar $cnt)")
+            lines+=("$rankStr")
         fi
     done
 
     lines+=("")
     lines+=(">>> YOUR ALIASES ARE WORKING FOR YOU <<<")
 
-    zpwrExpandBox -t "EXPANSION STATS" "${lines[@]}"
+    zpwrExpandBox -t "EXPANSION STATS" -w 70 "${lines[@]}"
 }
 #}}}*********************************************************** 
