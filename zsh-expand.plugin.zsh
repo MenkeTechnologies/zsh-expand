@@ -30,6 +30,10 @@ fi
 
 export ZPWR_EXPAND_SUFFIX=true
 
+if ! (( $+ZPWR_EXPAND_PREVIEW )); then
+    export ZPWR_EXPAND_PREVIEW=true
+fi
+
 autoload regexp-replace
 setopt extendedglob
 setopt rcquotes
@@ -411,6 +415,23 @@ fi
 
 zle -N zpwrExpandGlobalAliases
 zle -N zpwrExpandDebugWidget
+
+# expansion preview ghost text via zle-line-pre-redraw
+if [[ $ZPWR_EXPAND_PREVIEW == true ]]; then
+    if (( ${+functions[zle-line-pre-redraw]} )); then
+        # chain with existing hook
+        functions[_zpwr_orig_line_pre_redraw]=${functions[zle-line-pre-redraw]}
+        function zle-line-pre-redraw() {
+            _zpwr_orig_line_pre_redraw "$@"
+            zpwrExpandPreview
+        }
+    else
+        function zle-line-pre-redraw() {
+            zpwrExpandPreview
+        }
+    fi
+    zle -N zle-line-pre-redraw
+fi
 
 bindkey '\e^E' zpwrExpandGlobalAliases
 bindkey '^\' zpwrExpandDebugWidget

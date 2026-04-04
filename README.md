@@ -50,6 +50,7 @@
 - [Autopair Integration](#-autopair-integration)
 - [History Injection](#-history-injection)
 - [Debug Widget](#-debug-widget)
+- [Expansion Preview](#-expansion-preview)
 - [Command-Position Parser](#-command-position-parser)
 - [Performance](#-performance)
 - [Test Coverage](#-test-coverage)
@@ -113,7 +114,8 @@ torify sudo -kE -u root su -l deploy                         \
 | **Suffix Alias Expansion** | `file.txt<space>` -> `vim file.txt` -- expands suffix aliases (`alias -s`) at command position |
 | **Autopair Integration** | Detects [autopair](https://github.com/hlissner/zsh-autopair) and delegates space insertion to preserve bracket/quote auto-pairing |
 | **History Injection** | Optionally writes the fully-expanded form of your command into history |
-| **Debug Widget** | `Esc Ctrl+D` shows parser state -- prefix chain, command position, expansion action -- without modifying the line |
+| **Debug Widget** | `Ctrl+\` shows parser state -- prefix chain, command position, expansion action -- without modifying the line |
+| **Expansion Preview** | Ghost text shows what an alias would expand to before you press space -- like fish autosuggestions but for alias expansion |
 
 ---
 
@@ -265,6 +267,9 @@ export ZPWR_EXPAND_PRE_EXEC_NATIVE=true   # expand globs on accept-line
 # -- SUFFIX --
 export ZPWR_EXPAND_SUFFIX=true            # expand suffix aliases (alias -s)
 
+# -- PREVIEW --
+export ZPWR_EXPAND_PREVIEW=true          # ghost text showing pending expansion
+
 # -- BLACKLIST --
 export ZPWR_EXPAND_BLACKLIST=(g gco)      # aliases to never expand
 ```
@@ -323,6 +328,7 @@ The key is the correct word, the value is a space-separated list of misspellings
 | Self-referential alias escape | **yes** | no | no | no |
 | Correct-then-expand chaining | **yes** | no | no | no |
 | History injection | **yes** | no | no | no |
+| Live expansion preview (ghost text) | **yes** | no | no | no |
 | Expand inside quotes | **yes** | no | no | no |
 | Autopair integration | **yes** | no | no | no |
 | Case-insensitive prefix matching | **yes** | no | no | no |
@@ -448,6 +454,26 @@ Press `Esc Ctrl+D` to inspect the parser's view of the current line without expa
 ```
 
 Shows the parsed prefix chain, identified command position, what expansion would fire, and whether the command word exists. Useful for debugging why something isn't expanding or verifying the parser is consuming flags correctly.
+
+---
+
+### // EXPANSION PREVIEW
+
+Ghost text shows what the last word would expand to as you type, before pressing space:
+
+```
+gco → git checkout
+```
+
+The preview appears dimmed after the cursor via `POSTDISPLAY`. Press space to commit the expansion, or keep typing to dismiss it. Supports regular aliases, global aliases, suffix aliases, and spelling corrections.
+
+Enabled by default. Disable with:
+
+```sh
+export ZPWR_EXPAND_PREVIEW=false
+```
+
+No other zsh expansion plugin shows a live preview of pending expansions.
 
 ---
 
