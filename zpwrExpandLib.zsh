@@ -143,10 +143,18 @@ function zpwrExpandWordStopHistoryExpansion(){
         local _pre_expand=$LBUFFER
         zle expand-word
         ZPWR_VARS[WAS_EXPANDED]=true
-        # track native expansion only if buffer actually changed
         if [[ $LBUFFER != $_pre_expand ]]; then
+            # space-path: zle expand-word changed the buffer
             ZPWR_VARS[EXPAND_TYPE]=native
             ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
+            ZPWR_VARS[NATIVE_SAVED]=$((${#LBUFFER} - ${#_pre_expand}))
+        elif [[ $ZPWR_VARS[lastword_lbuffer] == *[\!\*\$\~]* ]]; then
+            # history-path: zle expand-word is a no-op outside ZLE, but the lastword
+            # contains history/glob/param chars that zsh will expand at execution
+            ZPWR_VARS[EXPAND_TYPE]=native
+            ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
+            ZPWR_VARS[NATIVE_SAVED]=0
+            ZPWR_VARS[WAS_EXPANDED]=true
         fi
     fi
 
@@ -632,6 +640,15 @@ function zpwrExpandSupernaturalSpace() {
                 else
                     zpwrExpandWordStopHistoryExpansion
                 fi
+            fi
+        fi
+        # stats-only: track native expansions on ENTER even when expansion is gated off.
+        # zsh itself will expand !history, globs, $params, ~user at execution time.
+        if [[ $triggerKey == "${ZPWR_VARS[ENTER_KEY]}" && $ZPWR_VARS[WAS_EXPANDED] != true ]]; then
+            if [[ $ZPWR_VARS[lastword_lbuffer] == *[\!\*\$\~]* ]]; then
+                ZPWR_VARS[EXPAND_TYPE]=native
+                ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
+                ZPWR_VARS[WAS_EXPANDED]=true
             fi
         fi
     fi
