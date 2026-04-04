@@ -34,6 +34,13 @@
 # zpwrExpandGetAliasValue: basic retrieval
 #==============================================================
 
+@test 'getAliasValue: undefined alias sets EXPANDED empty' {
+    ZPWR_VARS[EXPANDED]='should-be-cleared'
+    ZPWR_VARS[lastword_lbuffer]=__zexptest_gav_no_such_alias__
+    zpwrExpandGetAliasValue
+    assert "$ZPWR_VARS[EXPANDED]" same_as ''
+}
+
 @test 'getAliasValue: simple one-word alias' {
     alias __zexptest_gav1='ls'
     ZPWR_VARS[lastword_lbuffer]=__zexptest_gav1
