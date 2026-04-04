@@ -176,7 +176,7 @@ function zpwrExpandGlobalAliases() {
         # called as ZLE widget (e.g. via keybinding) — parse words from LBUFFER
         zpwrExpandParseWords "$LBUFFER"
     fi
-    result=$galiases[$ZPWR_VARS[lastword_lbuffer]]
+    result=$galiases[(e)$ZPWR_VARS[lastword_lbuffer]]
     if [[ -n $result ]] && [[ $LBUFFER == (#b)(*[[:space:]]#)($ZPWR_VARS[lastword_lbuffer]) ]]; then
 
         res1=${match[1]}
@@ -184,6 +184,11 @@ function zpwrExpandGlobalAliases() {
         LBUFFER="$res1$result"
         ZPWR_VARS[WAS_EXPANDED]=true
         ZPWR_VARS[EXPAND_TYPE]=global
+
+        # stats: record if called directly as ZLE widget (not via supernatural space)
+        if [[ -z "$1" ]]; then
+            zpwrExpandStatsRecord "S:global:$ZPWR_VARS[lastword_lbuffer]"
+        fi
 
         zpwrExpandGoToTabStopOrEndOfLBuffer
     fi
