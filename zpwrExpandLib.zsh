@@ -240,7 +240,7 @@ function zpwrExpandRegexMatchOnCommandPosition() {
 #{{{                    MARK:box and debug
 #**************************************************************
 function zpwrExpandBox() {
-    local title="" wrapW=0
+    local title="" wrapW=0 forceColor=false
     local -a rawLines=()
 
     # parse flags
@@ -248,6 +248,7 @@ function zpwrExpandBox() {
         case $1 in
             -t|--title) title=$2; shift 2 ;;
             -w|--width) wrapW=$2; shift 2 ;;
+            -c|--color) forceColor=true; shift ;;
             --) shift; break ;;
             *)  shift ;;
         esac
@@ -327,7 +328,7 @@ function zpwrExpandBox() {
 
     # color support: ANSI 256-color when outputting to terminal, plain for zle -M / pipes
     local useColor=false
-    [[ -t 1 ]] && useColor=true
+    [[ -t 1 || $forceColor == true ]] && useColor=true
 
     local RST="" cBorder="" cTitle="" cContent="" cShadow=""
     if [[ $useColor == true ]]; then
@@ -430,7 +431,7 @@ function zpwrExpandDebugWidget() {
         lines+=("valid:    no ($cmdWord not found)")
     fi
 
-    msg=$(zpwrExpandBox -t "zsh-expand debug" "${lines[@]}")
+    msg=$(zpwrExpandBox --color -t "zsh-expand debug" "${lines[@]}")
 
     # restore state
     ZPWR_EXPAND_WORDS_LPARTITION=("${savedPartition[@]}")
