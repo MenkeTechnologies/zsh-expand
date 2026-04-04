@@ -141,7 +141,6 @@ function zpwrExpandWordStopHistoryExpansion(){
         regexp-replace res1 '(^|[ ])!([[:graph:]]+ )' '$match[1]\!$match[2]' &> /dev/null
         LBUFFER="$res1$ZPWR_VARS[lastword_lbuffer]"
         ZPWR_VARS[WAS_EXPANDED]=true
-        ZPWR_VARS[EXPAND_TYPE]=native
         zle expand-word
     fi
 
@@ -556,7 +555,7 @@ function zpwrExpandSupernaturalSpace() {
 
     zpwrExpandParseWords "$LBUFFER"
 
-    if [[ $triggerKey == "${ZPWR_VARS[SPACEBAR_KEY]}" ]]; then
+    if [[ $KEYS == " " || $triggerKey == "${ZPWR_VARS[SPACEBAR_KEY]}" ]]; then
         if [[ $ZPWR_EXPAND == false ]]; then
             zle self-insert
             return
@@ -620,9 +619,6 @@ function zpwrExpandSupernaturalSpace() {
                     fi
                 else
                     zpwrExpandWordStopHistoryExpansion
-                fi
-                if [[ $ZPWR_VARS[WAS_EXPANDED] == true ]]; then
-                    ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
                 fi
             fi
         fi
