@@ -774,7 +774,7 @@ function zpwrExpandStats() {
 
     for entry in "${sorted[@]}"; do
         (( rank++ ))
-        (( rank > 15 )) && break
+        (( rank > ${ZPWR_EXPAND_STATS_TOP:-15} )) && break
         cnt=${entry%% *}
         name=${entry#* }
 
