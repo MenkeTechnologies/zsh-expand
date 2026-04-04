@@ -430,8 +430,7 @@ function zpwrExpandDebugWidget() {
     elif [[ -n $cmdWord ]]; then
         lines+=("valid:    no ($cmdWord not found)")
     fi
-
-    msg=$(zpwrExpandBox --color -t "zsh-expand debug" "${lines[@]}")
+    msg=$(zpwrExpandBox -t "zsh-expand debug" "${lines[@]}")
 
     # restore state
     ZPWR_EXPAND_WORDS_LPARTITION=("${savedPartition[@]}")
