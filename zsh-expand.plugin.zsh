@@ -413,6 +413,5 @@ zle -N zpwrExpandGlobalAliases
 zle -N zpwrExpandDebugWidget
 
 bindkey '\e^E' zpwrExpandGlobalAliases
-bindkey '^\' zpwrExpandGlobalAliases
-bindkey '\e^D' zpwrExpandDebugWidget
+bindkey '^\' zpwrExpandDebugWidget
 #}}}***********************************************************
