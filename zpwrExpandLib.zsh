@@ -460,14 +460,14 @@ function zpwrExpandPreviewResolve() {
     local lastword=$1
     [[ -z $lastword ]] && return 1
 
-    if (( ${+aliases[$lastword]} )); then
-        REPLY=${aliases[$lastword]}
-    elif (( ${+galiases[$lastword]} )); then
-        REPLY=${galiases[$lastword]}
-    elif [[ -n ${lastword:e} ]] && (( ${+saliases[${lastword:e}]} )); then
-        REPLY="$saliases[${lastword:e}] $lastword"
-    elif [[ -n ${ZPWR_EXPAND_CORRECT_REVERSE[$lastword]} ]]; then
-        REPLY=${ZPWR_EXPAND_CORRECT_REVERSE[$lastword]}
+    if (( ${+aliases[(e)$lastword]} )); then
+        REPLY=${aliases[(e)$lastword]}
+    elif (( ${+galiases[(e)$lastword]} )); then
+        REPLY=${galiases[(e)$lastword]}
+    elif [[ -n ${lastword:e} ]] && (( ${+saliases[(e)${lastword:e}]} )); then
+        REPLY="$saliases[(e)${lastword:e}] $lastword"
+    elif [[ -n ${ZPWR_EXPAND_CORRECT_REVERSE[(e)$lastword]} ]]; then
+        REPLY=${ZPWR_EXPAND_CORRECT_REVERSE[(e)$lastword]}
     fi
 
     [[ -n $REPLY ]] && return 0
