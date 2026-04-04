@@ -436,15 +436,9 @@ fi
 bindkey '\e^E' zpwrExpandGlobalAliases
 bindkey '^\' zpwrExpandDebugWidget
 
-# completion for zpwrExpandStats
-function _zpwrExpandStats() {
-    _arguments \
-        '(-h --help)'{-h,--help}'[Show help]' \
-        '(-t --top)'{-t,--top}'[Top N aliases]:count:' \
-        '(-w --width)'{-w,--width}'[Box width]:width:' \
-        '(-c --color)'{-c,--color}'[Force ANSI colors]' \
-        '(-r --reset)'{-r,--reset}'[Clear all stats]' \
-        '(-f --file)'{-f,--file}'[Stats file path]:file:_files'
-}
-compdef _zpwrExpandStats zpwrExpandStats
+# load completion
+fpath+=(${0:A:h}/completions)
+if (( $+functions[compdef] )); then
+    compdef _zpwrExpandStats zpwrExpandStats
+fi
 #}}}***********************************************************
