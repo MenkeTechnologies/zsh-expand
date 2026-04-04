@@ -752,3 +752,171 @@ line2   spaced'
     assert "$out" contains 'ns:tool'
     command rm -f "$tmp"
 }
+
+#==============================================================
+# history expansion forms detection
+#==============================================================
+
+@test 'history: !! matches native pattern' {
+    local w='!!'
+    [[ $w == *[\!\*\$\~]* ]]
+    assert $? equals 0
+}
+
+@test 'history: !$ matches native pattern' {
+    local w='!$'
+    [[ $w == *[\!\*\$\~]* ]]
+    assert $? equals 0
+}
+
+@test 'history: !^ does not match (caret excluded)' {
+    local w='!^'
+    # contains ! so it matches
+    [[ $w == *[\!\*\$\~]* ]]
+    assert $? equals 0
+}
+
+@test 'history: !* matches native pattern' {
+    local w='!*'
+    [[ $w == *[\!\*\$\~]* ]]
+    assert $? equals 0
+}
+
+@test 'history: !5 matches native pattern' {
+    local w='!5'
+    [[ $w == *[\!\*\$\~]* ]]
+    assert $? equals 0
+}
+
+@test 'history: !-3 matches native pattern' {
+    local w='!-3'
+    [[ $w == *[\!\*\$\~]* ]]
+    assert $? equals 0
+}
+
+@test 'history: !:1 matches native pattern' {
+    local w='!:1'
+    [[ $w == *[\!\*\$\~]* ]]
+    assert $? equals 0
+}
+
+@test 'history: !foo matches native pattern' {
+    local w='!foo'
+    [[ $w == *[\!\*\$\~]* ]]
+    assert $? equals 0
+}
+
+@test 'history: *.txt glob matches native pattern' {
+    local w='*.txt'
+    [[ $w == *[\!\*\$\~]* ]]
+    assert $? equals 0
+}
+
+@test 'history: $HOME param matches native pattern' {
+    local w='$HOME'
+    [[ $w == *[\!\*\$\~]* ]]
+    assert $? equals 0
+}
+
+@test 'history: ~user matches native pattern' {
+    local w='~user'
+    [[ $w == *[\!\*\$\~]* ]]
+    assert $? equals 0
+}
+
+@test 'history: HEAD^ does not match (^ excluded to avoid git ref false positives)' {
+    local w='HEAD^'
+    [[ $w != *[\!\*\$\~]* ]]
+    assert $? equals 0
+}
+
+@test 'history: plain word does not match' {
+    local w='hello'
+    [[ $w != *[\!\*\$\~]* ]]
+    assert $? equals 0
+}
+
+#==============================================================
+# history expansion saved-char estimation record format
+#==============================================================
+
+@test 'stats: !! record with saved length is counted' {
+    local tmp out
+    tmp=$(mktemp "${TMPDIR:-/tmp}/zunit-zpwr-stats-bangbang.XXXXXX")
+    ZPWR_EXPAND_STATS_FILE=$tmp
+    # simulate: previous command was 20 chars, !! saves 18
+    zpwrExpandStatsRecord 'H:native:!!:18'
+    out=$(zpwrExpandStats)
+    assert "$out" contains 'NATIVE'
+    assert "$out" contains '!!'
+    assert "$out" contains '18'
+    command rm -f "$tmp"
+}
+
+@test 'stats: !$ record with saved length is counted' {
+    local tmp out
+    tmp=$(mktemp "${TMPDIR:-/tmp}/zunit-zpwr-stats-banglast.XXXXXX")
+    ZPWR_EXPAND_STATS_FILE=$tmp
+    # !$ expands to last arg — saves len(last_arg) - 2
+    zpwrExpandStatsRecord 'H:native:!$:6'
+    out=$(zpwrExpandStats)
+    assert "$out" contains 'NATIVE'
+    assert "$out" contains '!$'
+    assert "$out" contains '6'
+    command rm -f "$tmp"
+}
+
+@test 'stats: !* record with saved length is counted' {
+    local tmp out
+    tmp=$(mktemp "${TMPDIR:-/tmp}/zunit-zpwr-stats-bangstar.XXXXXX")
+    ZPWR_EXPAND_STATS_FILE=$tmp
+    zpwrExpandStatsRecord 'H:native:!*:12'
+    out=$(zpwrExpandStats)
+    assert "$out" contains '!*'
+    assert "$out" contains '12'
+    command rm -f "$tmp"
+}
+
+@test 'stats: !n history number record counted' {
+    local tmp out
+    tmp=$(mktemp "${TMPDIR:-/tmp}/zunit-zpwr-stats-bangn.XXXXXX")
+    ZPWR_EXPAND_STATS_FILE=$tmp
+    zpwrExpandStatsRecord 'H:native:!42:25'
+    out=$(zpwrExpandStats)
+    assert "$out" contains '!42'
+    assert "$out" contains '25'
+    command rm -f "$tmp"
+}
+
+@test 'stats: !-n relative history record counted' {
+    local tmp out
+    tmp=$(mktemp "${TMPDIR:-/tmp}/zunit-zpwr-stats-bangminus.XXXXXX")
+    ZPWR_EXPAND_STATS_FILE=$tmp
+    zpwrExpandStatsRecord 'H:native:!-3:14'
+    out=$(zpwrExpandStats)
+    assert "$out" contains '!-3'
+    assert "$out" contains '14'
+    command rm -f "$tmp"
+}
+
+@test 'stats: !string prefix-match record counted' {
+    local tmp out
+    tmp=$(mktemp "${TMPDIR:-/tmp}/zunit-zpwr-stats-bangstr.XXXXXX")
+    ZPWR_EXPAND_STATS_FILE=$tmp
+    zpwrExpandStatsRecord 'H:native:!git:30'
+    out=$(zpwrExpandStats)
+    assert "$out" contains '!git'
+    assert "$out" contains '30'
+    command rm -f "$tmp"
+}
+
+@test 'stats: glob * record counted without saved value' {
+    local tmp out
+    tmp=$(mktemp "${TMPDIR:-/tmp}/zunit-zpwr-stats-glob-star.XXXXXX")
+    ZPWR_EXPAND_STATS_FILE=$tmp
+    zpwrExpandStatsRecord 'S:native:*:0'
+    zpwrExpandStatsRecord 'S:native:*:0'
+    out=$(zpwrExpandStats)
+    assert "$out" contains 'NATIVE'
+    command rm -f "$tmp"
+}
