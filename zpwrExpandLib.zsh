@@ -143,8 +143,8 @@ function zpwrExpandWordStopHistoryExpansion(){
         local _pre_expand=$LBUFFER
         zle expand-word
         ZPWR_VARS[WAS_EXPANDED]=true
-        # track native expansion only if buffer actually changed and no prior expansion recorded
-        if [[ $LBUFFER != $_pre_expand && -z $ZPWR_VARS[ORIGINAL_LAST_COMMAND] ]]; then
+        # track native expansion only if buffer actually changed
+        if [[ $LBUFFER != $_pre_expand ]]; then
             ZPWR_VARS[EXPAND_TYPE]=native
             ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
         fi
@@ -589,14 +589,14 @@ function zpwrExpandSupernaturalSpace() {
     #dont expand =word because that is zle expand-word
     if [[ ${ZPWR_VARS[lastword_lbuffer]:0:1} != '=' ]] && (( $#ZPWR_VARS[lastword_lbuffer] > 0 ));then
         if [[ -z $ZPWR_VARS[blacklistUser] ]] || ! [[ $ZPWR_VARS[lastword_lbuffer] =~ $ZPWR_VARS[blacklistUser] ]]; then
-            if (( ${+aliases[${ZPWR_VARS[lastword_lbuffer]}]} )) && ! [[ ${aliases[${ZPWR_VARS[lastword_lbuffer]}]} =~ $ZPWR_VARS[blacklistFirstPosRegex] ]];then
+            if (( ${+aliases[(e)${ZPWR_VARS[lastword_lbuffer]}]} )) && ! [[ ${aliases[(e)${ZPWR_VARS[lastword_lbuffer]}]} =~ $ZPWR_VARS[blacklistFirstPosRegex] ]];then
 
                 #zpwrLogDebug "regular=>'$ZPWR_VARS[lastword_lbuffer]'"
                 zpwrExpandRightTrim
                 zpwrExpandLastWordAtCommandPosAndExpand moveCursor zle "$triggerKey"
             else
                 #zpwrLogDebug "NOT regular=>'$ZPWR_VARS[lastword_lbuffer]'"
-                if (( ${+galiases[${ZPWR_VARS[lastword_lbuffer]}]} )); then
+                if (( ${+galiases[(e)${ZPWR_VARS[lastword_lbuffer]}]} )); then
 
                     zpwrExpandRightTrim
                     # global alias expansion
