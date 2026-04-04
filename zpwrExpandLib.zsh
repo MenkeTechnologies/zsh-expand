@@ -124,6 +124,7 @@ function zpwrExpandAliasEscape(){
         # expand
         LBUFFER="$res1\\$ZPWR_VARS[EXPANDED]"
         ZPWR_VARS[WAS_EXPANDED]=true
+        ZPWR_VARS[EXPAND_TYPE]=escape
     fi
 
 
@@ -140,6 +141,7 @@ function zpwrExpandWordStopHistoryExpansion(){
         regexp-replace res1 '(^|[ ])!([[:graph:]]+ )' '$match[1]\!$match[2]' &> /dev/null
         LBUFFER="$res1$ZPWR_VARS[lastword_lbuffer]"
         ZPWR_VARS[WAS_EXPANDED]=true
+        ZPWR_VARS[EXPAND_TYPE]=native
         zle expand-word
     fi
 
@@ -154,6 +156,7 @@ function zpwrExpandAlias(){
         # expand
         LBUFFER="$res1$ZPWR_VARS[EXPANDED]"
         ZPWR_VARS[WAS_EXPANDED]=true
+        ZPWR_VARS[EXPAND_TYPE]=alias
     fi
 
 }
@@ -175,6 +178,7 @@ function zpwrExpandGlobalAliases() {
         # expand
         LBUFFER="$res1$result"
         ZPWR_VARS[WAS_EXPANDED]=true
+        ZPWR_VARS[EXPAND_TYPE]=global
 
         zpwrExpandGoToTabStopOrEndOfLBuffer
     fi
@@ -206,6 +210,7 @@ function zpwrExpandSuffixAlias(){
             res1=${match[1]}
             LBUFFER="$res1$saliases[$ext] $word"
             ZPWR_VARS[WAS_EXPANDED]=true
+            ZPWR_VARS[EXPAND_TYPE]=suffix
             zpwrExpandGoToTabStopOrEndOfLBuffer
         fi
     fi
@@ -545,6 +550,7 @@ function zpwrExpandSupernaturalSpace() {
     ZPWR_EXPAND_PRE_EXPAND=()
     ZPWR_VARS[foundIncorrect]=false
     ZPWR_VARS[NEED_TO_ADD_SPACECHAR]=true
+    ZPWR_VARS[EXPAND_TYPE]=""
     ZPWR_VARS[LAST_WORD_WAS_AT_COMMAND]=false
     ZPWR_VARS[WAS_EXPANDED]=false
 
@@ -635,16 +641,17 @@ function zpwrExpandSupernaturalSpace() {
         set +x
     fi
 
-    # track expansion stats — tag with type (space or history)
+    # track expansion stats — format: trigger:type:alias
+    # trigger: S=space, H=history/enter
+    # type: alias, global, suffix, escape, native
     if [[ $ZPWR_VARS[WAS_EXPANDED] == true && -n $ZPWR_VARS[ORIGINAL_LAST_COMMAND] ]]; then
-        if [[ $triggerKey == "${ZPWR_VARS[ENTER_KEY]}" || -z $triggerKey ]]; then
-            zpwrExpandStatsRecord "H:$ZPWR_VARS[ORIGINAL_LAST_COMMAND]"
-        else
-            zpwrExpandStatsRecord "S:$ZPWR_VARS[ORIGINAL_LAST_COMMAND]"
-        fi
+        local _trigger=S
+        [[ $triggerKey == "${ZPWR_VARS[ENTER_KEY]}" || -z $triggerKey ]] && _trigger=H
+        local _type=${ZPWR_VARS[EXPAND_TYPE]:-alias}
+        zpwrExpandStatsRecord "${_trigger}:${_type}:$ZPWR_VARS[ORIGINAL_LAST_COMMAND]"
     fi
     if [[ $ZPWR_VARS[foundIncorrect] == true ]]; then
-        zpwrExpandStatsRecord "__correction__"
+        zpwrExpandStatsRecord "S:correction:"
     fi
 }
 #}}}***********************************************************
@@ -671,54 +678,88 @@ function zpwrExpandStats() {
 
     local -A counts
     local -i total=0 spaceTotal=0 histTotal=0 corrections=0 savedChars=0
-    local line alias expanded type
+    local -i aliasTotal=0 globalTotal=0 suffixTotal=0 escapeTotal=0 nativeTotal=0 _cnt=0
+    local line alias expanded trigger etype
 
-    # tally counts — lines are "S:alias", "H:alias", or "__correction__"
+    # tally counts — format: "trigger:type:alias" or legacy "S:alias" / "__correction__"
     while IFS= read -r line; do
-        if [[ $line == __correction__ ]]; then
+        if [[ $line == __correction__ || $line == S:correction: ]]; then
             (( corrections++ ))
-        elif [[ $line == [SH]:* ]]; then
-            type=${line%%:*}
-            alias=${line#?:}
-            (( counts[$alias]++ ))
+        elif [[ $line == [SH]:*:* ]]; then
+            # new format: trigger:type:alias
+            trigger=${line%%:*}
+            line=${line#?:}
+            etype=${line%%:*}
+            alias=${line#*:}
+            _cnt=${counts[(e)$alias]:-0}
+            counts[$alias]=$(( _cnt + 1 ))
             (( total++ ))
-            if [[ $type == S ]]; then
-                (( spaceTotal++ ))
-            else
-                (( histTotal++ ))
-            fi
+            if [[ $trigger == S ]]; then (( spaceTotal++ )); else (( histTotal++ )); fi
+            case $etype in
+                alias)   (( aliasTotal++ )) ;;
+                global)  (( globalTotal++ )) ;;
+                suffix)  (( suffixTotal++ )) ;;
+                escape)  (( escapeTotal++ )) ;;
+                native)  (( nativeTotal++ )) ;;
+            esac
+        elif [[ $line == [SH]:* ]]; then
+            # old format: trigger:alias
+            trigger=${line%%:*}
+            alias=${line#?:}
+            _cnt=${counts[(e)$alias]:-0}
+            counts[$alias]=$(( _cnt + 1 ))
+            (( total++ ))
+            (( aliasTotal++ ))
+            if [[ $trigger == S ]]; then (( spaceTotal++ )); else (( histTotal++ )); fi
         else
-            # legacy format (no prefix) — count as space expansion
-            (( counts[$line]++ ))
+            # legacy format (no prefix)
+            _cnt=${counts[(e)$line]:-0}
+            counts[$line]=$(( _cnt + 1 ))
             (( total++ ))
             (( spaceTotal++ ))
+            (( aliasTotal++ ))
         fi
     done < "$statsFile"
 
     # compute chars saved per alias
-    for alias in ${(k)counts}; do
-        expanded=${aliases[$alias]}
+    local -i _cnt _alen _elen
+    local _key
+    for _key in "${(k)counts[@]}"; do
+        expanded=${aliases[$_key]}
+        _cnt=${counts[(e)$_key]}
+        _alen=${#_key}
         if [[ -n $expanded ]]; then
-            (( savedChars += (${#expanded} - ${#alias}) * counts[$alias] ))
+            _elen=${#expanded}
+            (( savedChars += (_elen - _alen) * _cnt ))
         fi
     done
 
     # sort by frequency, top 15
     local -a sorted=()
     local k
-    for k in ${(k)counts}; do
-        sorted+=("${counts[$k]} $k")
+    for k in "${(k)counts[@]}"; do
+        _cnt=${counts[(e)$k]}
+        sorted+=("$_cnt $k")
     done
     sorted=(${(On)sorted})
 
     # build output lines
     local -a lines=()
-    lines+=("── TOTALS ───────────────────────")
-    lines+=("  SPACE EXPANSIONS:  $spaceTotal")
+    lines+=("── TRIGGER ──────────────────────")
+    lines+=("  SPACE EXPANSIONS:   $spaceTotal")
     lines+=("  HISTORY EXPANSIONS: $histTotal")
-    lines+=("  TOTAL EXPANSIONS:  $total")
-    lines+=("  CORRECTIONS:       $corrections")
-    lines+=("  KEYSTROKES SAVED:  $savedChars")
+    lines+=("")
+    lines+=("── TYPE ─────────────────────────")
+    lines+=("  ALIAS:              $aliasTotal")
+    lines+=("  GLOBAL ALIAS:       $globalTotal")
+    lines+=("  SUFFIX ALIAS:       $suffixTotal")
+    lines+=("  SELF-REF ESCAPE:    $escapeTotal")
+    lines+=("  NATIVE (glob/hist): $nativeTotal")
+    lines+=("  CORRECTIONS:        $corrections")
+    lines+=("")
+    lines+=("── SUMMARY ──────────────────────")
+    lines+=("  TOTAL EXPANSIONS:   $total")
+    lines+=("  KEYSTROKES SAVED:   $savedChars")
     lines+=("")
     lines+=("── TOP ALIASES ──────────────────")
 
