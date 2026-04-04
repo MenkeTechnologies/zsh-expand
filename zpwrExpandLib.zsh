@@ -257,18 +257,19 @@ function zpwrExpandBox() {
     if (( $# )); then
         rawLines=("$@")
     fi
-    # When stdin is not a TTY, only read if data is already available (read -t 0),
-    # then drain the rest. Avoids blocking forever when fd 0 is open but never EOF
-    # (e.g. some CI/sandbox runners) while still supporting real pipes.
     if [[ ! -t 0 ]]; then
         local stdinLine
-        if read -r -t 0 stdinLine || [[ -n $stdinLine ]]; then
+        while IFS= read -r stdinLine || [[ -n $stdinLine ]]; do
             rawLines+=("$stdinLine")
-            while IFS= read -r stdinLine || [[ -n $stdinLine ]]; do
-                rawLines+=("$stdinLine")
-            done
-        fi
+        done
     fi
+    # strip backspace overprint sequences (bold: X\bX -> X, underline: _\bX -> X)
+    local -i ri
+    for (( ri = 1; ri <= $#rawLines; ri++ )); do
+        while [[ $rawLines[$ri] == *$'\b'* ]]; do
+            rawLines[$ri]=${rawLines[$ri]//?$'\b'/}
+        done
+    done
     # expand tabs to spaces so char count matches rendered width
     rawLines=("${(@)rawLines//$'\t'/        }")
 
@@ -309,7 +310,7 @@ function zpwrExpandBox() {
         fi
     done
 
-    # find actual max content width (may be less than wrapW after wrapping)
+    # find actual max content width, capped to wrapW so box never exceeds terminal
     local -i w=0 len
     local line
     for line in "${lines[@]}"; do
@@ -317,6 +318,7 @@ function zpwrExpandBox() {
         (( len > w )) && w=$len
     done
     (( titleW + 2 > w )) && w=$((titleW + 2))
+    (( w > wrapW )) && w=$wrapW
 
     # build box
     local -i boxW=$((w + 4))
@@ -328,6 +330,8 @@ function zpwrExpandBox() {
         msg="╭${(l:boxW-2::─:)}╮"
     fi
     for line in "${lines[@]}"; do
+        # truncate if still wider than w (e.g. single word longer than wrapW)
+        (( ${#line} > w )) && line=${line:0:$w}
         len=${#line}
         msg+=$'\n'"│ $line${(l:w-len+1:: :)}│"
     done
