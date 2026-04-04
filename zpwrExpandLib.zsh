@@ -634,5 +634,106 @@ function zpwrExpandSupernaturalSpace() {
     if [[ $ZPWR_TRACE == true ]]; then
         set +x
     fi
+
+    # track expansion stats
+    if [[ $ZPWR_VARS[WAS_EXPANDED] == true && -n $ZPWR_VARS[ORIGINAL_LAST_COMMAND] ]]; then
+        zpwrExpandStatsRecord "$ZPWR_VARS[ORIGINAL_LAST_COMMAND]"
+    fi
+    if [[ $ZPWR_VARS[foundIncorrect] == true ]]; then
+        zpwrExpandStatsRecord "__correction__"
+    fi
+}
+#}}}***********************************************************
+
+#{{{                    MARK:stats
+#**************************************************************
+function zpwrExpandStatsRecord() {
+    local alias=$1
+    local statsFile=${ZPWR_EXPAND_STATS_FILE:-${TMPDIR:-/tmp}/zpwr-expand-stats-${UID}.dat}
+
+    # append alias name to stats file (one per expansion)
+    print -r -- "$alias" >> "$statsFile"
+}
+
+function zpwrExpandStats() {
+    'builtin' emulate -L zsh
+
+    local statsFile=${ZPWR_EXPAND_STATS_FILE:-${TMPDIR:-/tmp}/zpwr-expand-stats-${UID}.dat}
+
+    if [[ ! -f $statsFile ]]; then
+        zpwrExpandBox -t "EXPANSION STATS" "No expansions recorded yet."
+        return
+    fi
+
+    local -A counts
+    local -i total=0 corrections=0 savedChars=0
+    local alias expanded
+
+    # tally counts
+    while IFS= read -r alias; do
+        if [[ $alias == __correction__ ]]; then
+            (( corrections++ ))
+        else
+            (( counts[$alias]++ ))
+            (( total++ ))
+        fi
+    done < "$statsFile"
+
+    # compute chars saved per alias
+    for alias in ${(k)counts}; do
+        expanded=${aliases[$alias]}
+        if [[ -n $expanded ]]; then
+            (( savedChars += (${#expanded} - ${#alias}) * counts[$alias] ))
+        fi
+    done
+
+    # sort by frequency, top 15
+    local -a sorted=()
+    local k
+    for k in ${(k)counts}; do
+        sorted+=("${counts[$k]} $k")
+    done
+    sorted=(${(On)sorted})
+
+    # build output lines
+    local -a lines=()
+    lines+=("TOTAL EXPANSIONS:  $total")
+    lines+=("CORRECTIONS:       $corrections")
+    lines+=("KEYSTROKES SAVED:  $savedChars")
+    lines+=("")
+    lines+=("── TOP ALIASES ──────────────────")
+
+    local -i rank=0
+    local entry cnt name bar barLen maxBar
+    maxBar=20
+    local -i topCount=0
+    if (( $#sorted )); then
+        topCount=${sorted[1]%% *}
+    fi
+    (( topCount == 0 )) && topCount=1
+
+    for entry in "${sorted[@]}"; do
+        (( rank++ ))
+        (( rank > 15 )) && break
+        cnt=${entry%% *}
+        name=${entry#* }
+
+        # bar chart
+        barLen=$(( cnt * maxBar / topCount ))
+        (( barLen < 1 )) && barLen=1
+        bar=${(l:barLen::█:)}${(l:maxBar-barLen::░:)}
+
+        expanded=${aliases[$name]}
+        if [[ -n $expanded ]]; then
+            lines+=("$(printf '  %2d. %-12s %s %3d  // %s' $rank $name $bar $cnt $expanded)")
+        else
+            lines+=("$(printf '  %2d. %-12s %s %3d' $rank $name $bar $cnt)")
+        fi
+    done
+
+    lines+=("")
+    lines+=(">>> YOUR ALIASES ARE WORKING FOR YOU <<<")
+
+    zpwrExpandBox -t "EXPANSION STATS" "${lines[@]}"
 }
 #}}}*********************************************************** 

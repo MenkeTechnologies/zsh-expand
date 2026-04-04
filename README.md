@@ -51,6 +51,7 @@
 - [History Injection](#-history-injection)
 - [Debug Widget](#-debug-widget)
 - [Expansion Preview](#-expansion-preview)
+- [Expansion Stats](#-expansion-stats)
 - [Command-Position Parser](#-command-position-parser)
 - [Performance](#-performance)
 - [Test Coverage](#-test-coverage)
@@ -116,6 +117,7 @@ torify sudo -kE -u root su -l deploy                         \
 | **History Injection** | Optionally writes the fully-expanded form of your command into history |
 | **Debug Widget** | `Ctrl+\` shows parser state -- prefix chain, command position, expansion action -- without modifying the line |
 | **Expansion Preview** | Ghost text shows what an alias would expand to before you press space -- like fish autosuggestions but for alias expansion |
+| **Expansion Stats** | Tracks every expansion to a stats file -- `zpwrExpandStats` renders a cyberpunk dashboard with top aliases, keystroke savings, and bar charts |
 
 ---
 
@@ -477,6 +479,32 @@ No other zsh expansion plugin shows a live preview of pending expansions.
 
 ---
 
+### // EXPANSION STATS
+
+Every expansion is logged to a stats file. Run `zpwrExpandStats` to see a cyberpunk dashboard:
+
+```
+┌── EXPANSION STATS ───────────────────────────────────────────┐
+│ TOTAL EXPANSIONS:  133                                       │
+│ CORRECTIONS:       5                                         │
+│ KEYSTROKES SAVED:  986                                       │
+│                                                              │
+│ ── TOP ALIASES ──────────────────                            │
+│    1. gco          ████████████████████  47  // git checkout │
+│    2. gs           █████████████░░░░░░░  31  // git status   │
+│    3. gd           █████████░░░░░░░░░░░  22  // git diff     │
+│    4. ga           ██████░░░░░░░░░░░░░░  15  // git add      │
+│    5. gp           ███░░░░░░░░░░░░░░░░░   9  // git push     │
+│                                                              │
+│ >>> YOUR ALIASES ARE WORKING FOR YOU <<<                     │
+└──────────────────────────────────────────────────────────────┘
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+```
+
+Stats persist across sessions in `$ZPWR_EXPAND_STATS_FILE` (defaults to `$TMPDIR/zpwr-expand-stats-$UID.dat`). Shows top 15 aliases with proportional bar charts and the expansion each maps to.
+
+---
+
 ### // COMMAND-POSITION PARSER
 
 Previous versions used a single POSIX extended regex to match prefix commands and their flags. This worked for simple cases but couldn't scale -- every new command and flag combination made the regex longer and harder to debug. Flag arguments containing `=` (like `strace -e trace=network`) were incorrectly stripped as variable assignments.
@@ -567,7 +595,7 @@ A large [zunit](https://github.com/zunit-zsh/zunit) suite (11,000+ discrete `@te
 zsh scripts/count-tests.zsh
 ```
 
-Coverage includes alias expansion (`tests/t-blacklist-firstpos-alias.zsh` locks in `ZPWR_VARS[blacklistFirstPosRegex]` against representative alias values; `tests/t-blacklist-subcommand-suffix.zsh` for `blacklistSubcommandPositionRegex` — `pip3.11`, `proxychains4`, and tools intentionally not listed), global aliases, suffix aliases, spelling correction (`tests/t-correct-guards.zsh` for early-exit guards: `env` alone, global-alias last word, `git` subcommand blacklist, command-only tail), command-position parsing (`tests/t-parser-cache-metadata.zsh` for `cachedParserPrefix` / `cachedRegexMatch` and cleaned `ZPWR_EXPAND_WORDS_LPARTITION`), word parsing (`tests/t-parse-flag-equals-lastword.zsh` for `--flag=value` / assignment tokens and lastword; `tests/t-parse-leading-separators.zsh` for leading `;` / `|` / `&&` / `||`; `tests/t-parse-buffer-edge.zsh` for all-prefix lines with empty tail and tab-separated tokens), `zsh -n` on repo-root plugin sources (`tests/t-syntax-plugin-root.zsh`; `tests/t-syntax.zsh` checks `tests/*.zsh` only), native expansion, config flags, tab stops, prefix chains, command existence checks, integration flows, `zpwrExpandLastWordAtCommandPosAndExpand` behavior for non-`zle` callers and ENTER / `ZPWR_EXPAND_PRE_EXEC_SECOND_POSITION` (`tests/t-api-caller-and-enter.zsh`), preset `cachedRegexMatch` / `cachedRegexMatched` for `zpwrExpandRegexMatchOnCommandPosition` without re-running the parser (`tests/t-regex-cache-api.zsh`), `zpwrExpandGlobalAliases` with no argument (parse `LBUFFER` like the ZLE widget — `tests/t-global-alias-widget.zsh`), assignment-only lines and empty partitions (`tests/t-parse-assignments-edge.zsh`), and edge cases (including parser regressions such as `ltrace -n` / `-b` flag arguments). Dedicated files exercise assignment stripping, `--` end-of-options, phase-1 shell keywords (`nocorrect`, `time`, `command`, `exec`, …), sandbox/build helpers (`xvfb-run`, `systemd-run`, `bwrap`, `ccache`, …), namespace and capability stacks (`unshare`, `nsenter`, `prlimit`, deep `sudo`/`env`), trace/wrap helpers (`rlwrap`, `timeout`, `strace`, `ltrace`), scheduling (`watch`, `ionice`, `chrt`, `taskset`, `caffeinate`, `setsid`), mixed-case wrapper spellings (`SUDO`, `DoAs`, `ENV`, … — `tests/t-parser-case-insensitive-prefix.zsh`), dbus session helpers and network proxies (`dbus-run-session`, `dbus-launch`, `torify`, `eatmydata`, `torsocks`, `pkexec`, `distcc`, … — `tests/t-parser-dbus-torify-proxy.zsh`; `firejail`, `systemd-run`, `nocache`, `ccache` — `tests/t-parser-firejail-systemd-dbus.zsh`), the debug widget’s Unicode box renderer (`zpwrExpandBox` — `tests/t-box-fuzz.zsh`, `tests/t-box-backspace-and-color.zsh`, `tests/t-box-double-dash.zsh`), `su` / `runuser` / `sg` login stacks (`tests/t-parser-su-logins.zsh`; `chroot` / `flock` / `runuser` / `su` combinations — `tests/t-parser-chroot-flock-su-runuser.zsh`; `sg` with schedulers, namespaces, and sandbox wrappers — `tests/t-parser-sg-stacks.zsh`), backslash- and quote-stripped wrapper words (`tests/t-parser-backslash-escape.zsh`), deeper `bwrap` / `fakeroot` / `systemd-run` / `capsh` / `valgrind` stacks (`tests/t-parser-sandbox-service.zsh`; `valgrind` / `proot` / `capsh` / `xvfb-run` with `strace` / `ltrace` — `tests/t-parser-valgrind-proot-capsh.zsh`), `ccache` / `distcc` / `trickle` / `faketime` / `proot` / `fakechroot` / `linux32` / `setarch` (`tests/t-parser-build-tools-proot.zsh`), and long prefix chains (`tests/t-parser-assignments-and-wrappers.zsh`, `tests/t-parser-phase1-keywords.zsh`, `tests/t-parser-phase1-proot-stack.zsh`, `tests/t-parser-cgroup-chpst-trickle.zsh`, `tests/t-parser-prlimit-choom-flock.zsh`, `tests/t-parser-cpulimit-daemonize-sem.zsh`, `tests/t-parser-stdbuf-nohup-env.zsh`, `tests/t-parser-wrapper-misc.zsh`, `tests/t-parser-capability-namespace.zsh`, `tests/t-parser-setpriv-xvfb-stack.zsh`, `tests/t-parser-systemd-container-sem.zsh`, `tests/t-parser-firejail-systemd-dbus.zsh`, `tests/t-parser-nsenter-unshare-valgrind.zsh`, `tests/t-parser-valgrind-proot-capsh.zsh`, `tests/t-parser-rlwrap-timeout-strace.zsh`, `tests/t-parser-watch-sched.zsh`, `tests/t-ltrace-parser-regression.zsh`).
+Coverage includes alias expansion (`tests/t-blacklist-firstpos-alias.zsh` locks in `ZPWR_VARS[blacklistFirstPosRegex]` against representative alias values; `tests/t-blacklist-subcommand-suffix.zsh` for `blacklistSubcommandPositionRegex` — `pip3.11`, `proxychains4`, and tools intentionally not listed), global aliases, suffix aliases, spelling correction (`tests/t-correct-guards.zsh` for early-exit guards: `env` alone, global-alias last word, `git` subcommand blacklist, command-only tail), command-position parsing (`tests/t-parser-cache-metadata.zsh` for `cachedParserPrefix` / `cachedRegexMatch` and cleaned `ZPWR_EXPAND_WORDS_LPARTITION`), word parsing (`tests/t-parse-flag-equals-lastword.zsh` for `--flag=value` / assignment tokens and lastword; `tests/t-parse-leading-separators.zsh` for leading `;` / `|` / `&&` / `||`; `tests/t-parse-buffer-edge.zsh` for all-prefix lines with empty tail and tab-separated tokens), `zsh -n` on repo-root plugin sources (`tests/t-syntax-plugin-root.zsh`; `tests/t-syntax.zsh` checks `tests/*.zsh` only), native expansion, config flags, tab stops, prefix chains, command existence checks, integration flows, `zpwrExpandLastWordAtCommandPosAndExpand` behavior for non-`zle` callers and ENTER / `ZPWR_EXPAND_PRE_EXEC_SECOND_POSITION` (`tests/t-api-caller-and-enter.zsh`; multi-word parser tail / `NEED_TO_ADD_SPACECHAR` when not at command position — `tests/t-api-multiword-tail.zsh`), preset `cachedRegexMatch` / `cachedRegexMatched` for `zpwrExpandRegexMatchOnCommandPosition` without re-running the parser (`tests/t-regex-cache-api.zsh`), `zpwrExpandGlobalAliases` with no argument (parse `LBUFFER` like the ZLE widget — `tests/t-global-alias-widget.zsh`), assignment-only lines and empty partitions (`tests/t-parse-assignments-edge.zsh`), and edge cases (including parser regressions such as `ltrace -n` / `-b` flag arguments). Dedicated files exercise assignment stripping, `--` end-of-options, phase-1 shell keywords (`nocorrect`, `time`, `command`, `exec`, …), sandbox/build helpers (`xvfb-run`, `systemd-run`, `bwrap`, `ccache`, …), namespace and capability stacks (`unshare`, `nsenter`, `prlimit`, deep `sudo`/`env`), trace/wrap helpers (`rlwrap`, `timeout`, `strace`, `ltrace`), scheduling (`watch`, `ionice`, `chrt`, `taskset`, `caffeinate`, `setsid`), mixed-case wrapper spellings (`SUDO`, `DoAs`, `ENV`, … — `tests/t-parser-case-insensitive-prefix.zsh`), dbus session helpers and network proxies (`dbus-run-session`, `dbus-launch`, `torify`, `eatmydata`, `torsocks`, `pkexec`, `distcc`, … — `tests/t-parser-dbus-torify-proxy.zsh`; `firejail`, `systemd-run`, `nocache`, `ccache` — `tests/t-parser-firejail-systemd-dbus.zsh`), the debug widget’s Unicode box renderer (`zpwrExpandBox` — `tests/t-box-fuzz.zsh`, `tests/t-box-backspace-and-color.zsh`, `tests/t-box-double-dash.zsh`), `su` / `runuser` / `sg` login stacks (`tests/t-parser-su-logins.zsh`; `chroot` / `flock` / `runuser` / `su` combinations — `tests/t-parser-chroot-flock-su-runuser.zsh`; `sg` with schedulers, namespaces, and sandbox wrappers — `tests/t-parser-sg-stacks.zsh`), backslash- and quote-stripped wrapper words (`tests/t-parser-backslash-escape.zsh`), deeper `bwrap` / `fakeroot` / `systemd-run` / `capsh` / `valgrind` stacks (`tests/t-parser-sandbox-service.zsh`; `valgrind` / `proot` / `capsh` / `xvfb-run` with `strace` / `ltrace` — `tests/t-parser-valgrind-proot-capsh.zsh`), `ccache` / `distcc` / `trickle` / `faketime` / `proot` / `fakechroot` / `linux32` / `setarch` (`tests/t-parser-build-tools-proot.zsh`), and long prefix chains (`tests/t-parser-assignments-and-wrappers.zsh`, `tests/t-parser-phase1-keywords.zsh`, `tests/t-parser-phase1-proot-stack.zsh`, `tests/t-parser-cgroup-chpst-trickle.zsh`, `tests/t-parser-prlimit-choom-flock.zsh`, `tests/t-parser-cpulimit-daemonize-sem.zsh`, `tests/t-parser-stdbuf-nohup-env.zsh`, `tests/t-parser-wrapper-misc.zsh`, `tests/t-parser-capability-namespace.zsh`, `tests/t-parser-setpriv-xvfb-stack.zsh`, `tests/t-parser-systemd-container-sem.zsh`, `tests/t-parser-firejail-systemd-dbus.zsh`, `tests/t-parser-nsenter-unshare-valgrind.zsh`, `tests/t-parser-valgrind-proot-capsh.zsh`, `tests/t-parser-rlwrap-timeout-strace.zsh`, `tests/t-parser-rlwrap-ionice-watch-extra.zsh`, `tests/t-parser-watch-sched.zsh`, `tests/t-ltrace-parser-regression.zsh`).
 
 ```sh
 zunit
