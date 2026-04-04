@@ -652,13 +652,54 @@ function zpwrExpandSupernaturalSpace() {
                 ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
                 ZPWR_VARS[WAS_EXPANDED]=true
                 # estimate saved chars for history refs using the history entry
-                local _saved=0 _lw=$ZPWR_VARS[lastword_lbuffer]
+                local _saved=0 _lw=$ZPWR_VARS[lastword_lbuffer] _expansion=""
+                local -a _histWords=()
                 case $_lw in
-                    !!) _saved=$(( ${#history[1]} - 2 )) ;;
-                    \!-*|\!*) _saved=$(( ${#history[1]} - ${#_lw} )) ;;
-                    *) _saved=0 ;;
+                    # !! — full previous command
+                    !!) _expansion=${history[1]} ;;
+                    # !$ — last word of previous command
+                    \!\$)
+                        _histWords=( ${(z)history[1]} )
+                        _expansion=${_histWords[-1]}
+                        ;;
+                    # !^ — first argument (word 2) of previous command
+                    \!\^)
+                        _histWords=( ${(z)history[1]} )
+                        _expansion=${_histWords[2]}
+                        ;;
+                    # !* — all arguments of previous command
+                    \!\*)
+                        _histWords=( ${(z)history[1]} )
+                        _expansion="${_histWords[2,-1]}"
+                        ;;
+                    # !:n — nth word of previous command (0-indexed)
+                    \!:<->)
+                        _histWords=( ${(z)history[1]} )
+                        _expansion=${_histWords[$(( ${_lw#\!:} + 1 ))]}
+                        ;;
+                    # !n — history entry n (1-based)
+                    \!<->)
+                        _expansion=${history[${_lw#\!}]}
+                        ;;
+                    # !-n — n commands back
+                    \!-<->)
+                        _expansion=${history[${_lw#\!-}]}
+                        ;;
+                    # !string — most recent command starting with string
+                    \!?*)
+                        # approximate: use previous command
+                        _expansion=${history[1]}
+                        ;;
+                    # ^old^new^ — quick substitution (approximate)
+                    \^*\^*)
+                        _expansion=${history[1]}
+                        ;;
+                    *) _expansion="" ;;
                 esac
-                (( _saved < 0 )) && _saved=0
+                if [[ -n $_expansion ]]; then
+                    _saved=$(( ${#_expansion} - ${#_lw} ))
+                    (( _saved < 0 )) && _saved=0
+                fi
                 ZPWR_VARS[NATIVE_SAVED]=$_saved
             fi
         fi
