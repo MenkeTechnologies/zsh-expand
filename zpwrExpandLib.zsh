@@ -257,11 +257,17 @@ function zpwrExpandBox() {
     if (( $# )); then
         rawLines=("$@")
     fi
+    # When stdin is not a TTY, only read if data is already available (read -t 0),
+    # then drain the rest. Avoids blocking forever when fd 0 is open but never EOF
+    # (e.g. some CI/sandbox runners) while still supporting real pipes.
     if [[ ! -t 0 ]]; then
         local stdinLine
-        while IFS= read -r stdinLine; do
+        if read -r -t 0 stdinLine || [[ -n $stdinLine ]]; then
             rawLines+=("$stdinLine")
-        done
+            while IFS= read -r stdinLine || [[ -n $stdinLine ]]; do
+                rawLines+=("$stdinLine")
+            done
+        fi
     fi
     # expand tabs to spaces so char count matches rendered width
     rawLines=("${(@)rawLines//$'\t'/        }")
@@ -270,6 +276,9 @@ function zpwrExpandBox() {
     if (( wrapW == 0 )); then
         wrapW=$((COLUMNS > 0 ? COLUMNS - 4 : 76))
     fi
+
+    # never allow zero wrap width (would infinite-loop in word-wrap)
+    (( wrapW < 1 )) && wrapW=1
 
     # ensure title fits
     local -i titleW=${#title}
