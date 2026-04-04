@@ -659,10 +659,17 @@ function zpwrExpandSupernaturalSpace() {
     # type: alias, global, suffix, escape, native
     if [[ $ZPWR_VARS[WAS_EXPANDED] == true && -n $ZPWR_VARS[ORIGINAL_LAST_COMMAND] ]]; then
         local _trigger=S
-        # ZLE widget receives key in $KEYS; history path has empty $KEYS and empty triggerKey
-        if [[ $KEYS == " " || $triggerKey == "${ZPWR_VARS[SPACEBAR_KEY]}" ]]; then
+        # explicit triggerKey from caller takes precedence (history hook passes ENTER)
+        # otherwise use $KEYS from ZLE widget context (may be stale outside ZLE)
+        if [[ $triggerKey == "${ZPWR_VARS[ENTER_KEY]}" ]]; then
+            _trigger=H
+        elif [[ $triggerKey == "${ZPWR_VARS[SPACEBAR_KEY]}" ]]; then
             _trigger=S
-        elif [[ -n $triggerKey || -z $KEYS ]]; then
+        elif [[ -n $triggerKey ]]; then
+            _trigger=H
+        elif [[ $KEYS == " " ]]; then
+            _trigger=S
+        else
             _trigger=H
         fi
         local _type=${ZPWR_VARS[EXPAND_TYPE]:-alias}

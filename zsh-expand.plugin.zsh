@@ -404,7 +404,7 @@ if [[ $ZPWR_EXPAND_TO_HISTORY == true ]]; then
     function zpwrExpandHistory() {
 
         local LBUFFER="${*%$'\n'}"
-        zpwrExpandSupernaturalSpace 2>/dev/null
+        zpwrExpandSupernaturalSpace "${ZPWR_VARS[ENTER_KEY]}" 2>/dev/null
 
         print -sr -- "$LBUFFER"
         return 1
