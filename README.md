@@ -484,21 +484,39 @@ No other zsh expansion plugin shows a live preview of pending expansions.
 Every expansion is logged to a stats file. Run `zpwrExpandStats` to see a cyberpunk dashboard:
 
 ```
-┌── EXPANSION STATS ───────────────────────────────────────────┐
-│ TOTAL EXPANSIONS:  133                                       │
-│ CORRECTIONS:       5                                         │
-│ KEYSTROKES SAVED:  986                                       │
-│                                                              │
-│ ── TOP ALIASES ──────────────────                            │
-│    1. gco          ████████████████████  47  // git checkout │
-│    2. gs           █████████████░░░░░░░  31  // git status   │
-│    3. gd           █████████░░░░░░░░░░░  22  // git diff     │
-│    4. ga           ██████░░░░░░░░░░░░░░  15  // git add      │
-│    5. gp           ███░░░░░░░░░░░░░░░░░   9  // git push     │
-│                                                              │
-│ >>> YOUR ALIASES ARE WORKING FOR YOU <<<                     │
-└──────────────────────────────────────────────────────────────┘
-░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+ ███████╗███████╗██╗  ██╗      ███████╗██╗  ██╗██████╗  █████╗ ███╗   ██╗██████╗
+ ╚══███╔╝██╔════╝██║  ██║      ██╔════╝╚██╗██╔╝██╔══██╗██╔══██╗████╗  ██║██╔══██╗
+   ███╔╝ ███████╗███████║█████╗█████╗   ╚███╔╝ ██████╔╝███████║██╔██╗ ██║██║  ██║
+  ███╔╝  ╚════██║██╔══██║╚════╝██╔══╝   ██╔██╗ ██╔═══╝ ██╔══██║██║╚██╗██║██║  ██║
+ ███████╗███████║██║  ██║      ███████╗██╔╝ ██╗██║     ██║  ██║██║ ╚████║██████╔╝
+ ╚══════╝╚══════╝╚═╝  ╚═╝      ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝╚═╝  ╚═══╝╚═════╝
+┌── EXPANSION STATS ─────────────────────────────────────────────────────┐
+│ ── TRIGGER ──────────────────────────────────────────────              │
+│   SPACE EXPANSIONS:   124                                              │
+│   HISTORY EXPANSIONS: 12                                               │
+│                                                                        │
+│ ── TYPE ─────────────────────────────────────────────────              │
+│   ALIAS:              136                                              │
+│   GLOBAL ALIAS:       0                                                │
+│   SUFFIX ALIAS:       0                                                │
+│   SELF-REF ESCAPE:    0                                                │
+│   NATIVE (glob/hist): 0                                                │
+│   CORRECTIONS:        5                                                │
+│                                                                        │
+│ ── SUMMARY ──────────────────────────────────────────────              │
+│   TOTAL EXPANSIONS:   136                                              │
+│   KEYSTROKES SAVED:   1040                                             │
+│                                                                        │
+│ ── TOP ALIASES ──────────────────────────────────────────              │
+│    1. gco          ████████████████████  59  // git checkout           │
+│    2. gs           ██████████░░░░░░░░░░  31  // git status             │
+│    3. gd           ███████░░░░░░░░░░░░░  22  // git diff               │
+│    4. ga           █████░░░░░░░░░░░░░░░  15  // git add                │
+│    5. gp           ███░░░░░░░░░░░░░░░░░   9  // git push               │
+│                                                                        │
+│ >>> YOUR ALIASES ARE WORKING FOR YOU <<<                               │
+└────────────────────────────────────────────────────────────────────────┘
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 ```
 
 Stats persist permanently across sessions in `$ZPWR_EXPAND_STATS_FILE` (defaults to `$ZPWR_LOCAL`, `$XDG_CACHE_HOME`, or `~/.cache`). The dashboard lists the top aliases (default count from `ZPWR_EXPAND_STATS_TOP`, overridable with `zpwrExpandStats -t`) with proportional bar charts and each alias’s expansion. Each line is tagged `S:` (spacebar expansion) or `H:` (history accept-line / non-space trigger) so space and history paths are tallied separately.
