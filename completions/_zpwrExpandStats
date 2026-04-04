@@ -1,0 +1,14 @@
+#compdef zpwrExpandStats
+# completion for zpwrExpandStats — expansion stats dashboard
+
+_zpwrExpandStats() {
+    _arguments \
+        '(-h --help)'{-h,--help}'[Show cyberpunk stats dashboard help]' \
+        '(-t --top)'{-t,--top}'[Top N aliases (default: 20)]:count:' \
+        '(-w --width)'{-w,--width}'[Box width (default: 70)]:width:' \
+        '(-c --color)'{-c,--color}'[Force ANSI colors]' \
+        '(-r --reset)'{-r,--reset}'[Clear all stats]' \
+        '(-f --file)'{-f,--file}'[Stats file path]:file:_files'
+}
+
+_zpwrExpandStats "$@"
