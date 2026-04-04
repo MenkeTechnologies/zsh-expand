@@ -237,6 +237,181 @@ function zpwrExpandRegexMatchOnCommandPosition() {
 
 #}}}***********************************************************
 
+#{{{                    MARK:box and debug
+#**************************************************************
+function zpwrExpandBox() {
+    local title="" wrapW=0
+    local -a rawLines=()
+
+    # parse flags
+    while [[ $1 == -* ]]; do
+        case $1 in
+            -t|--title) title=$2; shift 2 ;;
+            -w|--width) wrapW=$2; shift 2 ;;
+            --) shift; break ;;
+            *)  shift ;;
+        esac
+    done
+
+    # collect lines from args and/or stdin, expand tabs
+    if (( $# )); then
+        rawLines=("$@")
+    fi
+    if [[ ! -t 0 ]]; then
+        local stdinLine
+        while IFS= read -r stdinLine; do
+            rawLines+=("$stdinLine")
+        done
+    fi
+    # expand tabs to spaces so char count matches rendered width
+    rawLines=("${(@)rawLines//$'\t'/        }")
+
+    # default wrap width to terminal width minus box overhead (4 chars: "│ " + " │")
+    if (( wrapW == 0 )); then
+        wrapW=$((COLUMNS > 0 ? COLUMNS - 4 : 76))
+    fi
+
+    # ensure title fits
+    local -i titleW=${#title}
+    (( titleW + 2 > wrapW )) && wrapW=$((titleW + 2))
+
+    # word-wrap lines that exceed wrapW
+    local -a lines=()
+    local raw remaining chunk trimmed
+    local -i breakAt
+    for raw in "${rawLines[@]}"; do
+        if (( ${#raw} <= wrapW )); then
+            lines+=("$raw")
+        else
+            remaining=$raw
+            while (( ${#remaining} > wrapW )); do
+                chunk=${remaining:0:$wrapW}
+                breakAt=${#chunk}
+                if [[ $chunk == *" "* ]]; then
+                    trimmed=${chunk% *}
+                    breakAt=${#trimmed}
+                    (( breakAt == 0 )) && breakAt=$wrapW
+                fi
+                lines+=("${remaining:0:$breakAt}")
+                remaining=${remaining:$breakAt}
+                remaining=${remaining# }
+            done
+            [[ -n $remaining ]] && lines+=("$remaining")
+        fi
+    done
+
+    # find actual max content width (may be less than wrapW after wrapping)
+    local -i w=0 len
+    local line
+    for line in "${lines[@]}"; do
+        len=${#line}
+        (( len > w )) && w=$len
+    done
+    (( titleW + 2 > w )) && w=$((titleW + 2))
+
+    # build box
+    local -i boxW=$((w + 4))
+    local msg
+    if [[ -n $title ]]; then
+        local -i titlePad=$((boxW - titleW - 5))
+        msg="╭─ $title ${(l:titlePad::─:)}╮"
+    else
+        msg="╭${(l:boxW-2::─:)}╮"
+    fi
+    for line in "${lines[@]}"; do
+        len=${#line}
+        msg+=$'\n'"│ $line${(l:w-len+1:: :)}│"
+    done
+    msg+=$'\n'"╰${(l:boxW-2::─:)}╯"
+    print -r -- "$msg"
+}
+
+function zpwrExpandDebugWidget() {
+
+    'builtin' emulate -L zsh
+    setopt rcquotes extended_glob zle
+
+    if [[ -z $LBUFFER ]]; then
+        zle -M "zsh-expand: empty line"
+        return
+    fi
+
+    local -a savedPartition
+    local savedMatch savedMatched savedPrefix
+
+    # save state
+    savedPartition=("${ZPWR_EXPAND_WORDS_LPARTITION[@]}")
+    savedMatch=$ZPWR_VARS[cachedRegexMatch]
+    savedMatched=$ZPWR_VARS[cachedRegexMatched]
+    savedPrefix=$ZPWR_VARS[cachedParserPrefix]
+
+    zpwrExpandParseWords "$LBUFFER"
+
+    local lastword=$ZPWR_VARS[lastword_lbuffer]
+    local prefix=$ZPWR_VARS[cachedParserPrefix]
+    local tail=$ZPWR_VARS[cachedRegexMatch]
+    local matched=$ZPWR_VARS[cachedRegexMatched]
+    local -a tailWords=( ${(z)tail} )
+    local cmdWord=${tailWords[1]}
+    local msg=""
+    local expandsTo="" expandType=""
+
+    # determine what would happen
+    if [[ -n $lastword ]]; then
+        if (( ${+aliases[$lastword]} )); then
+            expandsTo=${aliases[$lastword]}
+            expandType="alias"
+        elif (( ${+galiases[$lastword]} )); then
+            expandsTo=${galiases[$lastword]}
+            expandType="global alias"
+        elif [[ -n ${lastword:e} ]] && (( ${+saliases[${lastword:e}]} )); then
+            expandsTo="$saliases[${lastword:e}] $lastword"
+            expandType="suffix alias"
+        elif [[ -n ${ZPWR_EXPAND_CORRECT_REVERSE[$ZPWR_VARS[lastword_remove_special]]} ]]; then
+            expandsTo=${ZPWR_EXPAND_CORRECT_REVERSE[$ZPWR_VARS[lastword_remove_special]]}
+            expandType="correction"
+        fi
+    fi
+
+    # build lines
+    local -a lines=()
+    lines+=("input:    $LBUFFER")
+    lines+=("words:    ${#ZPWR_EXPAND_WORDS_LPARTITION} [${ZPWR_EXPAND_WORDS_LPARTITION[*]}]")
+    if [[ -n $prefix ]]; then
+        lines+=("prefix:   $prefix")
+    fi
+    if [[ $matched == true && -n $tail ]]; then
+        lines+=("command:  $cmdWord")
+        if (( $#tailWords > 1 )); then
+            lines+=("args:     ${tailWords[2,-1]}")
+        fi
+    elif [[ $matched == true ]]; then
+        lines+=("command:  (all words consumed as prefix)")
+    fi
+    lines+=("lastword: $lastword")
+    if [[ -n $expandType ]]; then
+        lines+=("action:   $expandType -> $expandsTo")
+    else
+        lines+=("action:   (no expansion)")
+    fi
+    if zpwrExpandIsCommand "$cmdWord" 2>/dev/null; then
+        lines+=("valid:    yes ($cmdWord exists)")
+    elif [[ -n $cmdWord ]]; then
+        lines+=("valid:    no ($cmdWord not found)")
+    fi
+
+    msg=$(zpwrExpandBox -t "zsh-expand debug" "${lines[@]}")
+
+    # restore state
+    ZPWR_EXPAND_WORDS_LPARTITION=("${savedPartition[@]}")
+    ZPWR_VARS[cachedRegexMatch]=$savedMatch
+    ZPWR_VARS[cachedRegexMatched]=$savedMatched
+    ZPWR_VARS[cachedParserPrefix]=$savedPrefix
+
+    zle -M "$msg"
+}
+#}}}***********************************************************
+
 #{{{                    MARK:main fn
 #**************************************************************
 function zpwrExpandSupernaturalSpace() {
