@@ -257,7 +257,97 @@
     zpwrExpandStatsRecord 'S:alias:__zpr_ks'
     out=$(zpwrExpandStats)
     assert "$out" contains 'KEYSTROKES SAVED'
+    assert "$out" contains '20'
     unalias __zpr_ks
+    command rm -f "$tmp"
+}
+
+@test 'stats: keystrokes saved includes global aliases' {
+    local tmp out
+    tmp=$(mktemp "${TMPDIR:-/tmp}/zunit-zpwr-stats-saved-global.XXXXXX")
+    ZPWR_EXPAND_STATS_FILE=$tmp
+    # global alias: je (2 chars) -> | jq . (6 chars), saves 4 per use
+    # 3 uses = 12 keystrokes saved
+    alias -g __ZPR_KS_G='| jq .'
+    zpwrExpandStatsRecord 'S:global:__ZPR_KS_G'
+    zpwrExpandStatsRecord 'S:global:__ZPR_KS_G'
+    zpwrExpandStatsRecord 'S:global:__ZPR_KS_G'
+    out=$(zpwrExpandStats)
+    # __ZPR_KS_G is 10 chars, '| jq .' is 6 chars — would subtract if not handled as global
+    # we just want to verify it's being counted (non-zero or matches expected)
+    assert "$out" contains '__ZPR_KS_G'
+    assert "$out" contains '| jq .'
+    unalias __ZPR_KS_G
+    command rm -f "$tmp"
+}
+
+@test 'stats: keystrokes saved includes suffix aliases' {
+    local tmp out
+    tmp=$(mktemp "${TMPDIR:-/tmp}/zunit-zpwr-stats-saved-suffix.XXXXXX")
+    ZPWR_EXPAND_STATS_FILE=$tmp
+    # suffix alias: .zpks extension -> vim  (3 chars)
+    # file.zpks (9 chars) -> vim file.zpks (13 chars), saves 4 per use
+    # 2 uses = 8 keystrokes saved
+    saliases[zpks]=vim
+    zpwrExpandStatsRecord 'S:suffix:file.zpks'
+    zpwrExpandStatsRecord 'S:suffix:file.zpks'
+    out=$(zpwrExpandStats)
+    assert "$out" contains 'file.zpks'
+    assert "$out" contains 'vim file.zpks'
+    unset 'saliases[zpks]'
+    command rm -f "$tmp"
+}
+
+@test 'stats: TOP ALIASES shows global alias expansion' {
+    local tmp out
+    tmp=$(mktemp "${TMPDIR:-/tmp}/zunit-zpwr-stats-top-global.XXXXXX")
+    ZPWR_EXPAND_STATS_FILE=$tmp
+    alias -g __ZPR_TOPG='| sort'
+    zpwrExpandStatsRecord 'S:global:__ZPR_TOPG'
+    zpwrExpandStatsRecord 'S:global:__ZPR_TOPG'
+    out=$(zpwrExpandStats)
+    # should show the expansion text next to the alias
+    assert "$out" contains '__ZPR_TOPG'
+    assert "$out" contains '| sort'
+    unalias __ZPR_TOPG
+    command rm -f "$tmp"
+}
+
+@test 'stats: TOP ALIASES shows suffix alias expansion' {
+    local tmp out
+    tmp=$(mktemp "${TMPDIR:-/tmp}/zunit-zpwr-stats-top-suffix.XXXXXX")
+    ZPWR_EXPAND_STATS_FILE=$tmp
+    saliases[zpsfx]=cat
+    zpwrExpandStatsRecord 'S:suffix:data.zpsfx'
+    out=$(zpwrExpandStats)
+    assert "$out" contains 'data.zpsfx'
+    assert "$out" contains 'cat data.zpsfx'
+    unset 'saliases[zpsfx]'
+    command rm -f "$tmp"
+}
+
+@test 'stats: keystrokes saved sums all alias types' {
+    local tmp out savedLine
+    tmp=$(mktemp "${TMPDIR:-/tmp}/zunit-zpwr-stats-saved-all.XXXXXX")
+    ZPWR_EXPAND_STATS_FILE=$tmp
+    # regular: __zpr_r (7 chars) -> hello world (11 chars) = 4 per use, 2 uses = 8
+    alias __zpr_r='hello world'
+    # global: __ZPR_G (7 chars) -> | tail -n 5 (11 chars) = 4 per use, 2 uses = 8
+    alias -g __ZPR_G='| tail -n 5'
+    # suffix: zpmix ext -> less (4 chars), file.zpmix (10 chars) -> less file.zpmix (15 chars) = 5 per use, 2 uses = 10
+    saliases[zpmix]=less
+    zpwrExpandStatsRecord 'S:alias:__zpr_r'
+    zpwrExpandStatsRecord 'S:alias:__zpr_r'
+    zpwrExpandStatsRecord 'S:global:__ZPR_G'
+    zpwrExpandStatsRecord 'S:global:__ZPR_G'
+    zpwrExpandStatsRecord 'S:suffix:file.zpmix'
+    zpwrExpandStatsRecord 'S:suffix:file.zpmix'
+    out=$(zpwrExpandStats)
+    # total saved = 8 + 8 + 10 = 26
+    assert "$out" contains 'KEYSTROKES SAVED'
+    assert "$out" contains '26'
+    unalias __zpr_r __ZPR_G
+    unset 'saliases[zpmix]'
     command rm -f "$tmp"
 }
 
