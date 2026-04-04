@@ -25,22 +25,25 @@
         local -i expectedW=${#boxLines[1]}
         local -i i lineLen
 
-        # must have at least 3 lines (top, content, bottom)
-        [[ $numLines -ge 3 ]]
+        # must have at least 4 lines (top, content, bottom, shadow)
+        [[ $numLines -ge 4 ]]
         assert $? equals 0
 
         # top border
-        assert "$boxLines[1]" matches "^╭.*╮$"
+        assert "$boxLines[1]" matches "^┌.*┐$"
 
-        # bottom border
-        assert "$boxLines[$numLines]" matches "^╰.*╯$"
+        # bottom border (line before shadow)
+        assert "$boxLines[$((numLines - 1))]" matches "^└.*┘$"
+
+        # shadow bar (last line)
+        assert "$boxLines[$numLines]" matches "^░.*░$"
 
         # middle lines
-        for (( i = 2; i < numLines; i++ )); do
+        for (( i = 2; i < numLines - 1; i++ )); do
             assert "$boxLines[$i]" matches "^│.*│$"
         done
 
-        # all lines same width
+        # all lines same width (top, content, bottom — shadow matches too)
         for (( i = 1; i <= numLines; i++ )); do
             lineLen=${#boxLines[$i]}
             assert $lineLen equals $expectedW
