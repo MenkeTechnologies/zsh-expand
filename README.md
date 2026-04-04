@@ -49,6 +49,7 @@
 - [Suffix Alias Expansion](#-suffix-alias-expansion)
 - [Autopair Integration](#-autopair-integration)
 - [History Injection](#-history-injection)
+- [Debug Widget](#-debug-widget)
 - [Command-Position Parser](#-command-position-parser)
 - [Performance](#-performance)
 - [Test Coverage](#-test-coverage)
@@ -112,6 +113,7 @@ torify sudo -kE -u root su -l deploy                         \
 | **Suffix Alias Expansion** | `file.txt<space>` -> `vim file.txt` -- expands suffix aliases (`alias -s`) at command position |
 | **Autopair Integration** | Detects [autopair](https://github.com/hlissner/zsh-autopair) and delegates space insertion to preserve bracket/quote auto-pairing |
 | **History Injection** | Optionally writes the fully-expanded form of your command into history |
+| **Debug Widget** | `Esc Ctrl+D` shows parser state -- prefix chain, command position, expansion action -- without modifying the line |
 
 ---
 
@@ -275,6 +277,7 @@ export ZPWR_EXPAND_BLACKLIST=(g gco)      # aliases to never expand
 |---|---|
 | `Space` | Supernatural expand + insert space |
 | `Ctrl+Space` | Insert literal space (bypass) |
+| `Esc Ctrl+D` | Debug widget -- show parser state without expanding |
 
 ---
 
@@ -426,6 +429,26 @@ export ZPWR_EXPAND_PRE_EXEC_NATIVE=true
 
 ---
 
+### // DEBUG WIDGET
+
+Press `Esc Ctrl+D` to inspect the parser's view of the current line without expanding anything:
+
+```
++-- zsh-expand debug -------------------+
+| input:    sudo -kE -u root gco        |
+| words:    3 [sudo -kE -u root gco]    |
+| prefix:   sudo -kE -u root            |
+| command:  gco                          |
+| lastword: gco                          |
+| action:   alias -> git checkout        |
+| valid:    no (gco not found)           |
++----------------------------------------+
+```
+
+Shows the parsed prefix chain, identified command position, what expansion would fire, and whether the command word exists. Useful for debugging why something isn't expanding or verifying the parser is consuming flags correctly.
+
+---
+
 ### // COMMAND-POSITION PARSER
 
 Previous versions used a single POSIX extended regex to match prefix commands and their flags. This worked for simple cases but couldn't scale -- every new command and flag combination made the regex longer and harder to debug. Flag arguments containing `=` (like `strace -e trace=network`) were incorrectly stripped as variable assignments.
@@ -516,7 +539,7 @@ A large [zunit](https://github.com/zunit-zsh/zunit) suite (10,000+ discrete `@te
 zsh scripts/count-tests.zsh
 ```
 
-Coverage includes alias expansion, global aliases, suffix aliases, spelling correction, command-position parsing, word parsing, native expansion, config flags, tab stops, prefix chains, command existence checks, integration flows, and edge cases (including parser regressions such as `ltrace -n` / `-b` flag arguments). Dedicated files exercise assignment stripping, `--` end-of-options, phase-1 shell keywords (`nocorrect`, `time`, `command`, `exec`, …), sandbox/build helpers (`xvfb-run`, `systemd-run`, `bwrap`, `ccache`, …), namespace and capability stacks (`unshare`, `nsenter`, `prlimit`, deep `sudo`/`env`), trace/wrap helpers (`rlwrap`, `timeout`, `strace`, `ltrace`), and long prefix chains (`tests/t-parser-assignments-and-wrappers.zsh`, `tests/t-parser-phase1-keywords.zsh`, `tests/t-parser-wrapper-misc.zsh`, `tests/t-parser-capability-namespace.zsh`, `tests/t-parser-rlwrap-timeout-strace.zsh`, `tests/t-ltrace-parser-regression.zsh`).
+Coverage includes alias expansion, global aliases, suffix aliases, spelling correction, command-position parsing, word parsing, native expansion, config flags, tab stops, prefix chains, command existence checks, integration flows, and edge cases (including parser regressions such as `ltrace -n` / `-b` flag arguments). Dedicated files exercise assignment stripping, `--` end-of-options, phase-1 shell keywords (`nocorrect`, `time`, `command`, `exec`, …), sandbox/build helpers (`xvfb-run`, `systemd-run`, `bwrap`, `ccache`, …), namespace and capability stacks (`unshare`, `nsenter`, `prlimit`, deep `sudo`/`env`), trace/wrap helpers (`rlwrap`, `timeout`, `strace`, `ltrace`), scheduling (`watch`, `ionice`, `chrt`, `taskset`, `caffeinate`, `setsid`), and long prefix chains (`tests/t-parser-assignments-and-wrappers.zsh`, `tests/t-parser-phase1-keywords.zsh`, `tests/t-parser-wrapper-misc.zsh`, `tests/t-parser-capability-namespace.zsh`, `tests/t-parser-rlwrap-timeout-strace.zsh`, `tests/t-parser-watch-sched.zsh`, `tests/t-ltrace-parser-regression.zsh`).
 
 ```sh
 zunit
