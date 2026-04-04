@@ -674,3 +674,81 @@ line2   spaced'
     assert "$REPLY" same_as 'echo normal'
     unalias __zpr_norm
 }
+
+#==============================================================
+# new stats format: trigger:type:alias:saved for natives
+#==============================================================
+
+@test 'stats: native record with saved chars suffix parses correctly' {
+    local tmp out
+    tmp=$(mktemp "${TMPDIR:-/tmp}/zunit-zpwr-stats-native-saved.XXXXXX")
+    ZPWR_EXPAND_STATS_FILE=$tmp
+    # new format: H:native:!!:42 means 42 chars saved
+    zpwrExpandStatsRecord 'H:native:!!:42'
+    zpwrExpandStatsRecord 'H:native:!!:38'
+    out=$(zpwrExpandStats)
+    # both should count as native, saved chars should total 80
+    assert "$out" contains 'NATIVE'
+    assert "$out" contains '!!'
+    assert "$out" contains '80'
+    command rm -f "$tmp"
+}
+
+@test 'stats: native record without saved suffix still counts (legacy)' {
+    local tmp out
+    tmp=$(mktemp "${TMPDIR:-/tmp}/zunit-zpwr-stats-native-nosave.XXXXXX")
+    ZPWR_EXPAND_STATS_FILE=$tmp
+    # old format without saved chars
+    zpwrExpandStatsRecord 'S:native:globby'
+    zpwrExpandStatsRecord 'H:native:globby'
+    out=$(zpwrExpandStats)
+    assert "$out" contains 'NATIVE'
+    assert "$out" contains 'globby'
+    command rm -f "$tmp"
+}
+
+@test 'stats: mixed alias savings and native saved chars sum together' {
+    local tmp out
+    tmp=$(mktemp "${TMPDIR:-/tmp}/zunit-zpwr-stats-mixed-saved.XXXXXX")
+    ZPWR_EXPAND_STATS_FILE=$tmp
+    alias __zpr_mixa='git checkout branch'  # 10 chars -> 19 chars = 9 saved/use
+    # 2 uses: 18 chars saved from alias
+    zpwrExpandStatsRecord 'S:alias:__zpr_mixa'
+    zpwrExpandStatsRecord 'S:alias:__zpr_mixa'
+    # 3 native expansions with saved chars
+    zpwrExpandStatsRecord 'H:native:!!:10'
+    zpwrExpandStatsRecord 'H:native:!!:15'
+    zpwrExpandStatsRecord 'H:native:!!:5'
+    # total saved = 18 + 30 = 48
+    out=$(zpwrExpandStats)
+    assert "$out" contains '48'
+    unalias __zpr_mixa
+    command rm -f "$tmp"
+}
+
+@test 'stats: native saved zero does not corrupt totals' {
+    local tmp out
+    tmp=$(mktemp "${TMPDIR:-/tmp}/zunit-zpwr-stats-native-zero.XXXXXX")
+    ZPWR_EXPAND_STATS_FILE=$tmp
+    zpwrExpandStatsRecord 'H:native:starword:0'
+    zpwrExpandStatsRecord 'H:native:starword:0'
+    out=$(zpwrExpandStats)
+    assert "$out" contains 'NATIVE'
+    assert "$out" contains 'starword'
+    command rm -f "$tmp"
+}
+
+#==============================================================
+# native char in alias name (not type) is not confused with saved
+#==============================================================
+
+@test 'stats: alias name containing colon is not split at first colon' {
+    local tmp out
+    tmp=$(mktemp "${TMPDIR:-/tmp}/zunit-zpwr-stats-colon-alias.XXXXXX")
+    ZPWR_EXPAND_STATS_FILE=$tmp
+    # alias type does not use saved suffix — 'ns:tool' is the alias name
+    zpwrExpandStatsRecord 'S:alias:ns:tool'
+    out=$(zpwrExpandStats)
+    assert "$out" contains 'ns:tool'
+    command rm -f "$tmp"
+}
