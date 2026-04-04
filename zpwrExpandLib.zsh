@@ -649,7 +649,7 @@ function zpwrExpandSupernaturalSpace() {
 #**************************************************************
 function zpwrExpandStatsRecord() {
     local alias=$1
-    local statsFile=${ZPWR_EXPAND_STATS_FILE:-${TMPDIR:-/tmp}/zpwr-expand-stats-${UID}.dat}
+    local statsFile=${ZPWR_EXPAND_STATS_FILE:-${ZPWR_LOCAL:-${XDG_CACHE_HOME:-$HOME/.cache}}/zpwr-expand-stats.dat}
 
     # append alias name to stats file (one per expansion)
     print -r -- "$alias" >> "$statsFile"
@@ -658,7 +658,7 @@ function zpwrExpandStatsRecord() {
 function zpwrExpandStats() {
     'builtin' emulate -L zsh
 
-    local statsFile=${ZPWR_EXPAND_STATS_FILE:-${TMPDIR:-/tmp}/zpwr-expand-stats-${UID}.dat}
+    local statsFile=${ZPWR_EXPAND_STATS_FILE:-${ZPWR_LOCAL:-${XDG_CACHE_HOME:-$HOME/.cache}}/zpwr-expand-stats.dat}
 
     if [[ ! -f $statsFile ]]; then
         zpwrExpandBox -t "EXPANSION STATS" "No expansions recorded yet."

@@ -501,7 +501,7 @@ Every expansion is logged to a stats file. Run `zpwrExpandStats` to see a cyberp
 ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 ```
 
-Stats persist across sessions in `$ZPWR_EXPAND_STATS_FILE` (defaults to `$TMPDIR/zpwr-expand-stats-$UID.dat`). Shows top 15 aliases with proportional bar charts and the expansion each maps to.
+Stats persist permanently across sessions in `$ZPWR_EXPAND_STATS_FILE` (defaults to `$ZPWR_LOCAL`, `$XDG_CACHE_HOME`, or `~/.cache`). Shows top 15 aliases with proportional bar charts and the expansion each maps to.
 
 ---
 
