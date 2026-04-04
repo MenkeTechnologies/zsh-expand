@@ -635,9 +635,13 @@ function zpwrExpandSupernaturalSpace() {
         set +x
     fi
 
-    # track expansion stats
+    # track expansion stats — tag with type (space or history)
     if [[ $ZPWR_VARS[WAS_EXPANDED] == true && -n $ZPWR_VARS[ORIGINAL_LAST_COMMAND] ]]; then
-        zpwrExpandStatsRecord "$ZPWR_VARS[ORIGINAL_LAST_COMMAND]"
+        if [[ $triggerKey == "${ZPWR_VARS[ENTER_KEY]}" || -z $triggerKey ]]; then
+            zpwrExpandStatsRecord "H:$ZPWR_VARS[ORIGINAL_LAST_COMMAND]"
+        else
+            zpwrExpandStatsRecord "S:$ZPWR_VARS[ORIGINAL_LAST_COMMAND]"
+        fi
     fi
     if [[ $ZPWR_VARS[foundIncorrect] == true ]]; then
         zpwrExpandStatsRecord "__correction__"
@@ -666,16 +670,28 @@ function zpwrExpandStats() {
     fi
 
     local -A counts
-    local -i total=0 corrections=0 savedChars=0
-    local alias expanded
+    local -i total=0 spaceTotal=0 histTotal=0 corrections=0 savedChars=0
+    local line alias expanded type
 
-    # tally counts
-    while IFS= read -r alias; do
-        if [[ $alias == __correction__ ]]; then
+    # tally counts — lines are "S:alias", "H:alias", or "__correction__"
+    while IFS= read -r line; do
+        if [[ $line == __correction__ ]]; then
             (( corrections++ ))
-        else
+        elif [[ $line == [SH]:* ]]; then
+            type=${line%%:*}
+            alias=${line#?:}
             (( counts[$alias]++ ))
             (( total++ ))
+            if [[ $type == S ]]; then
+                (( spaceTotal++ ))
+            else
+                (( histTotal++ ))
+            fi
+        else
+            # legacy format (no prefix) — count as space expansion
+            (( counts[$line]++ ))
+            (( total++ ))
+            (( spaceTotal++ ))
         fi
     done < "$statsFile"
 
@@ -697,9 +713,12 @@ function zpwrExpandStats() {
 
     # build output lines
     local -a lines=()
-    lines+=("TOTAL EXPANSIONS:  $total")
-    lines+=("CORRECTIONS:       $corrections")
-    lines+=("KEYSTROKES SAVED:  $savedChars")
+    lines+=("── TOTALS ───────────────────────")
+    lines+=("  SPACE EXPANSIONS:  $spaceTotal")
+    lines+=("  HISTORY EXPANSIONS: $histTotal")
+    lines+=("  TOTAL EXPANSIONS:  $total")
+    lines+=("  CORRECTIONS:       $corrections")
+    lines+=("  KEYSTROKES SAVED:  $savedChars")
     lines+=("")
     lines+=("── TOP ALIASES ──────────────────")
 
