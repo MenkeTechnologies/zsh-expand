@@ -140,8 +140,14 @@ function zpwrExpandWordStopHistoryExpansion(){
         # expand
         regexp-replace res1 '(^|[ ])!([[:graph:]]+ )' '$match[1]\!$match[2]' &> /dev/null
         LBUFFER="$res1$ZPWR_VARS[lastword_lbuffer]"
-        ZPWR_VARS[WAS_EXPANDED]=true
+        local _pre_expand=$LBUFFER
         zle expand-word
+        ZPWR_VARS[WAS_EXPANDED]=true
+        # track native expansion only if buffer actually changed
+        if [[ $LBUFFER != $_pre_expand ]]; then
+            ZPWR_VARS[EXPAND_TYPE]=native
+            ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
+        fi
     fi
 
 }
