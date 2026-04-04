@@ -807,11 +807,17 @@ ${_d} ░░░░░░░░░░░░░░░░░░░░░░░░�
         fi
     done < "$statsFile"
 
-    # compute chars saved per alias
+    # compute chars saved per alias (regular, global, and suffix)
     local -i _cnt _alen _elen
     local _key
     for _key in "${(k)counts[@]}"; do
-        expanded=${aliases[$_key]}
+        expanded=${aliases[(e)$_key]}
+        [[ -z $expanded ]] && expanded=${galiases[(e)$_key]}
+        # suffix alias: key is a filename like foo.txt, look up by extension
+        if [[ -z $expanded && -n ${_key:e} ]]; then
+            expanded=${saliases[(e)${_key:e}]}
+            [[ -n $expanded ]] && expanded="$expanded $_key"
+        fi
         _cnt=${counts[(e)$_key]}
         _alen=${#_key}
         if [[ -n $expanded ]]; then
@@ -904,7 +910,12 @@ ${_c} ╚══════╝╚══════╝╚═╝  ╚═╝      
         (( barLen < 1 )) && barLen=1
         bar=${(l:barLen::█:)}${(l:maxBar-barLen::░:)}
 
-        expanded=${aliases[$name]}
+        expanded=${aliases[(e)$name]}
+        [[ -z $expanded ]] && expanded=${galiases[(e)$name]}
+        if [[ -z $expanded && -n ${name:e} ]]; then
+            expanded=${saliases[(e)${name:e}]}
+            [[ -n $expanded ]] && expanded="$expanded $name"
+        fi
         printf -v rankStr '  %2d. %-12s %s %3d' $rank "$name" "$bar" $cnt
         if [[ -n $expanded ]]; then
             expanded=${expanded//$'\n'/ }
