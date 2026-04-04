@@ -680,14 +680,36 @@ function zpwrExpandStats() {
         case $1 in
             -h|--help)
                 cat <<'HELP'
-zpwrExpandStats — expansion stats dashboard
+ ███████╗██╗  ██╗██████╗  █████╗ ███╗   ██╗██████╗
+ ██╔════╝╚██╗██╔╝██╔══██╗██╔══██╗████╗  ██║██╔══██╗
+ █████╗   ╚███╔╝ ██████╔╝███████║██╔██╗ ██║██║  ██║
+ ██╔══╝   ██╔██╗ ██╔═══╝ ██╔══██║██║╚██╗██║██║  ██║
+ ███████╗██╔╝ ██╗██║     ██║  ██║██║ ╚████║██████╔╝
+ ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝╚═╝  ╚═══╝╚═════╝
+ ┌──────────────────────────────────────────────────────┐
+ │ STATUS: TRACKING  // SIGNAL: ████████░░ // STATS  │
+ └──────────────────────────────────────────────────────┘
+  >> EXPANSION STATS DASHBOARD // FULL SPECTRUM <<
 
-  -h, --help          Show this help
-  -t, --top N         Show top N aliases (default: 15)
-  -w, --width N       Box width (default: 70)
-  -c, --color         Force ANSI colors
-  -r, --reset         Clear all stats
-  -f, --file PATH     Stats file path
+  USAGE: zpwrExpandStats [OPTIONS]
+
+  ── OPTIONS ────────────────────────────────────────────
+  -h, --help                                     // Show this help
+  -t, --top <N>                                  // Top N aliases (default: 15)
+  -w, --width <N>                                // Box width (default: 70)
+  -c, --color                                    // Force ANSI colors
+  -r, --reset                                    // Clear all stats
+  -f, --file <PATH>                              // Override stats file path
+
+  ── CONFIG ─────────────────────────────────────────────
+  ZPWR_EXPAND_STATS_FILE                         // Stats file location
+  ZPWR_EXPAND_STATS_TOP                          // Default top N
+
+  ── SYSTEM ─────────────────────────────────────────
+  (c) MenkeTechnologies
+  Your keystrokes are currency. Spend them wisely.
+  >>> JACK IN. TRACK YOUR EXPANSIONS. OWN YOUR ALIASES. <<<
+ ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 HELP
                 return 0
                 ;;
