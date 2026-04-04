@@ -340,20 +340,140 @@
     unset ZPWR_EXPAND_STATS_TOP
 }
 
-@test 'stats: unset ZPWR_EXPAND_STATS_TOP uses default 15' {
+@test 'stats: unset ZPWR_EXPAND_STATS_TOP uses default 20' {
     local tmp out
     tmp=$(mktemp "${TMPDIR:-/tmp}/zunit-zpwr-stats-top-default.XXXXXX")
     ZPWR_EXPAND_STATS_FILE=$tmp
     unset ZPWR_EXPAND_STATS_TOP
     local -i r
-    for (( r = 1; r <= 16; r++ )); do
+    for (( r = 1; r <= 21; r++ )); do
         zpwrExpandStatsRecord "S:alias:zst_def_${(l:2::0:)r}"
     done
     out=$(zpwrExpandStats)
-    # Tied counts sort with zst_def_16 … zst_def_02 in the top 15; zst_def_01 is rank 16.
-    assert "$out" contains 'zst_def_16'
+    # Tied counts sort with zst_def_21 … zst_def_02 in the top 20; zst_def_01 is rank 21.
+    assert "$out" contains 'zst_def_21'
     assert "$out" contains 'zst_def_02'
     [[ $out != *zst_def_01* ]]
     assert $? equals 0
+    command rm -f "$tmp"
+}
+
+#==============================================================
+# zpwrExpandStats CLI (-h, -t, -w, -f, -r, -c)
+#==============================================================
+
+@test 'stats CLI: -h prints dashboard help and exits 0' {
+    run zpwrExpandStats -h
+    assert $state equals 0
+    assert "$output" contains 'EXPANSION STATS DASHBOARD'
+    assert "$output" contains 'USAGE:'
+}
+
+@test 'stats CLI: --help matches -h' {
+    run zpwrExpandStats --help
+    assert $state equals 0
+    assert "$output" contains 'zpwrExpandStats'
+    assert "$output" contains '--top'
+}
+
+@test 'stats CLI: unknown option returns non-zero' {
+    run zpwrExpandStats --not-a-real-flag-zz 2>&1
+    assert $state not_equal_to 0
+    assert "$output" contains 'unknown option'
+}
+
+@test 'stats CLI: -r clears file passed via -f' {
+    local tmp
+    tmp=$(mktemp "${TMPDIR:-/tmp}/zunit-zpwr-stats-cli-reset.XXXXXX")
+    print -r 'S:alias:gone' >>"$tmp"
+    run zpwrExpandStats -r -f "$tmp"
+    assert $state equals 0
+    assert "$output" contains 'Stats cleared'
+    [[ ! -f $tmp ]]
+    assert $? equals 0
+}
+
+@test 'stats CLI: -r when -f path has no file' {
+    local tmp
+    tmp=$(mktemp "${TMPDIR:-/tmp}/zunit-zpwr-stats-cli-reset-miss.XXXXXX")
+    command rm -f "$tmp"
+    run zpwrExpandStats -r -f "$tmp"
+    assert $state equals 0
+    assert "$output" contains 'No stats file'
+}
+
+@test 'stats CLI: -f reads stats from alternate path' {
+    local tmp out
+    tmp=$(mktemp "${TMPDIR:-/tmp}/zunit-zpwr-stats-cli-file.XXXXXX")
+    ZPWR_EXPAND_STATS_FILE=$tmp
+    zpwrExpandStatsRecord 'S:alias:alt_path_marker'
+    unset ZPWR_EXPAND_STATS_FILE
+    out=$(zpwrExpandStats -f "$tmp")
+    assert "$out" contains 'alt_path_marker'
+    command rm -f "$tmp"
+}
+
+@test 'stats CLI: -t limits TOP ALIASES with -f' {
+    local tmp out
+    tmp=$(mktemp "${TMPDIR:-/tmp}/zunit-zpwr-stats-cli-top.XXXXXX")
+    ZPWR_EXPAND_STATS_FILE=$tmp
+    local -i i
+    for (( i = 1; i <= 5; i++ )); do zpwrExpandStatsRecord 'S:alias:cli_top_heavy'; done
+    for (( i = 1; i <= 2; i++ )); do zpwrExpandStatsRecord 'S:alias:cli_top_light'; done
+    unset ZPWR_EXPAND_STATS_FILE
+    out=$(zpwrExpandStats -f "$tmp" -t 1)
+    assert "$out" contains 'cli_top_heavy'
+    [[ $out != *cli_top_light* ]]
+    assert $? equals 0
+    command rm -f "$tmp"
+}
+
+@test 'stats CLI: -w widens box (corners present)' {
+    local tmp out
+    tmp=$(mktemp "${TMPDIR:-/tmp}/zunit-zpwr-stats-cli-width.XXXXXX")
+    ZPWR_EXPAND_STATS_FILE=$tmp
+    zpwrExpandStatsRecord 'S:alias:wide_box'
+    unset ZPWR_EXPAND_STATS_FILE
+    out=$(zpwrExpandStats -f "$tmp" -w 92)
+    assert "$out" matches ".*┌.*┐.*"
+    command rm -f "$tmp"
+}
+
+@test 'stats CLI: -c with stats does not error' {
+    local tmp out
+    tmp=$(mktemp "${TMPDIR:-/tmp}/zunit-zpwr-stats-cli-color.XXXXXX")
+    ZPWR_EXPAND_STATS_FILE=$tmp
+    zpwrExpandStatsRecord 'S:alias:color_row'
+    unset ZPWR_EXPAND_STATS_FILE
+    out=$(zpwrExpandStats -f "$tmp" -c 2>&1)
+    [[ $out != *"bad math"* ]]
+    assert $? equals 0
+    assert "$out" contains 'color_row'
+    command rm -f "$tmp"
+}
+
+@test 'stats CLI: long form --reset --file' {
+    local tmp
+    tmp=$(mktemp "${TMPDIR:-/tmp}/zunit-zpwr-stats-cli-long.XXXXXX")
+    print -r 'S:alias:gone2' >>"$tmp"
+    run zpwrExpandStats --reset --file "$tmp"
+    assert $state equals 0
+    [[ ! -f $tmp ]]
+    assert $? equals 0
+}
+
+@test 'stats CLI: multiline alias expansion collapsed in TOP ALIASES' {
+    local tmp out
+    tmp=$(mktemp "${TMPDIR:-/tmp}/zunit-zpwr-stats-cli-mline.XXXXXX")
+    ZPWR_EXPAND_STATS_FILE=$tmp
+    alias __zpr_mline='line1
+line2   spaced'
+    zpwrExpandStatsRecord 'S:alias:__zpr_mline'
+    unset ZPWR_EXPAND_STATS_FILE
+    out=$(zpwrExpandStats -f "$tmp" -w 70)
+    assert "$out" contains '__zpr_mline'
+    assert "$out" contains 'line1'
+    assert "$out" contains 'line2'
+    unalias __zpr_mline
     command rm -f "$tmp"
 }

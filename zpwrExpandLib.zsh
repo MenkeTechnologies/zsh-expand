@@ -671,7 +671,7 @@ function zpwrExpandStats() {
     setopt extendedglob
 
     local statsFile=${ZPWR_EXPAND_STATS_FILE:-${ZPWR_LOCAL:-${XDG_CACHE_HOME:-$HOME/.cache}}/zpwr-expand-stats.dat}
-    local -i topN=${ZPWR_EXPAND_STATS_TOP:-15}
+    local -i topN=${ZPWR_EXPAND_STATS_TOP:-20}
     local -i boxWidth=70
     local doReset=false doColor=false
 
@@ -701,7 +701,7 @@ ${_g} └───────────────────────�
 
   ${_c}── OPTIONS ────────────────────────────────────────────${_r}
   ${_g}-h${_r}, ${_g}--help${_r}                                     ${_d}//${_r} Show this help
-  ${_g}-t${_r}, ${_g}--top${_r} ${_y}<N>${_r}                                  ${_d}//${_r} Top N aliases (default: 15)
+  ${_g}-t${_r}, ${_g}--top${_r} ${_y}<N>${_r}                                  ${_d}//${_r} Top N aliases (default: 20)
   ${_g}-w${_r}, ${_g}--width${_r} ${_y}<N>${_r}                                ${_d}//${_r} Box width (default: 70)
   ${_g}-c${_r}, ${_g}--color${_r}                                    ${_d}//${_r} Force ANSI colors
   ${_g}-r${_r}, ${_g}--reset${_r}                                    ${_d}//${_r} Clear all stats
@@ -811,28 +811,63 @@ ${_d} ░░░░░░░░░░░░░░░░░░░░░░░░�
     done
     sorted=(${(On)sorted})
 
-    # build output lines
-    local -a lines=()
-    lines+=("── TRIGGER ──────────────────────")
-    lines+=("  SPACE EXPANSIONS:   $spaceTotal")
-    lines+=("  HISTORY EXPANSIONS: $histTotal")
-    lines+=("")
-    lines+=("── TYPE ─────────────────────────")
-    lines+=("  ALIAS:              $aliasTotal")
-    lines+=("  GLOBAL ALIAS:       $globalTotal")
-    lines+=("  SUFFIX ALIAS:       $suffixTotal")
-    lines+=("  SELF-REF ESCAPE:    $escapeTotal")
-    lines+=("  NATIVE (glob/hist): $nativeTotal")
-    lines+=("  CORRECTIONS:        $corrections")
-    lines+=("")
-    lines+=("── SUMMARY ──────────────────────")
-    lines+=("  TOTAL EXPANSIONS:   $total")
-    lines+=("  KEYSTROKES SAVED:   $savedChars")
-    lines+=("")
-    lines+=("── TOP ALIASES ──────────────────")
+    # color codes
+    local _r=$'\e[0m'
+    local _c=$'\e[38;5;51m'       # cyan neon
+    local _m=$'\e[1m\e[38;5;207m' # bold magenta
+    local _g=$'\e[38;5;48m'       # green neon
+    local _y=$'\e[38;5;226m'      # yellow
+    local _d=$'\e[38;5;236m'      # dark gray
+    local _w=$'\e[1m\e[38;5;255m' # bold white
+
+    # banner
+    print -r -- "${_c} ███████╗██╗  ██╗██████╗  █████╗ ███╗   ██╗██████╗${_r}
+${_c} ██╔════╝╚██╗██╔╝██╔══██╗██╔══██╗████╗  ██║██╔══██╗${_r}
+${_c} █████╗   ╚███╔╝ ██████╔╝███████║██╔██╗ ██║██║  ██║${_r}
+${_c} ██╔══╝   ██╔██╗ ██╔═══╝ ██╔══██║██║╚██╗██║██║  ██║${_r}
+${_c} ███████╗██╔╝ ██╗██║     ██║  ██║██║ ╚████║██████╔╝${_r}
+${_c} ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝╚═╝  ╚═══╝╚═════╝${_r}"
+
+    # build plain lines (for width calc) and colored lines (for display)
+    local -a plain=() color=()
+
+    plain+=("── TRIGGER ──────────────────────────────────────────────")
+    color+=("${_c}── TRIGGER ──────────────────────────────────────────────${_r}")
+    plain+=("  SPACE EXPANSIONS:   $spaceTotal")
+    color+=("  ${_w}SPACE EXPANSIONS:${_r}   ${_g}$spaceTotal${_r}")
+    plain+=("  HISTORY EXPANSIONS: $histTotal")
+    color+=("  ${_w}HISTORY EXPANSIONS:${_r} ${_g}$histTotal${_r}")
+    plain+=("")
+    color+=("")
+    plain+=("── TYPE ─────────────────────────────────────────────────")
+    color+=("${_c}── TYPE ─────────────────────────────────────────────────${_r}")
+    plain+=("  ALIAS:              $aliasTotal")
+    color+=("  ${_w}ALIAS:${_r}              ${_g}$aliasTotal${_r}")
+    plain+=("  GLOBAL ALIAS:       $globalTotal")
+    color+=("  ${_w}GLOBAL ALIAS:${_r}       ${_g}$globalTotal${_r}")
+    plain+=("  SUFFIX ALIAS:       $suffixTotal")
+    color+=("  ${_w}SUFFIX ALIAS:${_r}       ${_g}$suffixTotal${_r}")
+    plain+=("  SELF-REF ESCAPE:    $escapeTotal")
+    color+=("  ${_w}SELF-REF ESCAPE:${_r}    ${_g}$escapeTotal${_r}")
+    plain+=("  NATIVE (glob/hist): $nativeTotal")
+    color+=("  ${_w}NATIVE (glob/hist):${_r} ${_g}$nativeTotal${_r}")
+    plain+=("  CORRECTIONS:        $corrections")
+    color+=("  ${_w}CORRECTIONS:${_r}        ${_g}$corrections${_r}")
+    plain+=("")
+    color+=("")
+    plain+=("── SUMMARY ──────────────────────────────────────────────")
+    color+=("${_c}── SUMMARY ──────────────────────────────────────────────${_r}")
+    plain+=("  TOTAL EXPANSIONS:   $total")
+    color+=("  ${_w}TOTAL EXPANSIONS:${_r}   ${_y}$total${_r}")
+    plain+=("  KEYSTROKES SAVED:   $savedChars")
+    color+=("  ${_w}KEYSTROKES SAVED:${_r}   ${_y}$savedChars${_r}")
+    plain+=("")
+    color+=("")
+    plain+=("── TOP ALIASES ──────────────────────────────────────────")
+    color+=("${_c}── TOP ALIASES ──────────────────────────────────────────${_r}")
 
     local -i rank=0 maxExpand=0
-    local entry cnt name bar barLen maxBar rankStr
+    local entry cnt name bar barLen maxBar rankStr plainLine
     maxBar=20
     local -i topCount=0
     if (( $#sorted )); then
@@ -854,25 +889,47 @@ ${_d} ░░░░░░░░░░░░░░░░░░░░░░░░�
         expanded=${aliases[$name]}
         printf -v rankStr '  %2d. %-12s %s %3d' $rank "$name" "$bar" $cnt
         if [[ -n $expanded ]]; then
-            # collapse newlines/tabs/multi-spaces
             expanded=${expanded//$'\n'/ }
             expanded=${expanded//$'\t'/ }
             expanded=${expanded//  ##/ }
-            # truncate to fit within box width (prefix + "  // " + expansion)
             maxExpand=$((boxWidth - ${#rankStr} - 6))
             (( maxExpand < 10 )) && maxExpand=10
             (( ${#expanded} > maxExpand )) && expanded="${expanded:0:$((maxExpand - 3))}..."
-            lines+=("$rankStr  // $expanded")
+            plain+=("$rankStr  // $expanded")
+            color+=("  ${_g}$(printf '%2d' $rank).${_r} ${_g}$name${_r}$(printf '%*s' $((12 - ${#name})) '') ${_g}$bar${_r} $(printf '%3d' $cnt)  ${_d}//${_r} ${_w}$expanded${_r}")
         else
-            lines+=("$rankStr")
+            plain+=("$rankStr")
+            color+=("  ${_g}$(printf '%2d' $rank).${_r} ${_g}$name${_r}$(printf '%*s' $((12 - ${#name})) '') ${_g}$bar${_r} $(printf '%3d' $cnt)")
         fi
     done
 
-    lines+=("")
-    lines+=(">>> YOUR ALIASES ARE WORKING FOR YOU <<<")
+    plain+=("")
+    color+=("")
+    plain+=(">>> YOUR ALIASES ARE WORKING FOR YOU <<<")
+    color+=("${_m}>>>${_r} ${_y}YOUR ALIASES ARE WORKING FOR YOU${_r} ${_m}<<<${_r}")
 
-    local -a boxArgs=(-t "EXPANSION STATS" -w $boxWidth)
-    [[ $doColor == true ]] && boxArgs+=(--color)
-    zpwrExpandBox "${boxArgs[@]}" "${lines[@]}"
+    # compute box width from plain lines
+    local -i bW=0 len
+    for line in "${plain[@]}"; do
+        len=${#line}
+        (( len > bW )) && bW=$len
+    done
+    (( boxWidth > bW )) && bW=$boxWidth
+    local -i fullW=$((bW + 4))
+
+    # build box
+    local hbar=${(l:fullW-2::─:)}
+    local -i titleW=15  # "EXPANSION STATS"
+    local -i titlePad=$((fullW - titleW - 6))
+    local msg="${_c}┌── ${_m}EXPANSION STATS${_c} ${(l:titlePad::─:)}┐${_r}"
+    local -i i
+    for (( i = 1; i <= $#color; i++ )); do
+        len=${#plain[$i]}
+        local -i pad=$((bW - len))
+        msg+=$'\n'"${_c}│${_r} ${color[$i]}${(l:pad+1:: :)}${_c}│${_r}"
+    done
+    msg+=$'\n'"${_c}└${hbar}┘${_r}"
+    msg+=$'\n'"${_d}${(l:fullW::░:)}${_r}"
+    print -r -- "$msg"
 }
 #}}}*********************************************************** 
