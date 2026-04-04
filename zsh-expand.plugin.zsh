@@ -433,8 +433,7 @@ if [[ $ZPWR_EXPAND_PREVIEW == true ]]; then
     zle -N zle-line-pre-redraw
 fi
 
-bindkey '\e^E' zpwrExpandGlobalAliases
-bindkey '^\' zpwrExpandDebugWidget
+bindkey '\e^E' zpwrExpandDebugWidget
 
 # load completion
 fpath+=(${0:A:h}/completions)
