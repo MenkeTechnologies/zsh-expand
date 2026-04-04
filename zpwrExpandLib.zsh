@@ -571,6 +571,8 @@ function zpwrExpandSupernaturalSpace() {
     ZPWR_VARS[EXPAND_TYPE]=""
     ZPWR_VARS[LAST_WORD_WAS_AT_COMMAND]=false
     ZPWR_VARS[WAS_EXPANDED]=false
+    ZPWR_VARS[ORIGINAL_LAST_COMMAND]=""
+    ZPWR_VARS[NATIVE_SAVED]=""
 
     zpwrExpandParseWords "$LBUFFER"
 
@@ -649,6 +651,15 @@ function zpwrExpandSupernaturalSpace() {
                 ZPWR_VARS[EXPAND_TYPE]=native
                 ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
                 ZPWR_VARS[WAS_EXPANDED]=true
+                # estimate saved chars for history refs using the history entry
+                local _saved=0 _lw=$ZPWR_VARS[lastword_lbuffer]
+                case $_lw in
+                    !!) _saved=$(( ${#history[1]} - 2 )) ;;
+                    \!-*|\!*) _saved=$(( ${#history[1]} - ${#_lw} )) ;;
+                    *) _saved=0 ;;
+                esac
+                (( _saved < 0 )) && _saved=0
+                ZPWR_VARS[NATIVE_SAVED]=$_saved
             fi
         fi
     fi
@@ -690,7 +701,12 @@ function zpwrExpandSupernaturalSpace() {
             _trigger=H
         fi
         local _type=${ZPWR_VARS[EXPAND_TYPE]:-alias}
-        zpwrExpandStatsRecord "${_trigger}:${_type}:$ZPWR_VARS[ORIGINAL_LAST_COMMAND]"
+        # native types append saved-char count (can't look up expansion later)
+        if [[ $_type == native ]]; then
+            zpwrExpandStatsRecord "${_trigger}:${_type}:$ZPWR_VARS[ORIGINAL_LAST_COMMAND]:${ZPWR_VARS[NATIVE_SAVED]:-0}"
+        else
+            zpwrExpandStatsRecord "${_trigger}:${_type}:$ZPWR_VARS[ORIGINAL_LAST_COMMAND]"
+        fi
     fi
     if [[ $ZPWR_VARS[foundIncorrect] == true ]]; then
         zpwrExpandStatsRecord "S:correction:"
@@ -786,21 +802,29 @@ ${_d} ░░░░░░░░░░░░░░░░░░░░░░░░�
         return
     fi
 
-    local -A counts
+    local -A counts nativeSaved
     local -i total=0 spaceTotal=0 histTotal=0 corrections=0 savedChars=0
     local -i aliasTotal=0 globalTotal=0 suffixTotal=0 escapeTotal=0 nativeTotal=0 _cnt=0
-    local line alias expanded trigger etype
+    local line alias expanded trigger etype rest savedField
 
-    # tally counts — format: "trigger:type:alias" or legacy "S:alias" / "__correction__"
+    # tally counts — format: "trigger:type:alias[:saved]" or legacy "S:alias" / "__correction__"
     while IFS= read -r line; do
         if [[ $line == __correction__ || $line == S:correction: ]]; then
             (( corrections++ ))
         elif [[ $line == [SH]:*:* ]]; then
-            # new format: trigger:type:alias
+            # new format: trigger:type:alias[:saved]
             trigger=${line%%:*}
-            line=${line#?:}
-            etype=${line%%:*}
-            alias=${line#*:}
+            rest=${line#?:}
+            etype=${rest%%:*}
+            rest=${rest#*:}
+            # if native, record may have trailing :saved chars
+            if [[ $etype == native && $rest == *:* ]]; then
+                alias=${rest%:*}
+                savedField=${rest##*:}
+                nativeSaved[$alias]=$(( ${nativeSaved[(e)$alias]:-0} + savedField ))
+            else
+                alias=$rest
+            fi
             _cnt=${counts[(e)$alias]:-0}
             counts[$alias]=$(( _cnt + 1 ))
             (( total++ ))
@@ -832,7 +856,7 @@ ${_d} ░░░░░░░░░░░░░░░░░░░░░░░░�
     done < "$statsFile"
 
     # compute chars saved per alias (regular, global, and suffix)
-    local -i _cnt _alen _elen
+    local -i _cnt _alen _elen _nsaved
     local _key
     for _key in "${(k)counts[@]}"; do
         expanded=${aliases[(e)$_key]}
@@ -848,6 +872,9 @@ ${_d} ░░░░░░░░░░░░░░░░░░░░░░░░�
             _elen=${#expanded}
             (( savedChars += (_elen - _alen) * _cnt ))
         fi
+        # add native saved chars (stored at record time for !! and globs)
+        _nsaved=${nativeSaved[(e)$_key]:-0}
+        (( savedChars += _nsaved ))
     done
 
     # sort by frequency, top 15
