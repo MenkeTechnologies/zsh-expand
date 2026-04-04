@@ -31,7 +31,7 @@ fi
 export ZPWR_EXPAND_SUFFIX=true
 
 if ! (( $+ZPWR_EXPAND_PREVIEW )); then
-    export ZPWR_EXPAND_PREVIEW=true
+    export ZPWR_EXPAND_PREVIEW=false
 fi
 
 autoload regexp-replace

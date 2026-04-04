@@ -268,7 +268,7 @@ export ZPWR_EXPAND_PRE_EXEC_NATIVE=true   # expand globs on accept-line
 export ZPWR_EXPAND_SUFFIX=true            # expand suffix aliases (alias -s)
 
 # -- PREVIEW --
-export ZPWR_EXPAND_PREVIEW=true          # ghost text showing pending expansion
+export ZPWR_EXPAND_PREVIEW=false         # ghost text showing pending expansion
 
 # -- BLACKLIST --
 export ZPWR_EXPAND_BLACKLIST=(g gco)      # aliases to never expand
@@ -465,12 +465,12 @@ Ghost text shows what the last word would expand to as you type, before pressing
 gco → git checkout
 ```
 
-The preview appears dimmed after the cursor via `POSTDISPLAY`. Press space to commit the expansion, or keep typing to dismiss it. Supports regular aliases, global aliases, suffix aliases, and spelling corrections.
+The preview appears below the prompt. Press space to commit the expansion, or keep typing to dismiss it. Supports regular aliases, global aliases, suffix aliases, and spelling corrections.
 
-Enabled by default. Disable with:
+Disabled by default (conflicts with `zle -M` output from other plugins). Enable with:
 
 ```sh
-export ZPWR_EXPAND_PREVIEW=false
+export ZPWR_EXPAND_PREVIEW=true
 ```
 
 No other zsh expansion plugin shows a live preview of pending expansions.
