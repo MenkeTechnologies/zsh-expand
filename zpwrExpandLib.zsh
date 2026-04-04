@@ -465,27 +465,18 @@ function zpwrExpandPreviewResolve() {
 }
 
 function zpwrExpandPreview() {
-    # called on zle-line-pre-redraw — show dimmed expansion preview via POSTDISPLAY
-    # runs AFTER autosuggestions has set its POSTDISPLAY, so we prepend our preview
+    # called on zle-line-pre-redraw — show expansion preview below prompt via zle -M
 
     # bail if preview disabled or expand disabled
     [[ $ZPWR_EXPAND_PREVIEW != true || $ZPWR_EXPAND == false ]] && return
 
-    # remove our previous preview highlight if any
-    if [[ -n $ZPWR_VARS[previewHighlight] ]]; then
-        region_highlight=("${(@)region_highlight:#$ZPWR_VARS[previewHighlight]}")
-        ZPWR_VARS[previewHighlight]=""
-    fi
-
-    # remove our previous preview text from POSTDISPLAY if any
-    if [[ -n $ZPWR_VARS[previewText] ]]; then
-        POSTDISPLAY=${POSTDISPLAY#$ZPWR_VARS[previewText]}
-        ZPWR_VARS[previewText]=""
-    fi
-
     # bail if empty or ends with space (already expanded)
     if [[ -z $LBUFFER || $LBUFFER[-1] == " " ]]; then
-        ZPWR_VARS[previewLastWord]=""
+        if [[ -n $ZPWR_VARS[previewShowing] ]]; then
+            zle -M ""
+            ZPWR_VARS[previewShowing]=""
+            ZPWR_VARS[previewLastWord]=""
+        fi
         return
     fi
 
@@ -494,30 +485,37 @@ function zpwrExpandPreview() {
 
     # check blacklist
     if [[ -n $ZPWR_VARS[blacklistUser] ]] && [[ $lastword =~ $ZPWR_VARS[blacklistUser] ]]; then
+        if [[ -n $ZPWR_VARS[previewShowing] ]]; then
+            zle -M ""
+            ZPWR_VARS[previewShowing]=""
+        fi
         return
     fi
+
+    # skip if same as last check
+    if [[ $lastword == $ZPWR_VARS[previewLastWord] ]]; then
+        return
+    fi
+    ZPWR_VARS[previewLastWord]=$lastword
 
     local expanded
     if zpwrExpandPreviewResolve "$lastword"; then
         expanded=$REPLY
-        # don't preview if expansion equals the word itself
-        [[ $expanded == "$lastword" ]] && return
-
-        local previewStr=" → $expanded"
-        local -i bufEnd=$#BUFFER
-        local -i previewStart=$((bufEnd + $#POSTDISPLAY))
-
-        # prepend our preview to POSTDISPLAY (autosuggestions' text follows)
-        POSTDISPLAY="${previewStr}${POSTDISPLAY}"
-
-        # highlight our preview range in dim gray
-        local -i hlStart=$((bufEnd))
-        local -i hlEnd=$((bufEnd + $#previewStr))
-        ZPWR_VARS[previewHighlight]="$hlStart $hlEnd fg=240"
-        region_highlight+=("$ZPWR_VARS[previewHighlight]")
-        ZPWR_VARS[previewText]=$previewStr
+        if [[ $expanded == "$lastword" ]]; then
+            if [[ -n $ZPWR_VARS[previewShowing] ]]; then
+                zle -M ""
+                ZPWR_VARS[previewShowing]=""
+            fi
+            return
+        fi
+        zle -M "  → $expanded"
+        ZPWR_VARS[previewShowing]=true
+    else
+        if [[ -n $ZPWR_VARS[previewShowing] ]]; then
+            zle -M ""
+            ZPWR_VARS[previewShowing]=""
+        fi
     fi
-    ZPWR_VARS[previewLastWord]=$lastword
 }
 #}}}***********************************************************
 
@@ -529,13 +527,9 @@ function zpwrExpandSupernaturalSpace() {
     setopt rcquotes extended_glob zle
 
     # clear expansion preview
-    if [[ -n $ZPWR_VARS[previewText] ]]; then
-        POSTDISPLAY=${POSTDISPLAY#$ZPWR_VARS[previewText]}
-        if [[ -n $ZPWR_VARS[previewHighlight] ]]; then
-            region_highlight=("${(@)region_highlight:#$ZPWR_VARS[previewHighlight]}")
-        fi
-        ZPWR_VARS[previewText]=""
-        ZPWR_VARS[previewHighlight]=""
+    if [[ -n $ZPWR_VARS[previewShowing] ]]; then
+        zle -M ""
+        ZPWR_VARS[previewShowing]=""
         ZPWR_VARS[previewLastWord]=""
     fi
 
