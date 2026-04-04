@@ -602,6 +602,9 @@ function zpwrExpandSupernaturalSpace() {
                 elif [[ $ZPWR_EXPAND_SUFFIX == true ]]; then
                     zpwrExpandRightTrim
                     zpwrExpandSuffixAlias
+                    if [[ $ZPWR_VARS[WAS_EXPANDED] == true ]]; then
+                        ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
+                    fi
                 fi
             fi
         fi
@@ -618,7 +621,9 @@ function zpwrExpandSupernaturalSpace() {
                 else
                     zpwrExpandWordStopHistoryExpansion
                 fi
-                #zle expand-word
+                if [[ $ZPWR_VARS[WAS_EXPANDED] == true ]]; then
+                    ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
+                fi
             fi
         fi
     fi
@@ -646,7 +651,12 @@ function zpwrExpandSupernaturalSpace() {
     # type: alias, global, suffix, escape, native
     if [[ $ZPWR_VARS[WAS_EXPANDED] == true && -n $ZPWR_VARS[ORIGINAL_LAST_COMMAND] ]]; then
         local _trigger=S
-        [[ $triggerKey == "${ZPWR_VARS[ENTER_KEY]}" || -z $triggerKey ]] && _trigger=H
+        # ZLE widget receives key in $KEYS; history path has empty $KEYS and empty triggerKey
+        if [[ $KEYS == " " || $triggerKey == "${ZPWR_VARS[SPACEBAR_KEY]}" ]]; then
+            _trigger=S
+        elif [[ -n $triggerKey || -z $KEYS ]]; then
+            _trigger=H
+        fi
         local _type=${ZPWR_VARS[EXPAND_TYPE]:-alias}
         zpwrExpandStatsRecord "${_trigger}:${_type}:$ZPWR_VARS[ORIGINAL_LAST_COMMAND]"
     fi
