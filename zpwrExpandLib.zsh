@@ -608,6 +608,7 @@ function zpwrExpandSupernaturalSpace() {
                     zpwrExpandRightTrim
                     zpwrExpandSuffixAlias
                     if [[ $ZPWR_VARS[WAS_EXPANDED] == true ]]; then
+                        ZPWR_VARS[LAST_WORD_WAS_AT_COMMAND]=true
                         ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
                     fi
                 fi
