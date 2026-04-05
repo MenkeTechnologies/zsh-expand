@@ -519,9 +519,6 @@ Every expansion is logged to a stats file. Run `zpwrExpandStats` to see a cyberp
 ```
 
 Stats persist permanently across sessions in `$ZPWR_EXPAND_STATS_FILE` (defaults to `$ZPWR_LOCAL`, `$XDG_CACHE_HOME`, or `~/.cache`). The dashboard lists the top aliases (default count from `ZPWR_EXPAND_STATS_TOP`, overridable with `zpwrExpandStats -t`) with proportional bar charts and each alias’s expansion. Each line is tagged `S:` (spacebar expansion) or `H:` (history accept-line / non-space trigger) so space and history paths are tallied separately.
-
-New expansions are logged in a **length-prefixed** form: `trigger:type:byteLen:payload` or, for native expansions with a saved-character estimate, `trigger:type:byteLen:payload:saved`. The decimal `byteLen` is the character length of `payload`, so `payload` may contain colons (e.g. `path:like:this`) without breaking parsing. Older stats files still use the previous colon-only layout; `zpwrExpandStats` accepts both.
-
 ---
 
 ### // COMMAND-POSITION PARSER
