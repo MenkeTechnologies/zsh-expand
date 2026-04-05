@@ -777,6 +777,9 @@ function zpwrExpandStatsRecord() {
     local statsFile=${ZPWR_EXPAND_STATS_FILE:-${ZPWR_LOCAL:-${XDG_CACHE_HOME:-$HOME/.cache}}/zpwr-expand-stats.dat}
     local len
 
+    # CI and minimal HOME trees often lack ~/.cache; append cannot create parents.
+    command mkdir -p "${statsFile:h}"
+
     if (( $# == 3 )); then
         len=${#3}
         print -r -- "$1"$'\0'"$2"$'\0'"$len"$'\0'"$3" >> "$statsFile"

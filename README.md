@@ -518,7 +518,7 @@ Every expansion is logged to a stats file. Run `zpwrExpandStats` to see a cyberp
 ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 ```
 
-Stats persist permanently across sessions in `$ZPWR_EXPAND_STATS_FILE` (defaults to `$ZPWR_LOCAL`, `$XDG_CACHE_HOME`, or `~/.cache`). The dashboard lists the top aliases (default count from `ZPWR_EXPAND_STATS_TOP`, overridable with `zpwrExpandStats -t`) with proportional bar charts and each alias’s expansion. Each line is tagged `S:` (spacebar expansion) or `H:` (history accept-line / non-space trigger) so space and history paths are tallied separately.
+Stats persist permanently across sessions in `$ZPWR_EXPAND_STATS_FILE` (defaults to `$ZPWR_LOCAL`, `$XDG_CACHE_HOME`, or `~/.cache`). The parent directory of that file is created automatically on first write (fresh CI runners and minimal `HOME` often have no `~/.cache` yet). The dashboard lists the top aliases (default count from `ZPWR_EXPAND_STATS_TOP`, overridable with `zpwrExpandStats -t`) with proportional bar charts and each alias’s expansion. Each line is tagged `S:` (spacebar expansion) or `H:` (history accept-line / non-space trigger) so space and history paths are tallied separately.
 ---
 
 ### // COMMAND-POSITION PARSER
