@@ -746,10 +746,22 @@ line2   spaced'
     local tmp out
     tmp=$(mktemp "${TMPDIR:-/tmp}/zunit-zpwr-stats-colon-alias.XXXXXX")
     ZPWR_EXPAND_STATS_FILE=$tmp
-    # alias type does not use saved suffix — 'ns:tool' is the alias name
-    zpwrExpandStatsRecord 'S:alias:ns:tool'
+    # length-prefixed record — 'ns:tool' is one alias name (contains ':')
+    zpwrExpandStatsRecord S alias 'ns:tool'
     out=$(zpwrExpandStats)
     assert "$out" contains 'ns:tool'
+    command rm -f "$tmp"
+}
+
+@test 'stats: native payload with colons keeps saved suffix' {
+    local tmp out
+    tmp=$(mktemp "${TMPDIR:-/tmp}/zunit-zpwr-stats-native-colon-payload.XXXXXX")
+    ZPWR_EXPAND_STATS_FILE=$tmp
+    zpwrExpandStatsRecord H native 'a:b:c' 99
+    out=$(zpwrExpandStats)
+    assert "$out" contains 'a:b:c'
+    assert "$out" contains 'NATIVE'
+    assert "$out" contains 'KEYSTROKES SAVED'
     command rm -f "$tmp"
 }
 
