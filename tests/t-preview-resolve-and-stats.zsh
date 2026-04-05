@@ -753,6 +753,23 @@ line2   spaced'
     command rm -f "$tmp"
 }
 
+@test 'stats: record on disk uses NUL field delimiters' {
+    local tmp line fields
+    tmp=$(mktemp "${TMPDIR:-/tmp}/zunit-zpwr-stats-nul.XXXXXX")
+    ZPWR_EXPAND_STATS_FILE=$tmp
+    zpwrExpandStatsRecord S alias 'x:y'
+    IFS= read -r line < "$tmp"
+    [[ $line == *$'\0'* ]]
+    assert $? equals 0
+    fields=(${(0)line})
+    assert ${#fields[@]} same_as 4
+    assert "$fields[1]" same_as 'S'
+    assert "$fields[2]" same_as 'alias'
+    assert "$fields[3]" same_as '3'
+    assert "$fields[4]" same_as 'x:y'
+    command rm -f "$tmp"
+}
+
 @test 'stats: native payload with colons keeps saved suffix' {
     local tmp out
     tmp=$(mktemp "${TMPDIR:-/tmp}/zunit-zpwr-stats-native-colon-payload.XXXXXX")

@@ -736,7 +736,7 @@ function zpwrExpandSupernaturalSpace() {
         set +x
     fi
 
-    # track expansion stats — format: trigger:type:byteLen:payload[:saved] (see zpwrExpandStatsRecord)
+    # track expansion stats — format: NUL-delimited fields trigger\0type\0byteLen\0payload[\0saved] (see zpwrExpandStatsRecord)
     # trigger: S=space, H=history/enter
     # type: alias, global, suffix, escape, native
     if [[ $ZPWR_VARS[WAS_EXPANDED] == true && -n $ZPWR_VARS[ORIGINAL_LAST_COMMAND] ]]; then
@@ -763,7 +763,7 @@ function zpwrExpandSupernaturalSpace() {
         fi
     fi
     if [[ $ZPWR_VARS[foundIncorrect] == true ]]; then
-        zpwrExpandStatsRecord "S:correction:"
+        zpwrExpandStatsRecord S correction ''
     fi
 }
 #}}}***********************************************************
@@ -771,18 +771,18 @@ function zpwrExpandSupernaturalSpace() {
 #{{{                    MARK:stats
 #**************************************************************
 function zpwrExpandStatsRecord() {
-    # One arg: raw line (e.g. S:correction: or legacy tests).
-    # Three args: trigger type payload — writes length-prefixed trigger:type:len:payload so payload may contain ':'.
-    # Four args: trigger type payload saved — native only; writes trigger:type:len:payload:saved.
+    # One arg: raw line (legacy tests / colon layout).
+    # Three args: trigger type payload — writes NUL-delimited trigger\0type\0len\0payload (len is ${#payload}; payload may contain ':').
+    # Four args: trigger type payload saved — native only; appends \0saved after payload.
     local statsFile=${ZPWR_EXPAND_STATS_FILE:-${ZPWR_LOCAL:-${XDG_CACHE_HOME:-$HOME/.cache}}/zpwr-expand-stats.dat}
     local len
 
     if (( $# == 3 )); then
         len=${#3}
-        print -r -- "$1:$2:${len}:$3" >> "$statsFile"
+        print -r -- "$1"$'\0'"$2"$'\0'"$len"$'\0'"$3" >> "$statsFile"
     elif (( $# == 4 )); then
         len=${#3}
-        print -r -- "$1:$2:${len}:$3:$4" >> "$statsFile"
+        print -r -- "$1"$'\0'"$2"$'\0'"$len"$'\0'"$3"$'\0'"$4" >> "$statsFile"
     elif (( $# == 1 )); then
         print -r -- "$1" >> "$statsFile"
     else
@@ -874,6 +874,8 @@ ${_d} ░░░░░░░░░░░░░░░░░░░░░░░░�
     local -i total=0 spaceTotal=0 histTotal=0 corrections=0 savedChars=0
     local -i aliasTotal=0 globalTotal=0 suffixTotal=0 escapeTotal=0 nativeTotal=0 _cnt=0
     local line alias expanded trigger etype rest savedField plen tail lp_ok
+    local -a fields
+    local nf
 
     # bump one stats row (trigger, expansion type, alias key for counts)
     _zpwrExpandStatsBumpRow() {
@@ -891,9 +893,48 @@ ${_d} ░░░░░░░░░░░░░░░░░░░░░░░░�
         esac
     }
 
-    # tally counts — length-prefixed: trigger:type:byteLen:payload[:saved];
+    # tally counts — NUL-delimited: trigger\0type\0byteLen\0payload[\0saved]; legacy colon length-prefixed;
     # legacy: trigger:type:rest (colon-delimited, ambiguous for native); "S:alias" two-part; bare alias
     while IFS= read -r line; do
+        if [[ $line == *$'\0'* ]]; then
+            fields=(${(0)line})
+            nf=$#fields
+            if (( nf >= 2 )) && [[ $fields[2] == correction ]]; then
+                (( corrections++ ))
+                continue
+            fi
+            trigger=$fields[1]
+            etype=$fields[2]
+            if (( nf == 5 )); then
+                plen=$fields[3]
+                alias=$fields[4]
+                savedField=$fields[5]
+                if [[ $etype == native && $plen =~ '^[0-9]+$' && $savedField =~ '^[0-9]+$' ]] && (( ${#alias} == plen )); then
+                    nativeSaved[$alias]=$(( ${nativeSaved[(e)$alias]:-0} + savedField ))
+                    _zpwrExpandStatsBumpRow "$trigger" "$etype" "$alias"
+                fi
+                continue
+            fi
+            if (( nf == 4 )); then
+                plen=$fields[3]
+                alias=$fields[4]
+                if [[ ! $plen =~ '^[0-9]+$' ]] || (( ${#alias} != plen )); then
+                    continue
+                fi
+                _zpwrExpandStatsBumpRow "$trigger" "$etype" "$alias"
+                continue
+            fi
+            if (( nf == 3 )); then
+                plen=$fields[3]
+                if [[ ! $plen =~ '^[0-9]+$' ]] || (( plen != 0 )); then
+                    continue
+                fi
+                alias=""
+                _zpwrExpandStatsBumpRow "$trigger" "$etype" "$alias"
+                continue
+            fi
+            continue
+        fi
         if [[ $line == __correction__ || $line == S:correction: ]]; then
             (( corrections++ ))
         elif [[ $line =~ '^([SH]):([^:]+):([0-9]+):(.*)$' ]]; then
