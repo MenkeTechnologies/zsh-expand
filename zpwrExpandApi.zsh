@@ -22,12 +22,14 @@ function zpwrExpandParseWords(){
 
     local i lastword_partition firstIndex lastIndex finalWord tmp
     local -a mywordsleft mywordsright mywordsall lbufAry lpartAry lastWordAry partitionAry
+    local -i isArgPosition=0
+    local -a tailWords=()
 
     # loop through words to get first and last words in partition
     tmp=${1}
     tmp=( ${(z)tmp} )
 
-    # arithmetic expansion $(()) is not a a command position so replace with junk value
+    # arithmetic expansion $(()) is not a command position so replace with junk value
     tmp[-1]=${tmp[-1]//[\$]\(\(/no_cmd_$RANDOM}
     # change <(, =(, $( to ; for word splitting
     tmp[-1]=${tmp[-1]//[\<\=\$]\(/;}
@@ -49,9 +51,8 @@ function zpwrExpandParseWords(){
                 break
                 ;;
             '>'* | '<'* | '&>'*)
-                #remove redirection operator from left words
+                # remove redirection operator (same index again removes target after shift)
                 mywordsleft[$i]=()
-                #remove redirected file
                 mywordsleft[$i]=()
                 ;;
             *)
@@ -65,12 +66,11 @@ function zpwrExpandParseWords(){
     # consumes shell keywords and command wrappers with their flags
     ZPWR_VARS[cachedRegexMatch]=""
     ZPWR_VARS[cachedRegexMatched]=false
-    local -i isArgPosition=0
     if (( $#ZPWR_EXPAND_WORDS_LPARTITION > 1 )); then
         zpwrExpandParserFindCommandPosition
         if [[ -n $ZPWR_VARS[cachedRegexMatch] || $ZPWR_VARS[cachedRegexMatched] == true ]]; then
             ZPWR_VARS[cachedRegexMatched]=true
-            local -a tailWords=( ${(z)ZPWR_VARS[cachedRegexMatch]} )
+            tailWords=( ${(z)ZPWR_VARS[cachedRegexMatch]} )
             (( $#tailWords > 1 )) && isArgPosition=1
         else
             isArgPosition=1
