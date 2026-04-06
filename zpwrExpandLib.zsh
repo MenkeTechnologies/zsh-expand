@@ -201,7 +201,7 @@ function zpwrExpandGlobalAliases() {
 
         # stats: record if called directly as ZLE widget (not via supernatural space)
         if [[ -z "$1" ]]; then
-                    zpwrExpandStatsRecord S global "$ZPWR_VARS[lastword_lbuffer]"
+            zpwrExpandStatsRecord S global "$ZPWR_VARS[lastword_lbuffer]"
         fi
 
         zpwrExpandGoToTabStopOrEndOfLBuffer
@@ -768,6 +768,12 @@ function zpwrExpandSupernaturalSpace() {
 }
 #}}}***********************************************************
 
+# CI and minimal HOME trees often lack ~/.cache; ensure stats dir exists once at source time.
+(){
+    local _d=${ZPWR_EXPAND_STATS_FILE:-${ZPWR_LOCAL:-${XDG_CACHE_HOME:-$HOME/.cache}}/zpwr-expand-stats.dat}
+    [[ -d ${_d:h} ]] || command mkdir -p "${_d:h}"
+}
+
 #{{{                    MARK:stats
 #**************************************************************
 function zpwrExpandStatsRecord() {
@@ -776,9 +782,6 @@ function zpwrExpandStatsRecord() {
     # Four args: trigger type payload saved — native only; appends \0saved after payload.
     local statsFile=${ZPWR_EXPAND_STATS_FILE:-${ZPWR_LOCAL:-${XDG_CACHE_HOME:-$HOME/.cache}}/zpwr-expand-stats.dat}
     local len
-
-    # CI and minimal HOME trees often lack ~/.cache; append cannot create parents.
-    command mkdir -p "${statsFile:h}"
 
     if (( $# == 3 )); then
         len=${#3}
@@ -912,8 +915,10 @@ ${_d} ░░░░░░░░░░░░░░░░░░░░░░░░�
                 plen=$fields[3]
                 alias=$fields[4]
                 savedField=$fields[5]
-                if [[ $etype == native && $plen =~ '^[0-9]+$' && $savedField =~ '^[0-9]+$' ]] && (( ${#alias} == plen )); then
-                    nativeSaved[$alias]=$(( ${nativeSaved[(e)$alias]:-0} + savedField ))
+                if [[ $plen =~ '^[0-9]+$' ]] && (( ${#alias} == plen )); then
+                    if [[ $etype == native && $savedField =~ '^[0-9]+$' ]]; then
+                        nativeSaved[$alias]=$(( ${nativeSaved[(e)$alias]:-0} + savedField ))
+                    fi
                     _zpwrExpandStatsBumpRow "$trigger" "$etype" "$alias"
                 fi
                 continue
@@ -1161,5 +1166,6 @@ ${_c} ╚══════╝╚══════╝╚═╝  ╚═╝      
     msg+=$'\n'"${_c}└${hbar}┘${_r}"
     msg+=$'\n'"${_d}${(l:fullW::░:)}${_r}"
     print -r -- "$msg"
+    unfunction _zpwrExpandStatsBumpRow 2>/dev/null
 }
 #}}}*********************************************************** 
