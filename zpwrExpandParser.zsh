@@ -39,6 +39,7 @@ function zpwrExpandParserFindCommandPosition() {
     local -a words
     words=("${(@)ZPWR_EXPAND_WORDS_LPARTITION}")
     local -i pos=1
+    local -i i
     local bare lower
 
     # Phase 1: consume shell keywords/builtins (case-sensitive)
