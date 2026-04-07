@@ -570,6 +570,8 @@ The parser exposes two results for downstream consumers:
 
 Source files can be compiled to `.zwc` bytecode for instant loading (`zcompile` or via your plugin manager). The expansion hot path uses zero external commands and zero subshells -- no `sed`, `awk`, `grep`, or `$(...)`. Every spacebar expansion runs in pure zsh builtins and parameter expansion, keeping latency invisible on every keypress.
 
+When `ZPWR_EXPAND=false`, the space/accept-line widget returns immediately after clearing any expansion preview: it does not run `zpwrExpandParseWords` or the command-position parser, so a disabled plugin adds essentially no parse cost on each keypress.
+
 Benchmarks (Apple Silicon, 10,000 iterations):
 
 | Scenario | Per call |
