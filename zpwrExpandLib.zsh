@@ -585,13 +585,20 @@ function zpwrExpandSupernaturalSpace() {
     ZPWR_VARS[ORIGINAL_LAST_COMMAND]=""
     ZPWR_VARS[NATIVE_SAVED]=""
 
+    # When expansion is disabled, skip parse and command-position work (same outcome as before).
+    if [[ $ZPWR_EXPAND == false ]]; then
+        if [[ $ZPWR_TRACE == true ]]; then
+            set +x
+        fi
+        if [[ $KEYS == " " || $triggerKey == "${ZPWR_VARS[SPACEBAR_KEY]}" ]]; then
+            zle self-insert
+        fi
+        return
+    fi
+
     zpwrExpandParseWords "$LBUFFER"
 
     if [[ $KEYS == " " || $triggerKey == "${ZPWR_VARS[SPACEBAR_KEY]}" ]]; then
-        if [[ $ZPWR_EXPAND == false ]]; then
-            zle self-insert
-            return
-        fi
         if [[ $ZPWR_CORRECT == true ]]; then
             zpwrExpandCorrectWord
             if [[ $ZPWR_VARS[foundIncorrect] = true && $ZPWR_CORRECT_EXPAND = true ]]; then
@@ -606,9 +613,6 @@ function zpwrExpandSupernaturalSpace() {
         fi
 
     else
-        if [[ $ZPWR_EXPAND == false ]]; then
-            return
-        fi
         zpwrExpandRegexMatchOnCommandPosition
     fi
 
