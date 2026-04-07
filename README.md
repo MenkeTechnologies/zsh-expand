@@ -525,7 +525,7 @@ Stats persist permanently across sessions in `$ZPWR_EXPAND_STATS_FILE` (defaults
 
 Previous versions used a single POSIX extended regex to match prefix commands and their flags. This worked for simple cases but couldn't scale -- every new command and flag combination made the regex longer and harder to debug. Flag arguments containing `=` (like `strace -e trace=network`) were incorrectly stripped as variable assignments.
 
-The current architecture uses a **left-to-right parser** (`zpwrExpandParserFindCommandPosition`) that walks the word array and understands shell grammar:
+The current architecture uses a **left-to-right parser** (`zpwrExpandParserFindCommandPosition`) that walks the word array and understands shell grammar. Shared helpers `_zpwr_bare` (strip quotes/backslash for token comparison) and `_zpwr_is_assignment` (NAME=value detection) are **defined once at file scope** in `zpwrExpandParser.zsh`, not recreated on every parse.
 
 ```
 Phase 1: consume shell keywords (nocorrect, time -p, builtin, command -p, exec -cl, eval, noglob, coproc, -)
