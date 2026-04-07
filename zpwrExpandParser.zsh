@@ -8,6 +8,27 @@
 ##### Notes:
 #}}}***********************************************************
 
+#{{{                    MARK:parser helpers (file scope)
+#**************************************************************
+# Used heavily by zpwrExpandParserFindCommandPosition — defined once here to
+# avoid define/unfunction overhead on every parse.
+
+function _zpwr_bare() {
+    local w=$1
+    # strip $' prefix
+    w=${w#\$\'}
+    # strip leading \, ', "
+    w=${w#[\\\"\']}
+    # strip trailing ', "
+    w=${w%[\"\']}
+    REPLY=$w
+}
+
+function _zpwr_is_assignment() {
+    [[ $1 == [A-Za-z_]*=* ]]
+}
+#}}}***********************************************************
+
 # Parser that walks ZPWR_EXPAND_WORDS_LPARTITION left-to-right to find
 # command position.  Strips assignments contextually (before command and
 # between prefixes, but NOT when they are flag arguments like -e trace=network).
@@ -19,24 +40,6 @@ function zpwrExpandParserFindCommandPosition() {
     words=("${(@)ZPWR_EXPAND_WORDS_LPARTITION}")
     local -i pos=1
     local bare lower
-
-    # helper: strip leading/trailing quotes and backslash for comparison
-    # \sudo => sudo, 'sudo' => sudo, "sudo" => sudo, $'sudo' => sudo
-    _zpwr_bare() {
-        local w=$1
-        # strip $' prefix
-        w=${w#\$\'}
-        # strip leading \, ', "
-        w=${w#[\\\"\']}
-        # strip trailing ', "
-        w=${w%[\"\']}
-        REPLY=$w
-    }
-
-    # helper: check if word is a variable assignment (NAME=value)
-    _zpwr_is_assignment() {
-        [[ $1 == [A-Za-z_]*=* ]]
-    }
 
     # Phase 1: consume shell keywords/builtins (case-sensitive)
     # These are processed by the shell before any exec, can appear in any order
@@ -882,6 +885,4 @@ function zpwrExpandParserFindCommandPosition() {
         fi
     done
     ZPWR_EXPAND_WORDS_LPARTITION=("${cleaned[@]}")
-
-    unfunction _zpwr_bare _zpwr_is_assignment 2>/dev/null
 }
