@@ -570,7 +570,7 @@ function zpwrExpandSupernaturalSpace() {
     fi
 
     local triggerKey="$1"
-    local _saved _lw _expansion _trigger _type
+    local _saved _lw _lwbuf _expansion _trigger _type
     local -a _histWords=()
     # globals
     ZPWR_EXPAND_WORDS_LPARTITION=()
@@ -612,30 +612,32 @@ function zpwrExpandSupernaturalSpace() {
         zpwrExpandRegexMatchOnCommandPosition
     fi
 
-    #dont expand =word because that is zle expand-word
-    if [[ ${ZPWR_VARS[lastword_lbuffer]:0:1} != '=' ]] && (( $#ZPWR_VARS[lastword_lbuffer] > 0 ));then
-        if [[ -z $ZPWR_VARS[blacklistUser] ]] || ! [[ $ZPWR_VARS[lastword_lbuffer] =~ $ZPWR_VARS[blacklistUser] ]]; then
-            if (( ${+aliases[(e)${ZPWR_VARS[lastword_lbuffer]}]} )) && ! [[ ${aliases[(e)${ZPWR_VARS[lastword_lbuffer]}]} =~ $ZPWR_VARS[blacklistFirstPosRegex] ]];then
+    _lwbuf=$ZPWR_VARS[lastword_lbuffer]
 
-                #zpwrLogDebug "regular=>'$ZPWR_VARS[lastword_lbuffer]'"
+    #dont expand =word because that is zle expand-word
+    if [[ ${_lwbuf:0:1} != '=' ]] && (( $#_lwbuf > 0 ));then
+        if [[ -z $ZPWR_VARS[blacklistUser] ]] || ! [[ $_lwbuf =~ $ZPWR_VARS[blacklistUser] ]]; then
+            if (( ${+aliases[(e)$_lwbuf]} )) && ! [[ ${aliases[(e)$_lwbuf]} =~ $ZPWR_VARS[blacklistFirstPosRegex] ]];then
+
+                #zpwrLogDebug "regular=>'$_lwbuf'"
                 zpwrExpandRightTrim
                 zpwrExpandLastWordAtCommandPosAndExpand moveCursor zle "$triggerKey"
             else
-                #zpwrLogDebug "NOT regular=>'$ZPWR_VARS[lastword_lbuffer]'"
-                if (( ${+galiases[(e)${ZPWR_VARS[lastword_lbuffer]}]} )); then
+                #zpwrLogDebug "NOT regular=>'$_lwbuf'"
+                if (( ${+galiases[(e)$_lwbuf]} )); then
 
                     zpwrExpandRightTrim
                     # global alias expansion
-                    #zpwrLogDebug "global=>'$ZPWR_VARS[lastword_lbuffer]'"
-                    zpwrExpandGlobalAliases "$ZPWR_VARS[lastword_lbuffer]"
+                    #zpwrLogDebug "global=>'$_lwbuf'"
+                    zpwrExpandGlobalAliases "$_lwbuf"
                     ZPWR_VARS[LAST_WORD_WAS_AT_COMMAND]=true
-                    ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
+                    ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$_lwbuf
                 elif [[ $ZPWR_EXPAND_SUFFIX == true ]]; then
                     zpwrExpandRightTrim
                     zpwrExpandSuffixAlias
                     if [[ $ZPWR_VARS[WAS_EXPANDED] == true ]]; then
                         ZPWR_VARS[LAST_WORD_WAS_AT_COMMAND]=true
-                        ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
+                        ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$_lwbuf
                     fi
                 fi
             fi
@@ -658,13 +660,13 @@ function zpwrExpandSupernaturalSpace() {
         # stats-only: track native expansions on ENTER even when expansion is gated off.
         # zsh itself will expand !history, globs, $params, ~user at execution time.
         if [[ $triggerKey == "${ZPWR_VARS[ENTER_KEY]}" && $ZPWR_VARS[WAS_EXPANDED] != true ]]; then
-            if [[ $ZPWR_VARS[lastword_lbuffer] == *[\!\*\$\~]* ]]; then
+            if [[ $_lwbuf == *[\!\*\$\~]* ]]; then
                 ZPWR_VARS[EXPAND_TYPE]=native
-                ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$ZPWR_VARS[lastword_lbuffer]
+                ZPWR_VARS[ORIGINAL_LAST_COMMAND]=$_lwbuf
                 ZPWR_VARS[WAS_EXPANDED]=true
                 # estimate saved chars for history refs using the history entry
                 _saved=0
-                _lw=$ZPWR_VARS[lastword_lbuffer]
+                _lw=$_lwbuf
                 _expansion=""
                 _histWords=()
                 case $_lw in
