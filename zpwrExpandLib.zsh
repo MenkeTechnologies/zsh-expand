@@ -675,25 +675,25 @@ function zpwrExpandSupernaturalSpace() {
                 _histWords=()
                 case $_lw in
                     # !! — full previous command
-                    !!) _expansion=${history[1]} ;;
+                    !!) _expansion=${history[$((HISTCMD-1))]} ;;
                     # !$ — last word of previous command
                     \!\$)
-                        _histWords=( ${(z)history[1]} )
+                        _histWords=( ${(z)history[$((HISTCMD-1))]} )
                         _expansion=${_histWords[-1]}
                         ;;
                     # !^ — first argument (word 2) of previous command
                     \!\^)
-                        _histWords=( ${(z)history[1]} )
+                        _histWords=( ${(z)history[$((HISTCMD-1))]} )
                         _expansion=${_histWords[2]}
                         ;;
                     # !* — all arguments of previous command
                     \!\*)
-                        _histWords=( ${(z)history[1]} )
+                        _histWords=( ${(z)history[$((HISTCMD-1))]} )
                         _expansion="${_histWords[2,-1]}"
                         ;;
                     # !:n — nth word of previous command (0-indexed)
                     \!:<->)
-                        _histWords=( ${(z)history[1]} )
+                        _histWords=( ${(z)history[$((HISTCMD-1))]} )
                         _expansion=${_histWords[$(( ${_lw#\!:} + 1 ))]}
                         ;;
                     # !n — history entry n (1-based)
@@ -707,11 +707,11 @@ function zpwrExpandSupernaturalSpace() {
                     # !string — most recent command starting with string
                     \!?*)
                         # approximate: use previous command
-                        _expansion=${history[1]}
+                        _expansion=${history[$((HISTCMD-1))]}
                         ;;
                     # ^old^new^ — quick substitution (approximate)
                     \^*\^*)
-                        _expansion=${history[1]}
+                        _expansion=${history[$((HISTCMD-1))]}
                         ;;
                     *) _expansion="" ;;
                 esac
@@ -1038,7 +1038,7 @@ ${_d} ░░░░░░░░░░░░░░░░░░░░░░░░�
         (( savedChars += _nsaved ))
     done
 
-    # sort by frequency, top 15
+    # sort by frequency, top N
     local -a sorted=()
     local k
     for k in "${(k)counts[@]}"; do
@@ -1048,13 +1048,15 @@ ${_d} ░░░░░░░░░░░░░░░░░░░░░░░░�
     sorted=(${(On)sorted})
 
     # color codes (same names as help banner)
-    _r=$'\e[0m'
-    _c=$'\e[38;5;51m'       # cyan neon
-    _m=$'\e[1m\e[38;5;207m' # bold magenta
-    _g=$'\e[38;5;48m'       # green neon
-    _y=$'\e[38;5;226m'      # yellow
-    _d=$'\e[38;5;236m'      # dark gray
-    _w=$'\e[1m\e[38;5;255m' # bold white
+    if [[ -t 1 || $doColor == true ]]; then
+        _r=$'\e[0m'
+        _c=$'\e[38;5;51m'       # cyan neon
+        _m=$'\e[1m\e[38;5;207m' # bold magenta
+        _g=$'\e[38;5;48m'       # green neon
+        _y=$'\e[38;5;226m'      # yellow
+        _d=$'\e[38;5;236m'      # dark gray
+        _w=$'\e[1m\e[38;5;255m' # bold white
+    fi
 
     # banner
     print -r -- "${_c} ███████╗███████╗██╗  ██╗      ███████╗██╗  ██╗██████╗  █████╗ ███╗   ██╗██████╗${_r}
