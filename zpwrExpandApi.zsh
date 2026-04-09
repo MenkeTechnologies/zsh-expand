@@ -87,7 +87,15 @@ function zpwrExpandParseWords(){
 
     #zpwrLogDebug "lpartition = '$ZPWR_EXPAND_WORDS_LPARTITION'"
 
-    lpartAry=( ${(z)${ZPWR_EXPAND_WORDS_LPARTITION}} )
+    # Avoid join+(z) on the whole partition: only the last word is modified for
+    # quote stripping in argument position, so only that token may need (z) re-split.
+    # Use (@) so [1,-2] stays an array slice — a plain "${arr[1,-2]}" joins into one string.
+    if (( isArgPosition )); then
+        lpartAry=( "${(@)ZPWR_EXPAND_WORDS_LPARTITION[1,-2]}" )
+        lpartAry+=( ${(z)ZPWR_EXPAND_WORDS_LPARTITION[-1]} )
+    else
+        lpartAry=( "${ZPWR_EXPAND_WORDS_LPARTITION[@]}" )
+    fi
 
     ZPWR_VARS[firstword_partition]=${lpartAry[1]}
 
