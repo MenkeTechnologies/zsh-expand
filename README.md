@@ -595,6 +595,8 @@ Stress test scaling (Apple Silicon, full prefix chain per loop):
 
 The parser never fails -- it just gets slower on inputs no human would ever type. The bottleneck is zsh's `(z)` word splitter, not the parser itself. Normal command lines are under 1KB and expand in under 1ms.
 
+`zpwrExpandParseWords` avoids re-running `(z)` on the whole statement partition when only a copy of the word array is needed; in argument position (quote stripping on the last token), it re-tokenizes **only** that last word instead of join-splitting the entire line again.
+
 How deep can you actually chain? The parser handles all of it instantly -- the OS is the limit:
 
 | Command | Max depth | Limiting factor |
