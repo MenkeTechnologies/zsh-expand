@@ -27,6 +27,26 @@ function _zpwr_bare() {
 function _zpwr_is_assignment() {
     [[ $1 == [A-Za-z_]*=* ]]
 }
+
+# O(1) lookup tables — Phase 1 keywords and Phase 2 command wrappers.
+# The parser case-statement has ~55 patterns; for non-wrapper commands (the common
+# case) every pattern is tested before `*) break`.  A hash pre-check skips the
+# entire case block in O(1).
+typeset -gA _ZPWR_PHASE1_CMDS=(
+    nocorrect 1  - 1  builtin 1  eval 1  noglob 1  coproc 1  time 1  command 1  exec 1
+)
+typeset -gA _ZPWR_PHASE2_CMDS=(
+    sudo 1  doas 1  env 1  nice 1  time 1  nohup 1  rlwrap 1  timeout 1
+    strace 1  ltrace 1  ionice 1  caffeinate 1  setsid 1  chrt 1  taskset 1
+    watch 1  runuser 1  flock 1  chroot 1  unshare 1  cpulimit 1  su 1
+    stdbuf 1  sg 1  choom 1  nsenter 1  numactl 1  prlimit 1  setpriv 1
+    setarch 1  linux32 1  linux64 1  runcon 1  xvfb-run 1  chpst 1  cgexec 1
+    trickle 1  faketime 1  proot 1  bwrap 1  capsh 1  valgrind 1  fakeroot 1
+    unbuffer 1  chronic 1  torsocks 1  proxychains4 1  daemonize 1  firejail 1
+    sem 1  systemd-run 1  nocache 1  fakechroot 1  ccache 1  distcc 1  pkexec 1
+    torify 1  dbus-run-session 1  dbus-launch 1  eatmydata 1  tsocks 1
+    catchsegv 1
+)
 #}}}***********************************************************
 
 # Parser that walks ZPWR_EXPAND_WORDS_LPARTITION left-to-right to find
@@ -39,7 +59,6 @@ function zpwrExpandParserFindCommandPosition() {
     local -a words
     words=("${(@)ZPWR_EXPAND_WORDS_LPARTITION}")
     local -i pos=1
-    local -i i
     local bare lower
 
     # Phase 1: consume shell keywords/builtins (case-sensitive)
@@ -52,6 +71,8 @@ function zpwrExpandParserFindCommandPosition() {
         fi
         _zpwr_bare "$words[$pos]"
         bare=$REPLY
+        # O(1) bail: not a Phase 1 keyword → skip entire case block
+        (( ! ${+_ZPWR_PHASE1_CMDS[$bare]} )) && break
         case $bare in
             nocorrect|-|builtin|eval|noglob|coproc)
                 (( pos++ ))
@@ -101,6 +122,8 @@ function zpwrExpandParserFindCommandPosition() {
         _zpwr_bare "$words[$pos]"
         bare=$REPLY
         lower=${(L)bare}
+        # O(1) bail: not a Phase 2 wrapper → skip entire case block
+        (( ! ${+_ZPWR_PHASE2_CMDS[$lower]} )) && break
         case $lower in
             sudo|doas)
                 (( pos++ ))
@@ -878,12 +901,6 @@ function zpwrExpandParserFindCommandPosition() {
     fi
 
     # update ZPWR_EXPAND_WORDS_LPARTITION to have assignments stripped
-    # (downstream code expects this)
-    local -a cleaned=()
-    for (( i = 1; i <= $#words; i++ )); do
-        if ! _zpwr_is_assignment "$words[$i]"; then
-            cleaned+=("$words[$i]")
-        fi
-    done
-    ZPWR_EXPAND_WORDS_LPARTITION=("${cleaned[@]}")
+    # (downstream code expects this) — single expansion, no loop
+    ZPWR_EXPAND_WORDS_LPARTITION=("${(@)words:#[A-Za-z_]*=*}")
 }
