@@ -595,7 +595,9 @@ Stress test scaling (Apple Silicon, full prefix chain per loop):
 
 The parser never fails -- it just gets slower on inputs no human would ever type. The bottleneck is zsh's `(z)` word splitter, not the parser itself. Normal command lines are under 1KB and expand in under 1ms.
 
-`zpwrExpandParseWords` avoids re-running `(z)` on the whole statement partition when only a copy of the word array is needed; in argument position (quote stripping on the last token), it re-tokenizes **only** that last word instead of join-splitting the entire line again.
+`zpwrExpandParseWords` avoids re-running `(z)` on the whole statement partition when only a copy of the word array is needed; in argument position (quote stripping on the last token), it re-tokenizes **only** that last word instead of join-splitting the entire line again. Assignment filtering on the partition (`FOO=bar`, `--flag=value`) is a single native glob expansion rather than a per-element loop.
+
+The command-position parser short-circuits the overwhelmingly common case (plain commands with no shell keyword or wrapper prefix: `git status`, `ls -la /tmp`, `vim foo`) via an inline precheck on the first word. Both the Phase 1 keyword loop and the Phase 2 wrapper loop would bail immediately on such input via their O(1) hash lookup anyway, so the fast path replicates those two hash lookups inline and skips the array copy, the `_zpwr_bare` calls, and the loop machinery entirely. In practice this drops parser latency by ~35% on non-prefixed lines; prefixed lines (`sudo`, `env`, `time ...`) still run the full loop and are unaffected.
 
 How deep can you actually chain? The parser handles all of it instantly -- the OS is the limit:
 

@@ -99,17 +99,11 @@ function zpwrExpandParseWords(){
 
     ZPWR_VARS[firstword_partition]=${lpartAry[1]}
 
-    # skip words containing = (assignments and --flag=value) for lastword
-    local -a _noeq=()
-    local _w
-    for _w in "${lpartAry[@]}"; do
-        [[ $_w != *=* ]] && _noeq+=("$_w")
-    done
-    if (( $#_noeq )); then
-        ZPWR_VARS[lastword_lbuffer]=${_noeq[-1]}
-    else
-        ZPWR_VARS[lastword_lbuffer]=''
-    fi
+    # skip words containing = (assignments and --flag=value) for lastword.
+    # native glob filter — one expansion, no per-element loop or appends
+    local -a _noeq
+    _noeq=("${(@)lpartAry:#*=*}")
+    ZPWR_VARS[lastword_lbuffer]=${_noeq[-1]:-''}
 
     #zpwrLogDebug "first word partition = ...$ZPWR_VARS[firstword_partition]..."
     #zpwrLogDebug "last word lbuf before no dbl quotes and [-1] = ...$ZPWR_VARS[lastword_lbuffer]..."

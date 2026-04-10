@@ -56,6 +56,29 @@ typeset -gA _ZPWR_PHASE2_CMDS=(
 # and ZPWR_VARS[cachedRegexMatched]=true on success.
 function zpwrExpandParserFindCommandPosition() {
 
+    # Fast path: the overwhelmingly common command line starts with a plain
+    # command — not a shell keyword (Phase 1), not a wrapper like sudo/env
+    # (Phase 2), not an assignment.  In that case both loops would bail on
+    # word 1 via their O(1) hash precheck.  Replicate the precheck inline to
+    # skip the array copy and all _zpwr_bare / _zpwr_is_assignment calls.
+    local _fpRaw=$ZPWR_EXPAND_WORDS_LPARTITION[1]
+    if [[ $_fpRaw != [A-Za-z_]*=* ]]; then
+        local _fpBare=$_fpRaw
+        # inline _zpwr_bare: strip $' prefix, then leading/trailing quote chars
+        _fpBare=${_fpBare#\$\'}
+        _fpBare=${_fpBare#[\\\"\']}
+        _fpBare=${_fpBare%[\"\']}
+        if (( ! ${+_ZPWR_PHASE1_CMDS[$_fpBare]} )) && \
+           (( ! ${+_ZPWR_PHASE2_CMDS[${(L)_fpBare}]} )); then
+            ZPWR_VARS[cachedParserPrefix]=""
+            ZPWR_VARS[cachedRegexMatch]="${ZPWR_EXPAND_WORDS_LPARTITION[*]}"
+            ZPWR_VARS[cachedRegexMatched]=true
+            # strip assignments from LPARTITION (matches slow-path final filter)
+            ZPWR_EXPAND_WORDS_LPARTITION=("${(@)ZPWR_EXPAND_WORDS_LPARTITION:#[A-Za-z_]*=*}")
+            return
+        fi
+    fi
+
     local -a words
     words=("${(@)ZPWR_EXPAND_WORDS_LPARTITION}")
     local -i pos=1
