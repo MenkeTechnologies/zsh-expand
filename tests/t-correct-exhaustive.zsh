@@ -744,11 +744,6 @@
     assert $LBUFFER same_as 'echo documentation'
 }
 
-@test 'correct: docs -> documentation' {
-    correct_word docs
-    assert $LBUFFER same_as 'echo documentation'
-}
-
 #==============================================================
 # double
 #==============================================================

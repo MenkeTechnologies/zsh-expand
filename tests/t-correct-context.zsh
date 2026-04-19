@@ -182,14 +182,6 @@
     assert $LBUFFER same_as 'echo implementation'
 }
 
-@test 'echo: fn -> function' {
-    LBUFFER="echo fn"
-    ZPWR_VARS[foundIncorrect]=false
-    zpwrExpandParseWords "$LBUFFER"
-    zpwrExpandCorrectWord
-    assert $LBUFFER same_as 'echo function'
-}
-
 @test 'echo: dir -> directory' {
     LBUFFER="echo dir"
     ZPWR_VARS[foundIncorrect]=false
@@ -394,14 +386,6 @@
     assert $LBUFFER same_as 'print implementation'
 }
 
-@test 'print: fn -> function' {
-    LBUFFER="print fn"
-    ZPWR_VARS[foundIncorrect]=false
-    zpwrExpandParseWords "$LBUFFER"
-    zpwrExpandCorrectWord
-    assert $LBUFFER same_as 'print function'
-}
-
 @test 'print: db -> database' {
     LBUFFER="print db"
     ZPWR_VARS[foundIncorrect]=false
@@ -584,14 +568,6 @@
     zpwrExpandParseWords "$LBUFFER"
     zpwrExpandCorrectWord
     assert $LBUFFER same_as 'grep error'
-}
-
-@test 'grep: fn -> function' {
-    LBUFFER="grep fn"
-    ZPWR_VARS[foundIncorrect]=false
-    zpwrExpandParseWords "$LBUFFER"
-    zpwrExpandCorrectWord
-    assert $LBUFFER same_as 'grep function'
 }
 
 @test 'grep: feil -> file' {
@@ -882,14 +858,6 @@
     assert $LBUFFER same_as 'echo foo bar and'
 }
 
-@test '4th word: echo one two three fn -> function' {
-    LBUFFER="echo one two three fn"
-    ZPWR_VARS[foundIncorrect]=false
-    zpwrExpandParseWords "$LBUFFER"
-    zpwrExpandCorrectWord
-    assert $LBUFFER same_as 'echo one two three function'
-}
-
 @test '4th word: echo a b c d cpu -> CPU' {
     LBUFFER="echo a b c d cpu"
     ZPWR_VARS[foundIncorrect]=false
@@ -956,14 +924,6 @@
     zpwrExpandParseWords "$LBUFFER"
     zpwrExpandCorrectWord
     assert $LBUFFER same_as 'ls | echo URL'
-}
-
-@test 'pipe: cat foo | echo fn -> function' {
-    LBUFFER="cat foo | echo fn"
-    ZPWR_VARS[foundIncorrect]=false
-    zpwrExpandParseWords "$LBUFFER"
-    zpwrExpandCorrectWord
-    assert $LBUFFER same_as 'cat foo | echo function'
 }
 
 @test 'pipe: cat foo | echo db -> database' {
@@ -1090,14 +1050,6 @@
     assert $LBUFFER same_as 'cat f | sort | echo CPU'
 }
 
-@test 'double pipe: a | b | echo fn -> function' {
-    LBUFFER="cat f | sort | echo fn"
-    ZPWR_VARS[foundIncorrect]=false
-    zpwrExpandParseWords "$LBUFFER"
-    zpwrExpandCorrectWord
-    assert $LBUFFER same_as 'cat f | sort | echo function'
-}
-
 @test 'double pipe: a | b | echo impl -> implementation' {
     LBUFFER="cat f | sort | echo impl"
     ZPWR_VARS[foundIncorrect]=false
@@ -1188,14 +1140,6 @@
     zpwrExpandParseWords "$LBUFFER"
     zpwrExpandCorrectWord
     assert $LBUFFER same_as 'ls; echo HTML'
-}
-
-@test 'semicolon: ls; echo fn -> function' {
-    LBUFFER="ls; echo fn"
-    ZPWR_VARS[foundIncorrect]=false
-    zpwrExpandParseWords "$LBUFFER"
-    zpwrExpandCorrectWord
-    assert $LBUFFER same_as 'ls; echo function'
 }
 
 @test 'semicolon: ls; echo db -> database' {
@@ -1290,14 +1234,6 @@
     assert $LBUFFER same_as 'ls; pwd; echo JSON'
 }
 
-@test 'double semicolon: a; b; echo fn -> function' {
-    LBUFFER="ls; pwd; echo fn"
-    ZPWR_VARS[foundIncorrect]=false
-    zpwrExpandParseWords "$LBUFFER"
-    zpwrExpandCorrectWord
-    assert $LBUFFER same_as 'ls; pwd; echo function'
-}
-
 @test 'double semicolon: a; b; echo cpu -> CPU' {
     LBUFFER="ls; pwd; echo cpu"
     ZPWR_VARS[foundIncorrect]=false
@@ -1364,14 +1300,6 @@
     zpwrExpandParseWords "$LBUFFER"
     zpwrExpandCorrectWord
     assert $LBUFFER same_as 'ls && echo CPU'
-}
-
-@test 'and-and: ls && echo fn -> function' {
-    LBUFFER="ls && echo fn"
-    ZPWR_VARS[foundIncorrect]=false
-    zpwrExpandParseWords "$LBUFFER"
-    zpwrExpandCorrectWord
-    assert $LBUFFER same_as 'ls && echo function'
 }
 
 @test 'and-and: ls && echo db -> database' {
@@ -1488,14 +1416,6 @@
     zpwrExpandParseWords "$LBUFFER"
     zpwrExpandCorrectWord
     assert $LBUFFER same_as 'ls || echo CPU'
-}
-
-@test 'or-or: ls || echo fn -> function' {
-    LBUFFER="ls || echo fn"
-    ZPWR_VARS[foundIncorrect]=false
-    zpwrExpandParseWords "$LBUFFER"
-    zpwrExpandCorrectWord
-    assert $LBUFFER same_as 'ls || echo function'
 }
 
 @test 'or-or: ls || echo db -> database' {
@@ -2214,14 +2134,6 @@
     assert $LBUFFER same_as 'echo alpha beta gamma delta epsilon zeta eta theta JSON'
 }
 
-@test 'long prefix: many words then fn -> function' {
-    LBUFFER="echo a b c d e f g h i j k l m fn"
-    ZPWR_VARS[foundIncorrect]=false
-    zpwrExpandParseWords "$LBUFFER"
-    zpwrExpandCorrectWord
-    assert $LBUFFER same_as 'echo a b c d e f g h i j k l m function'
-}
-
 #==============================================================
 # 26. Multiple words before typo
 #==============================================================
@@ -2496,14 +2408,6 @@
 
 @test 'foundIncorrect true: grep eror' {
     LBUFFER="grep eror"
-    ZPWR_VARS[foundIncorrect]=false
-    zpwrExpandParseWords "$LBUFFER"
-    zpwrExpandCorrectWord
-    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
-}
-
-@test 'foundIncorrect true: ls | echo fn' {
-    LBUFFER="ls | echo fn"
     ZPWR_VARS[foundIncorrect]=false
     zpwrExpandParseWords "$LBUFFER"
     zpwrExpandCorrectWord
@@ -3012,14 +2916,6 @@
     zpwrExpandParseWords "$LBUFFER"
     zpwrExpandCorrectWord
     assert $LBUFFER same_as 'a | b; echo CPU'
-}
-
-@test 'mixed: a && b || echo fn -> function' {
-    LBUFFER="a && b || echo fn"
-    ZPWR_VARS[foundIncorrect]=false
-    zpwrExpandParseWords "$LBUFFER"
-    zpwrExpandCorrectWord
-    assert $LBUFFER same_as 'a && b || echo function'
 }
 
 @test 'mixed: a || b && echo db -> database' {

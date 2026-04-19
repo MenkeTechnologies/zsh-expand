@@ -1,4 +1,4 @@
-#!/usr/bin/env zsh
+#lang!/usr/bin/env zsh
 #{{{                    MARK:Header
 #**************************************************************
 ##### Author: MenkeTechnologies

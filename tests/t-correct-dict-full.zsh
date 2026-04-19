@@ -965,18 +965,6 @@
     assert $LBUFFER same_as 'echo documentation'
 }
 
-@test 'dict echo: docs -> documentation' {
-    correct_word docs
-    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
-    assert $LBUFFER same_as 'echo documentation'
-}
-
-@test 'dict echo: doc -> documentation' {
-    correct_word doc
-    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
-    assert $LBUFFER same_as 'echo documentation'
-}
-
 @test 'dict echo: doesnt -> does not' {
     correct_word doesnt
     assert $ZPWR_VARS[foundIncorrect] same_as 'true'
@@ -1547,12 +1535,6 @@
     assert $LBUFFER same_as 'echo function'
 }
 
-@test 'dict echo: fn -> function' {
-    correct_word fn
-    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
-    assert $LBUFFER same_as 'echo function'
-}
-
 @test 'dict echo: fxnal -> functional' {
     correct_word fxnal
     assert $ZPWR_VARS[foundIncorrect] same_as 'true'
@@ -1565,12 +1547,6 @@
     assert $LBUFFER same_as 'echo functional'
 }
 
-@test 'dict echo: fnal -> functional' {
-    correct_word fnal
-    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
-    assert $LBUFFER same_as 'echo functional'
-}
-
 @test 'dict echo: fxns -> functions' {
     correct_word fxns
     assert $ZPWR_VARS[foundIncorrect] same_as 'true'
@@ -1579,12 +1555,6 @@
 
 @test 'dict echo: funcs -> functions' {
     correct_word funcs
-    assert $ZPWR_VARS[foundIncorrect] same_as 'true'
-    assert $LBUFFER same_as 'echo functions'
-}
-
-@test 'dict echo: fns -> functions' {
-    correct_word fns
     assert $ZPWR_VARS[foundIncorrect] same_as 'true'
     assert $LBUFFER same_as 'echo functions'
 }

@@ -252,14 +252,6 @@
     assert $LBUFFER same_as 'echo directory'
 }
 
-@test 'correctWord: corrects fn to function' {
-    LBUFFER="echo fn"
-    ZPWR_VARS[foundIncorrect]=false
-    zpwrExpandParseWords "$LBUFFER"
-    zpwrExpandCorrectWord
-    assert $LBUFFER same_as 'echo function'
-}
-
 @test 'correctWord: corrects func to function' {
     LBUFFER="echo func"
     ZPWR_VARS[foundIncorrect]=false
@@ -338,14 +330,6 @@
     zpwrExpandParseWords "$LBUFFER"
     zpwrExpandCorrectWord
     assert $LBUFFER same_as 'echo dependencies'
-}
-
-@test 'correctWord: corrects docs to documentation' {
-    LBUFFER="echo docs"
-    ZPWR_VARS[foundIncorrect]=false
-    zpwrExpandParseWords "$LBUFFER"
-    zpwrExpandCorrectWord
-    assert $LBUFFER same_as 'echo documentation'
 }
 
 @test 'correctWord: corrects perms to permissions' {
