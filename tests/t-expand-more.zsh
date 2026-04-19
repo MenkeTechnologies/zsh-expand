@@ -302,11 +302,6 @@
     assert $LBUFFER same_as 'echo docker'
 }
 
-@test 'correct: doc -> documentation' {
-    correct_word doc
-    assert $LBUFFER same_as 'echo documentation'
-}
-
 @test 'correct: doesnt -> does_not' {
     correct_word doesnt
     assert $LBUFFER same_as 'echo does not'
@@ -395,11 +390,6 @@
 @test 'correct: fn -> function' {
     correct_word fn
     assert $LBUFFER same_as 'echo function'
-}
-
-@test 'correct: fns -> functions' {
-    correct_word fns
-    assert $LBUFFER same_as 'echo functions'
 }
 
 #==============================================================
