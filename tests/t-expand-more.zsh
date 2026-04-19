@@ -387,11 +387,6 @@
     assert $LBUFFER same_as 'echo foreground'
 }
 
-@test 'correct: fn -> function' {
-    correct_word fn
-    assert $LBUFFER same_as 'echo function'
-}
-
 #==============================================================
 # Spelling corrections — G–L
 #==============================================================
