@@ -56,5 +56,4 @@ jobs:
         run: |
           set -euo pipefail
           cd zsh-expand
-          zsh scripts/count-tests.zsh
           zunit --verbose tests/*.zsh
