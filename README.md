@@ -1,5 +1,3 @@
-# zsh-expand
-
 ```
 @@@@@@@@   @@@@@@   @@@  @@@             @@@@@@@@  @@@  @@@  @@@@@@@
 @@@@@@@@  @@@@@@@   @@@  @@@             @@@@@@@@  @@@  @@@  @@@@@@@@
@@ -24,43 +22,51 @@
  :   : :  ::    :   :: :  :
 ```
 
-> *Jack into your shell. Let the machine think faster than you can type.*
-
----
-
 [![CI](https://github.com/MenkeTechnologies/zsh-expand/actions/workflows/ci.yml/badge.svg)](https://github.com/MenkeTechnologies/zsh-expand/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![zsh](https://img.shields.io/badge/zsh-plugin-cyan.svg)](https://github.com/MenkeTechnologies/zpwr)
 
-### // TABLE OF CONTENTS
+### `[EXPAND ALIASES + GLOBAL ALIASES + TYPO CORRECTIONS ON SPACE]`
 
-- [What Is This](#-what-is-this)
-- [Demo](#-demo)
-- [Neural Expansion Core](#-neural-expansion-core)
-- [Expansion Rules](#-expansion-rules)
-- [Supported Prefixes and Flags](#-supported-prefixes-and-flags)
-- [Bypass Protocols](#-bypass-protocols)
-- [Configuration Matrix](#-configuration-matrix)
-- [Key Bindings](#-key-bindings)
-- [Custom Corrections](#-custom-corrections)
-- [Versus the Competition](#-versus-the-competition)
-- [Tabstop Snippets](#-tabstop-snippets)
-- [Self-Referential Alias Escape](#-self-referential-alias-escape)
-- [Correct-Then-Expand](#-correct-then-expand)
-- [Expand Inside Quotes](#-expand-inside-quotes)
-- [Suffix Alias Expansion](#-suffix-alias-expansion)
-- [Autopair Integration](#-autopair-integration)
-- [History Injection](#-history-injection)
-- [Debug Widget](#-debug-widget)
-- [Expansion Preview](#-expansion-preview)
-- [Expansion Stats](#-expansion-stats)
-- [Command-Position Parser](#-command-position-parser)
-- [Performance](#-performance)
-- [Test Coverage](#-test-coverage)
-- [Install](#-install)
-- [The Monster Chain](#-the-monster-chain)
+> *"Jack into your shell. Let the machine think faster than you can type."*
+
+**zsh-expand** rewrites the spacebar into a live alias expander. Aliases, global aliases, and common typo corrections expand on space; deep prefix chains (`sudo`, `su`, `stdbuf`, `proxychains`, ...) are parsed to find the real command before expanding.
+
+### [`strykelang`](https://github.com/MenkeTechnologies/strykelang) &middot; [`zshrs`](https://github.com/MenkeTechnologies/zshrs) · [`MenkeTechnologiesMeta`](https://github.com/MenkeTechnologies/MenkeTechnologiesMeta) · [`zsh-more-completions`](https://github.com/MenkeTechnologies/zsh-more-completions) · [`zsh-cargo-completion`](https://github.com/MenkeTechnologies/zsh-cargo-completion) · [`zsh-git-acp`](https://github.com/MenkeTechnologies/zsh-git-acp) · [`zsh-sudo`](https://github.com/MenkeTechnologies/zsh-sudo) · [`zpwr`](https://github.com/MenkeTechnologies/zpwr)
 
 ---
 
-### // WHAT IS THIS
+## Table of Contents
+
+- [\[0x00\] // WHAT IS THIS](#0x00-what-is-this)
+- [\[0x01\] // DEMO](#0x01-demo)
+- [\[0x02\] // NEURAL EXPANSION CORE](#0x02-neural-expansion-core)
+- [\[0x03\] // EXPANSION RULES](#0x03-expansion-rules)
+- [\[0x04\] // SUPPORTED PREFIXES AND FLAGS](#0x04-supported-prefixes-and-flags)
+- [\[0x05\] // BYPASS PROTOCOLS](#0x05-bypass-protocols)
+- [\[0x06\] // CONFIGURATION MATRIX](#0x06-configuration-matrix)
+- [\[0x07\] // KEY BINDINGS](#0x07-key-bindings)
+- [\[0x08\] // CUSTOM CORRECTIONS](#0x08-custom-corrections)
+- [\[0x09\] // VERSUS THE COMPETITION](#0x09-versus-the-competition)
+- [\[0x0A\] // TABSTOP SNIPPETS](#0x0a-tabstop-snippets)
+- [\[0x0B\] // SELF-REFERENTIAL ALIAS ESCAPE](#0x0b-self-referential-alias-escape)
+- [\[0x0C\] // CORRECT-THEN-EXPAND](#0x0c-correct-then-expand)
+- [\[0x0D\] // EXPAND INSIDE QUOTES](#0x0d-expand-inside-quotes)
+- [\[0x0E\] // SUFFIX ALIAS EXPANSION](#0x0e-suffix-alias-expansion)
+- [\[0x0F\] // AUTOPAIR INTEGRATION](#0x0f-autopair-integration)
+- [\[0x10\] // HISTORY INJECTION](#0x10-history-injection)
+- [\[0x11\] // DEBUG WIDGET](#0x11-debug-widget)
+- [\[0x12\] // EXPANSION PREVIEW](#0x12-expansion-preview)
+- [\[0x13\] // EXPANSION STATS](#0x13-expansion-stats)
+- [\[0x14\] // COMMAND-POSITION PARSER](#0x14-command-position-parser)
+- [\[0x15\] // PERFORMANCE](#0x15-performance)
+- [\[0x16\] // TEST COVERAGE](#0x16-test-coverage)
+- [\[0x17\] // INSTALL](#0x17-install)
+- [\[0x18\] // THE MONSTER CHAIN](#0x18-the-monster-chain)
+
+---
+
+## [0x00] // WHAT IS THIS
 
 **The world's most powerful zsh expansion plugin.** Intercepts your spacebar and expands everything in its path -- regular aliases, global aliases, suffix aliases, misspellings, globs, history, parameters, and more. No pipes. No external commands. Pure zsh. Sub-millisecond. 11,000+ tests.
 
@@ -94,13 +100,13 @@ torify sudo -kE -u root su -l deploy                         \
 
 ```
 
-### // DEMO
+## [0x01] // DEMO
 
 [![asciicast](https://asciinema.org/a/FbFsuMCSLtooqkB5ZZbBZeiEg.svg)](https://asciinema.org/a/FbFsuMCSLtooqkB5ZZbBZeiEg)
 
 ---
 
-### // NEURAL EXPANSION CORE
+## [0x02] // NEURAL EXPANSION CORE
 
 | Layer | What It Does |
 |---|---|
@@ -121,7 +127,7 @@ torify sudo -kE -u root su -l deploy                         \
 
 ---
 
-### // EXPANSION RULES
+## [0x03] // EXPANSION RULES
 
 ```
 COMMAND POSITION
@@ -142,7 +148,7 @@ CURSOR RULES
 
 ---
 
-### // SUPPORTED PREFIXES AND FLAGS
+## [0x04] // SUPPORTED PREFIXES AND FLAGS
 
 Shell builtins/keywords (must precede external wrappers):
 
@@ -234,7 +240,7 @@ PATH=/usr/bin LANG=C sudo gco   =>  PATH=/usr/bin LANG=C sudo git checkout
 
 ---
 
-### // BYPASS PROTOCOLS
+## [0x05] // BYPASS PROTOCOLS
 
 **Ctrl+Space** -- insert a literal space, no expansion.
 
@@ -246,7 +252,7 @@ export ZPWR_EXPAND_BLACKLIST=(g gco)
 
 ---
 
-### // CONFIGURATION MATRIX
+## [0x06] // CONFIGURATION MATRIX
 
 ```sh
 # -- CORE --
@@ -278,7 +284,7 @@ export ZPWR_EXPAND_BLACKLIST=(g gco)      # aliases to never expand
 
 ---
 
-### // KEY BINDINGS
+## [0x07] // KEY BINDINGS
 
 | Key | Action |
 |---|---|
@@ -288,7 +294,7 @@ export ZPWR_EXPAND_BLACKLIST=(g gco)      # aliases to never expand
 
 ---
 
-### // CUSTOM CORRECTIONS
+## [0x08] // CUSTOM CORRECTIONS
 
 The correction dictionary is a plain associative array. Add your own entries after the plugin loads, then rebuild the O(1) reverse lookup:
 
@@ -311,7 +317,7 @@ The key is the correct word, the value is a space-separated list of misspellings
 
 ---
 
-### // VERSUS THE COMPETITION
+## [0x09] // VERSUS THE COMPETITION
 
 | Feature | zsh-expand | [zsh-abbr](https://github.com/olets/zsh-abbr) | [zsh-abbrev-alias](https://github.com/momo-lab/zsh-abbrev-alias) | [globalias](https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/globalias) |
 |---|---|---|---|---|
@@ -340,7 +346,7 @@ The key is the correct word, the value is a space-separated list of misspellings
 
 ---
 
-### // TABSTOP SNIPPETS
+## [0x0A] // TABSTOP SNIPPETS
 
 Define aliases with `$ZPWR_TABSTOP` placeholders to turn them into IDE-style snippets. On expansion, the cursor jumps to the placeholder instead of the end of the line:
 
@@ -357,7 +363,7 @@ No other zsh expansion plugin supports cursor placement on expansion.
 
 ---
 
-### // SELF-REFERENTIAL ALIAS ESCAPE
+## [0x0B] // SELF-REFERENTIAL ALIAS ESCAPE
 
 If an alias expands to something whose first word is the alias name itself, zsh-expand backslash-escapes it to prevent infinite recursion:
 
@@ -373,7 +379,7 @@ Other plugins either infinite-loop or silently break on this.
 
 ---
 
-### // CORRECT-THEN-EXPAND
+## [0x0C] // CORRECT-THEN-EXPAND
 
 When `ZPWR_CORRECT_EXPAND=true`, typo correction chains into alias expansion in a single keypress:
 
@@ -381,7 +387,7 @@ The spelling corrector fires first, then the corrected word is re-checked for al
 
 ---
 
-### // EXPAND INSIDE QUOTES
+## [0x0D] // EXPAND INSIDE QUOTES
 
 Optionally expand aliases inside quoted strings in argument position. Quoted words at command position are never expanded.
 
@@ -397,7 +403,7 @@ echo "gco<space>"  =>  echo "git checkout "   (argument — expanded)
 
 ---
 
-### // SUFFIX ALIAS EXPANSION
+## [0x0E] // SUFFIX ALIAS EXPANSION
 
 When `ZPWR_EXPAND_SUFFIX=true`, suffix aliases (`alias -s`) are expanded at command position:
 
@@ -417,13 +423,13 @@ Works with history injection -- the expanded form is saved to history on accept-
 
 ---
 
-### // AUTOPAIR INTEGRATION
+## [0x0F] // AUTOPAIR INTEGRATION
 
 If [zsh-autopair](https://github.com/hlissner/zsh-autopair) is loaded, zsh-expand delegates space insertion to `autopair-insert` so bracket and quote auto-pairing is preserved during expansion.
 
 ---
 
-### // HISTORY INJECTION
+## [0x10] // HISTORY INJECTION
 
 When `ZPWR_EXPAND_TO_HISTORY=true`:
 
@@ -437,7 +443,7 @@ export ZPWR_EXPAND_PRE_EXEC_NATIVE=true
 
 ---
 
-### // DEBUG WIDGET
+## [0x11] // DEBUG WIDGET
 
 Press `Ctrl+\` to inspect the parser's view of the current line without expanding anything:
 
@@ -458,7 +464,7 @@ Shows the parsed prefix chain, identified command position, what expansion would
 
 ---
 
-### // EXPANSION PREVIEW
+## [0x12] // EXPANSION PREVIEW
 
 Ghost text shows what the last word would expand to as you type, before pressing space:
 
@@ -478,7 +484,7 @@ No other zsh expansion plugin shows a live preview of pending expansions.
 
 ---
 
-### // EXPANSION STATS
+## [0x13] // EXPANSION STATS
 
 Every expansion is logged to a stats file. Run `zpwrExpandStats` to see a cyberpunk dashboard:
 
@@ -521,7 +527,7 @@ Every expansion is logged to a stats file. Run `zpwrExpandStats` to see a cyberp
 Stats persist permanently across sessions in `$ZPWR_EXPAND_STATS_FILE` (defaults to `$ZPWR_LOCAL`, `$XDG_CACHE_HOME`, or `~/.cache`). The parent directory of that file is created automatically on first write (fresh CI runners and minimal `HOME` often have no `~/.cache` yet). The dashboard lists the top aliases (default count from `ZPWR_EXPAND_STATS_TOP`, overridable with `zpwrExpandStats -t`) with proportional bar charts and each alias’s expansion. Each line is tagged `S:` (spacebar expansion) or `H:` (history accept-line / non-space trigger) so space and history paths are tallied separately.
 ---
 
-### // COMMAND-POSITION PARSER
+## [0x14] // COMMAND-POSITION PARSER
 
 Previous versions used a single POSIX extended regex to match prefix commands and their flags. This worked for simple cases but couldn't scale -- every new command and flag combination made the regex longer and harder to debug. Flag arguments containing `=` (like `strace -e trace=network`) were incorrectly stripped as variable assignments.
 
@@ -566,7 +572,7 @@ The parser exposes two results for downstream consumers:
 
 ---
 
-### // PERFORMANCE
+## [0x15] // PERFORMANCE
 
 Source files can be compiled to `.zwc` bytecode for instant loading (`zcompile` or via your plugin manager). The expansion hot path uses zero external commands and zero subshells -- no `sed`, `awk`, `grep`, or `$(...)`. Every spacebar expansion runs in pure zsh builtins and parameter expansion, keeping latency invisible on every keypress.
 
@@ -609,7 +615,7 @@ How deep can you actually chain? The parser handles all of it instantly -- the O
 
 ---
 
-### // TEST COVERAGE
+## [0x16] // TEST COVERAGE
 
 A large [zunit](https://github.com/zunit-zsh/zunit) suite (11,000+ discrete `@test` blocks). Exact totals change frequently — print them from the repo root with:
 
@@ -625,7 +631,7 @@ When the plugin is loaded without the full zpwr environment, `zpwrLogDebug` and 
 
 ---
 
-### // INSTALL
+## [0x17] // INSTALL
 
 #### Zinit
 ```sh
@@ -651,7 +657,7 @@ Source `zsh-expand.plugin.zsh` in `~/.zshrc`.
 
 ---
 
-### // THE MONSTER CHAIN
+## [0x18] // THE MONSTER CHAIN
 
 No other expansion plugin can do this. 12 shell builtin permutations up front, then every one of the 62 command wrapper commands duplicated with different flag combos. `strace` with all 38 flags and `ltrace` with all 25 flags. Variable assignments scattered everywhere. Shell builtins come first (they only exist inside zsh), then command wrappers chain freely. The parser consumes the entire prefix and `gco` expands to `git checkout`:
 
@@ -895,4 +901,3 @@ nocorrect noglob builtin eval coproc time -p command -p       \
 ```
 
 ---
-<p align="center"><sub>// end of line</sub></p>
