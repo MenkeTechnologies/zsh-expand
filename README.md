@@ -68,7 +68,7 @@
 
 ## [0x00] // WHAT IS THIS
 
-**The world's most powerful zsh expansion plugin.** Intercepts your spacebar and expands everything in its path -- regular aliases, global aliases, suffix aliases, misspellings, globs, history, parameters, and more. No pipes. No external commands. Pure zsh. Sub-millisecond. 11,000+ tests.
+**The world's most powerful zsh expansion plugin.** Intercepts your spacebar and expands everything in its path -- regular aliases, global aliases, suffix aliases, misspellings, globs, history, parameters, and more. No pipes. No external commands. Pure zsh. Sub-millisecond. 11,683 tests.
 
 ```
 gco<space>  =>  git checkout
@@ -340,7 +340,7 @@ The key is the correct word, the value is a space-separated list of misspellings
 | Autopair integration | **yes** | no | no | no |
 | Case-insensitive prefix matching | **yes** | no | no | no |
 | Blacklist / filter | **yes** | n/a | no | yes |
-| Test suite | **11,000+** | yes | no | no |
+| Test suite | **11,683** | yes | no | no |
 | Pure zsh (no external deps) | **yes** | yes | yes | ohmyzsh |
 | Active (2026) | **yes** | yes | slow (2024) | stale (2020) |
 
@@ -617,7 +617,7 @@ How deep can you actually chain? The parser handles all of it instantly -- the O
 
 ## [0x16] // TEST COVERAGE
 
-A large [zunit](https://github.com/zunit-zsh/zunit) suite (11,000+ discrete `@test` blocks). Exact totals change frequently — print them from the repo root with:
+A large [zunit](https://github.com/zunit-zsh/zunit) suite (11,683 discrete `@test` blocks). Exact totals change frequently — print them from the repo root with:
 
 ```sh
 zsh scripts/count-tests.zsh
