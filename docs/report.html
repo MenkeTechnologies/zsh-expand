@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <meta name="description" content="zsh-expand — Engineering report. World's most powerful zsh expansion plugin: 2,753 zsh lines across 4 source files, 11,683 zunit @test blocks across 78 t-*.zsh files, 62 prefix commands parsed with full flag awareness, 292 built-in misspelling corrections, 4 ZLE widgets, sub-millisecond expansion path, zero external commands in the hot path.">
+  <title>zsh-expand &mdash; Engineering Report</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&amp;family=Share+Tech+Mono&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="hud-static.css">
+  <link rel="stylesheet" href="tutorial.css">
+  <style>
+    .tutorial-main { max-width: 72rem; }
+    .stat-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(13rem,1fr));gap:0.7rem;margin:1rem 0; }
+    .stat-card { border:1px solid var(--border);border-top:3px solid var(--cyan);background:var(--bg-card);padding:0.85rem 1rem;border-radius:2px;text-align:center; }
+    .stat-card .stat-val { font-family:'Orbitron',sans-serif;font-size:26px;font-weight:900;color:var(--cyan);line-height:1.1;text-shadow:0 0 18px var(--cyan-glow); }
+    .stat-card .stat-val.accent { color:var(--accent);text-shadow:0 0 18px var(--accent-glow); }
+    .stat-card .stat-val.green  { color:var(--green);text-shadow:0 0 18px rgba(57,255,20,.3); }
+    .stat-card .stat-label { font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--text-muted);margin-top:0.45rem; }
+    .file-table { width:100%;border-collapse:collapse;margin:0.6rem 0;font-size:12px; }
+    .file-table th { background:var(--bg-secondary);color:var(--cyan);font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;text-align:left;padding:7px 10px;border:1px solid var(--border); }
+    .file-table td { padding:6px 10px;border:1px solid var(--border);color:var(--text-dim);vertical-align:middle; }
+    .file-table tr:hover td { background:var(--bg-hover); }
+    .file-table td:first-child { font-family:'Share Tech Mono',monospace;color:var(--accent-light);font-weight:600;white-space:nowrap; }
+    .file-table .num { text-align:right;font-family:'Share Tech Mono',monospace; }
+    .file-table .total-row td { background:var(--bg-secondary);font-weight:700;color:var(--text);border-top:2px solid var(--cyan); }
+    .file-table code { font-size:11px;color:var(--accent-light);background:var(--bg-primary);padding:1px 4px;border-radius:2px; }
+    .feature-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(20rem,1fr));gap:0.65rem;margin:0.8rem 0; }
+    .feature-card { border:1px solid var(--border);border-left:3px solid var(--cyan);background:var(--bg-card);padding:0.7rem 1rem;border-radius:2px; }
+    .feature-card h4 { font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--cyan);margin:0 0 0.3rem; }
+    .feature-card p { margin:0;font-size:11px;color:var(--text-dim);line-height:1.55; }
+    .feature-card code { font-size:10.5px;color:var(--accent-light);background:var(--bg-primary);padding:1px 4px;border-radius:2px; }
+    .section-rule { border:none;border-top:1px dashed var(--border);margin:1.8rem 0; }
+  </style>
+</head>
+<body>
+  <div class="app tutorial-app" id="reportApp">
+    <div class="crt-scanline" id="crtH" aria-hidden="true"></div>
+    <div class="crt-scanline-v" id="crtV" aria-hidden="true"></div>
+
+    <header class="tutorial-header">
+      <div class="tutorial-header-inner">
+        <div>
+          <h1 class="tutorial-brand">// ZSH-EXPAND &mdash; ENGINEERING REPORT</h1>
+          <nav class="tutorial-crumbs" aria-label="Breadcrumb">
+            <span class="current">Engineering Report</span>
+            <span class="sep">/</span>
+            <a href="index.html">Docs</a>
+            <span class="sep">/</span>
+            <a href="https://github.com/MenkeTechnologies/zsh-expand" target="_blank" rel="noopener noreferrer">GitHub</a>
+            <span class="sep">/</span>
+            <a href="https://github.com/MenkeTechnologies/zpwr" target="_blank" rel="noopener noreferrer">zpwr</a>
+            <span class="sep">/</span>
+            <a href="https://github.com/MenkeTechnologies/MenkeTechnologiesMeta" target="_blank" rel="noopener noreferrer">Meta</a>
+          </nav>
+          <p style="margin:0.35rem 0 0;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text-dim);letter-spacing:0.03em;opacity:0.75;">
+            Spacebar-triggered expansion engine &middot; pure zsh &middot; sub-millisecond hot path &middot; <code>62</code> prefix commands with full flag awareness &middot; <code>11,683</code> zunit tests
+          </p>
+        </div>
+        <div class="tutorial-toolbar">
+          <button type="button" class="btn btn-secondary" id="btnTheme" title="Toggle light/dark">Theme</button>
+          <button type="button" class="btn btn-secondary active" id="btnCrt" title="CRT scanline overlay">CRT</button>
+          <button type="button" class="btn btn-secondary active" id="btnNeon" title="Neon border pulse">Neon</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="tutorial-main">
+
+      <h2 class="tutorial-title"><span class="step-hash">&gt;_</span>EXECUTIVE SUMMARY</h2>
+      <p class="tutorial-subtitle">
+        <strong>zsh-expand</strong> rewrites the spacebar into a live alias expander. Every press of <kbd>Space</kbd> runs a ZLE widget that walks the current command line, resolves the command position through arbitrarily deep prefix chains (<code>sudo</code>, <code>env</code>, <code>nice</code>, <code>nsenter</code>, <code>strace</code>, <code>ltrace</code>, <code>nohup</code>, <code>rlwrap</code>, <code>numactl</code>, <code>chrt</code>, <code>ionice</code>, <code>flock</code>, <code>unshare</code>, <code>setpriv</code>, <code>setarch</code>, ...), and dispatches to one of:
+        regular alias expand, global alias expand, suffix alias expand (<code>alias -s</code>), misspelling correction, glob / parameter / history expansion via <code>zle expand-word</code>, or fall-through. Total surface: <strong>2,753 zsh lines</strong> across <strong>4 source files</strong>, pinned by <strong>11,683 <code>@test</code> blocks</strong> across <strong>78</strong> zunit files. Zero external commands in the hot path &mdash; the entire expansion is pure parameter expansion, associative lookup, and shell-builtin parsing. Hot-path latency: ~<code>36&nbsp;µs</code> per regular alias expand.
+      </p>
+
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-val">2,753</div><div class="stat-label">Zsh Lines</div></div>
+        <div class="stat-card"><div class="stat-val green">11,683</div><div class="stat-label">@test Blocks (zunit)</div></div>
+        <div class="stat-card"><div class="stat-val">78</div><div class="stat-label">Test Files</div></div>
+        <div class="stat-card"><div class="stat-val accent">62</div><div class="stat-label">Prefix Commands</div></div>
+        <div class="stat-card"><div class="stat-val">292</div><div class="stat-label">Built-in Corrections</div></div>
+        <div class="stat-card"><div class="stat-val">4</div><div class="stat-label">ZLE Widgets</div></div>
+        <div class="stat-card"><div class="stat-val">~36 &micro;s</div><div class="stat-label">Hot-path Latency</div></div>
+        <div class="stat-card"><div class="stat-val">0</div><div class="stat-label">External Commands</div></div>
+      </div>
+
+      <hr class="section-rule">
+
+      <h2 class="tutorial-title"><span class="step-hash">~</span>ARCHITECTURE</h2>
+      <p class="tutorial-subtitle">Four-file load order. The plugin entry point sources the parser first (pure functions, no side effects), then the API (state container helpers), then the lib (widget bodies + dictionary). Final block defines ZLE widgets, binds <code>Space</code> + <code>Ctrl-Space</code> + <code>Esc-Ctrl-E</code>, and adds <code>completions/</code> to <code>fpath</code>.</p>
+
+      <table class="file-table">
+        <thead>
+          <tr><th>File</th><th class="num">Lines</th><th>Role</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>zsh-expand.plugin.zsh</code></td>
+            <td class="num">443</td>
+            <td>Plugin entry point. Sources the three siblings, defines the 292 built-in correction entries, declares ZLE widgets (<code>zpwrExpandSupernaturalSpace</code>, <code>zpwrExpandTerminateSpace</code>, <code>zpwrExpandGlobalAliases</code>, <code>zpwrExpandDebugWidget</code>), binds keys, registers the <code>_zpwrExpandStats</code> completion via <code>compdef</code>.</td>
+          </tr>
+          <tr>
+            <td><code>zpwrExpandParser.zsh</code></td>
+            <td class="num">929</td>
+            <td>Prefix-chain parser. Walks the current buffer left-to-right, consumes <code>nocorrect</code> / <code>builtin</code> / <code>command</code> / <code>exec</code> / <code>eval</code> / <code>noglob</code> / <code>coproc</code> shell keywords first, then iterates external prefix commands (<code>sudo</code>, <code>doas</code>, <code>env</code>, <code>nice</code>, <code>nohup</code>, <code>rlwrap</code>, <code>timeout</code>, <code>strace</code>, <code>ltrace</code>, <code>ionice</code>, <code>caffeinate</code>, <code>setsid</code>, <code>chrt</code>, <code>taskset</code>, <code>watch</code>, <code>flock</code>, <code>chroot</code>, <code>runuser</code>, <code>unshare</code>, <code>cpulimit</code>, <code>su</code>, <code>stdbuf</code>, ...) with their full flag tables. Variable assignments (<code>X=1</code>) are skipped at any position.</td>
+          </tr>
+          <tr>
+            <td><code>zpwrExpandLib.zsh</code></td>
+            <td class="num">1,179</td>
+            <td>Widget bodies. Implements the expansion state machine: alias resolve &rarr; global resolve &rarr; correction lookup &rarr; native expand. Holds the O(1) reverse-lookup dictionary build (<code>ZPWR_EXPAND_CORRECT_REVERSE</code>). Suffix alias handling, self-referential <code>\backslash</code> escape, blacklist enforcement, autopair detection / delegation, history injection, preview ghost text, stats append.</td>
+          </tr>
+          <tr>
+            <td><code>zpwrExpandApi.zsh</code></td>
+            <td class="num">202</td>
+            <td>State-container helpers and config init. Exports <code>ZPWR_VARS</code> association keys consumed by the parser/lib, sets default values for the <code>ZPWR_EXPAND_*</code> / <code>ZPWR_CORRECT_*</code> family, declares the public-callable shape (caller / enter detection, multiword tail extraction).</td>
+          </tr>
+          <tr class="total-row">
+            <td>Total source</td>
+            <td class="num">2,753</td>
+            <td>4 files &middot; pure zsh &middot; zero forks in hot path</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <hr class="section-rule">
+
+      <h2 class="tutorial-title"><span class="step-hash">#</span>TEST COVERAGE</h2>
+      <p class="tutorial-subtitle"><strong>78</strong> zunit test files (<code>tests/t-*.zsh</code>) totalling <strong>11,683</strong> <code>@test</code> blocks. Coverage is partitioned by area &mdash; each file pins one class of behavior with exhaustive edge cases.</p>
+
+      <table class="file-table">
+        <thead>
+          <tr><th>Area</th><th>Representative Files</th><th>Pins</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Alias expansion</td>
+            <td><code>t-alias-position.zsh</code>, <code>t-alias-escape-edge.zsh</code>, <code>t-expand-alias-edge.zsh</code>, <code>t-expand-combo.zsh</code>, <code>t-expand-more.zsh</code>, <code>t-expand-unit.zsh</code>, <code>t-expand-utility-edge.zsh</code>, <code>t-expand-parse-edge.zsh</code></td>
+            <td>First-position vs subcommand-position expand; self-referential alias <code>\backslash</code> escape; combined prefix + alias chains; deep-stack regression.</td>
+          </tr>
+          <tr>
+            <td>Spelling correction</td>
+            <td><code>t-correct-context.zsh</code>, <code>t-correct-dict-full.zsh</code>, <code>t-correct-exhaustive.zsh</code>, <code>t-correct-guards.zsh</code>, <code>t-correct-multi-ctx.zsh</code>, <code>t-correct-user-extend.zsh</code>, <code>t-correct-word-edge.zsh</code></td>
+            <td>All 292 built-in entries round-trip; user-extension hook; correct-then-expand chain; per-context guards (don't correct real commands).</td>
+          </tr>
+          <tr>
+            <td>Prefix-chain blacklist</td>
+            <td><code>t-blacklist-firstpos-alias.zsh</code>, <code>t-blacklist-subcommand-suffix.zsh</code></td>
+            <td><code>ZPWR_EXPAND_BLACKLIST</code> wins in command position AND after every supported prefix; suffix-alias exclusion respected.</td>
+          </tr>
+          <tr>
+            <td>Config flag matrix</td>
+            <td><code>t-config-flags.zsh</code>, <code>t-api-caller-and-enter.zsh</code>, <code>t-api-multiword-tail.zsh</code></td>
+            <td>Every <code>ZPWR_EXPAND_*</code> toggle pinned on + off; caller-context API behaves the same on Enter as on Space; multi-word tail extraction.</td>
+          </tr>
+          <tr>
+            <td>Debug widget &amp; UI</td>
+            <td><code>t-box-backspace-and-color.zsh</code>, <code>t-box-double-dash.zsh</code>, <code>t-box-fuzz.zsh</code></td>
+            <td><kbd>Esc-Ctrl-E</kbd> debug-overlay rendering: ANSI escapes don't poison <code>${#string}</code> math; backspace doesn't corrupt the line; fuzz-input doesn't crash the widget.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p style="margin-top:0.6rem;font-size:11px;color:var(--text-muted);">
+        Runner: <a href="https://github.com/zunit-zsh/zunit" target="_blank" rel="noopener noreferrer">zunit</a>. CI matrix (<code>.github/workflows/ci.yml</code>) runs the full <strong>11,683</strong> on every push.
+      </p>
+
+      <hr class="section-rule">
+
+      <h2 class="tutorial-title"><span class="step-hash">/</span>INTEGRATION</h2>
+
+      <div class="feature-grid">
+        <div class="feature-card">
+          <h4>Zinit (recommended)</h4>
+          <p><code>zinit ice lucid nocompile</code><br><code>zinit load MenkeTechnologies/zsh-expand</code><br>The plugin's <code>0=</code> header follows the <a href="https://zdharma-continuum.github.io/Zsh-100-Commits-Club/Zsh-Plugin-Standard.html" target="_blank" rel="noopener noreferrer">Zsh Plugin Standard</a>; <code>nocompile</code> keeps the source path stable for the <code>${0:A:h}</code> resolution of sibling files.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Oh My Zsh</h4>
+          <p><code>git clone</code> into <code>$ZSH_CUSTOM/plugins/zsh-expand</code>, then <code>plugins+=(zsh-expand)</code> in <code>.zshrc</code>. No init hook required &mdash; the file is sourced top-to-bottom and the ZLE widgets register before the prompt fires.</p>
+        </div>
+        <div class="feature-card">
+          <h4>ZLE widgets installed</h4>
+          <p>Four widgets registered via <code>zle -N</code>: <code>zpwrExpandSupernaturalSpace</code> (bound to <kbd>Space</kbd>), <code>zpwrExpandTerminateSpace</code> (bound to <kbd>Enter</kbd> when <code>ZPWR_EXPAND_PRE_EXEC_NATIVE=true</code>), <code>zpwrExpandGlobalAliases</code> (callable from user widgets), <code>zpwrExpandDebugWidget</code> (bound to <kbd>Esc-Ctrl-E</kbd>).</p>
+        </div>
+        <div class="feature-card">
+          <h4>Completion registration</h4>
+          <p><code>fpath+=(${0:A:h}/completions)</code> adds the one shipped completion file (<code>completions/_zpwrExpandStats</code>) for the <code>zpwrExpandStats</code> command, then <code>compdef _zpwrExpandStats zpwrExpandStats</code> registers it when <code>compsys</code> is active.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Autopair coexistence</h4>
+          <p>If <a href="https://github.com/hlissner/zsh-autopair" target="_blank" rel="noopener noreferrer">zsh-autopair</a> is detected, the supernatural-space widget delegates the trailing space insertion to autopair's own <code>autopair-insert</code> rather than emitting a raw space &mdash; bracket/quote auto-pairing keeps working after expansion.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Preview hook</h4>
+          <p>When <code>ZPWR_EXPAND_PREVIEW=true</code>, the plugin installs a chained <code>zle-line-pre-redraw</code> hook (preserves any pre-existing user hook), rendering ghost-text of what the next <kbd>Space</kbd> would expand to. No polling &mdash; fires on the existing ZLE redraw cadence.</p>
+        </div>
+      </div>
+
+      <hr class="section-rule">
+
+      <h2 class="tutorial-title"><span class="step-hash">!</span>DESIGN DECISIONS</h2>
+
+      <div class="feature-grid">
+        <div class="feature-card">
+          <h4>O(1) reverse lookup, not Levenshtein</h4>
+          <p>The 292 entries declare <em>correct &rarr; list of misspellings</em>. On load, <code>zpwrExpandRebuildCorrectReverse</code> inverts to <em>misspelling &rarr; correct</em>, so correction is one associative-array probe per word, not an edit-distance scan against the dictionary. Userland additions plug into the same rebuild path.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Parse the prefix chain, don't peel one prefix</h4>
+          <p>Naive plugins handle <code>sudo gco</code> by stripping <code>sudo</code> and re-running the test. <code>zsh-expand</code> instead walks an open-ended chain (<code>sudo -kE -u root env -0iv -C /tmp nice -n 10 nohup gco</code>) honoring every flag table from the README. The cost: a 929-line parser. The gain: arbitrarily deep prefix combos work without per-case tuning.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Flag tables hand-curated per command</h4>
+          <p>Each of the 62 supported prefixes lists its <em>combo</em> flags (consume next char) AND its <em>flag-with-arg</em> flags (consume next word). Mixing these is what lets <code>strace -cf -s 256 gco</code> and <code>su -l root gco</code> both work. The flag tables live in <code>zpwrExpandParser.zsh</code> and are pinned by <code>t-expand-combo.zsh</code> regression tests.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Self-referential alias = backslash escape</h4>
+          <p><code>alias git=hub</code> would loop forever under naive recursion. <code>zsh-expand</code> detects when the head of the expansion equals the original command and prepends <code>\\</code> to suppress the second-round lookup &mdash; the same trick zsh's own <code>_expand_alias</code> uses internally. Pinned by <code>t-alias-escape-edge.zsh</code>.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Blacklist over whitelist</h4>
+          <p><code>ZPWR_EXPAND_BLACKLIST=(g gco)</code> ships empty by default. Every alias expands unless explicitly excluded &mdash; the inverse of opt-in expansion plugins. Lowers config burden: users add the 1&ndash;2 aliases they want quiet, not the 100s they want loud.</p>
+        </div>
+        <div class="feature-card">
+          <h4>Zero forks in the hot path</h4>
+          <p>The widget body uses only parameter expansion (<code>${var//pattern/repl}</code>), associative-array indexing (<code>$aliases[word]</code>, <code>$galiases[word]</code>), and built-in ZLE state. No <code>sed</code>, no <code>awk</code>, no <code>grep</code>, no <code>$(...)</code> in the expansion path &mdash; each fork on macOS is ~1&nbsp;ms, more than the entire ~36&nbsp;&micro;s budget.</p>
+        </div>
+      </div>
+
+      <hr class="section-rule">
+
+      <h2 class="tutorial-title"><span class="step-hash">$</span>POSITION</h2>
+      <p class="tutorial-subtitle">Quantitative position against the established alias-expansion plugin set. Numbers for siblings come from each project's published README/source as of writing; <code>zsh-expand</code>'s figures are derived in-tree by <code>wc -l</code> / <code>grep -c</code>.</p>
+
+      <table class="file-table">
+        <thead>
+          <tr>
+            <th>Plugin</th>
+            <th class="num">Tests</th>
+            <th class="num">Prefix cmds parsed</th>
+            <th>Correction dict</th>
+            <th>Suffix-alias expand</th>
+            <th>Preview ghost</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background:rgba(57,255,20,0.05);">
+            <td style="color:var(--green);"><strong>zsh-expand</strong></td>
+            <td class="num"><strong>11,683</strong></td>
+            <td class="num"><strong>62</strong></td>
+            <td>292 entries + user-extend</td>
+            <td>yes</td>
+            <td>yes</td>
+          </tr>
+          <tr>
+            <td>globalias (OMZ)</td>
+            <td class="num">0</td>
+            <td class="num">0</td>
+            <td>none</td>
+            <td>no</td>
+            <td>no</td>
+          </tr>
+          <tr>
+            <td>zsh-abbr</td>
+            <td class="num">~100s</td>
+            <td class="num">0</td>
+            <td>none</td>
+            <td>no</td>
+            <td>partial (cursor-time)</td>
+          </tr>
+          <tr>
+            <td>zsh-abbrev-alias</td>
+            <td class="num">~0</td>
+            <td class="num">0</td>
+            <td>none</td>
+            <td>no</td>
+            <td>no</td>
+          </tr>
+          <tr>
+            <td>zsh-you-should-use</td>
+            <td class="num">~dozens</td>
+            <td class="num">0 (post-exec only)</td>
+            <td>none</td>
+            <td>n/a</td>
+            <td>n/a</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="margin-top:0.4rem;font-size:11px;color:var(--text-muted);">Sibling plugins handle the alias-in-command-position case only. <code>zsh-expand</code> is the only one that parses arbitrarily-deep prefix chains AND ships a misspelling-correction dictionary AND ships a suffix-alias hook AND ships preview ghost text &mdash; in a single ZLE widget with sub-millisecond latency.</p>
+
+      <hr class="section-rule">
+
+      <h2 class="tutorial-title"><span class="step-hash">@</span>FOOTPRINT</h2>
+      <p class="tutorial-subtitle">No daemons. No timers. No state outside zsh.</p>
+      <ul style="font-size:12px;color:var(--text-dim);line-height:1.7;">
+        <li><strong>Disk</strong>: <code>~/.oh-my-zsh/custom/plugins/zsh-expand</code> (or zinit cache) &mdash; one repo clone, no install hook.</li>
+        <li><strong>Memory</strong>: 2 associative arrays (<code>ZPWR_EXPAND_CORRECT_WORDS</code>, <code>ZPWR_EXPAND_CORRECT_REVERSE</code>) &middot; one global association (<code>ZPWR_VARS</code>) &middot; 4 widget closures.</li>
+        <li><strong>Startup cost</strong>: source + dictionary build + reverse-table build, one-shot, no compile step.</li>
+        <li><strong>Runtime cost</strong>: 1 widget per <kbd>Space</kbd> keystroke &middot; zero external processes &middot; ~36&nbsp;&micro;s typical.</li>
+        <li><strong>Stats file</strong>: optional, opt-in via <code>ZPWR_EXPAND_STATS_FILE</code> &mdash; the only on-disk side effect.</li>
+      </ul>
+
+    </main>
+
+    <footer style="text-align:center;padding:2rem;font-size:10px;color:var(--text-muted);font-family:'Orbitron',sans-serif;letter-spacing:2px;">
+      ZSH-EXPAND ENGINEERING REPORT &middot; 2,753 ZSH LINES &middot; 11,683 ZUNIT TESTS &middot; 78 TEST FILES &middot; 62 PREFIX COMMANDS &middot; 292 CORRECTIONS &middot; 4 ZLE WIDGETS &middot; SUB-MS HOT PATH &middot; MENKETECHNOLOGIES
+    </footer>
+  </div>
+
+  <script>
+    const html = document.documentElement;
+    const btnTheme = document.getElementById('btnTheme');
+    const btnCrt = document.getElementById('btnCrt');
+    const btnNeon = document.getElementById('btnNeon');
+    const crtH = document.getElementById('crtH');
+    const crtV = document.getElementById('crtV');
+    btnTheme?.addEventListener('click', () => {
+      html.setAttribute('data-theme', html.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+    });
+    btnCrt?.addEventListener('click', () => {
+      btnCrt.classList.toggle('active');
+      const on = btnCrt.classList.contains('active');
+      if (crtH) crtH.style.display = on ? '' : 'none';
+      if (crtV) crtV.style.display = on ? '' : 'none';
+    });
+    btnNeon?.addEventListener('click', () => {
+      btnNeon.classList.toggle('active');
+      document.querySelector('.app')?.classList.toggle('neon-off');
+    });
+  </script>
+</body>
+</html>
