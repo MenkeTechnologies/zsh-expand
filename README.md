@@ -121,7 +121,7 @@ torify sudo -kE -u root su -l deploy                         \
 | **Suffix Alias Expansion** | `file.txt<space>` -> `vim file.txt` -- expands suffix aliases (`alias -s`) at command position |
 | **Autopair Integration** | Detects [autopair](https://github.com/hlissner/zsh-autopair) and delegates space insertion to preserve bracket/quote auto-pairing |
 | **History Injection** | Optionally writes the fully-expanded form of your command into history |
-| **Debug Widget** | `Ctrl+\` shows parser state -- prefix chain, command position, expansion action -- without modifying the line |
+| **Debug Widget** | `Ctrl+Opt+E` shows parser state -- prefix chain, command position, expansion action -- without modifying the line |
 | **Expansion Preview** | Ghost text shows what an alias would expand to before you press space -- like fish autosuggestions but for alias expansion |
 | **Expansion Stats** | Tracks every expansion to a stats file -- `zpwrExpandStats` renders a cyberpunk dashboard with top aliases, keystroke savings, and bar charts |
 
@@ -445,7 +445,7 @@ export ZPWR_EXPAND_PRE_EXEC_NATIVE=true
 
 ## [0x11] // DEBUG WIDGET
 
-Press `Ctrl+\` to inspect the parser's view of the current line without expanding anything:
+Press `Ctrl+Opt+E` to inspect the parser's view of the current line without expanding anything:
 
 ```
 ┌── zsh-expand debug ────────────────┐
