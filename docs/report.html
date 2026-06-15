@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark light">
-  <meta name="description" content="zsh-expand — Engineering report. World's most powerful zsh expansion plugin: 2,753 zsh lines across 4 source files, 11,683 zunit @test blocks across 78 t-*.zsh files, 62 prefix commands parsed with full flag awareness, 292 built-in misspelling corrections, 4 ZLE widgets, sub-millisecond expansion path, zero external commands in the hot path.">
+  <meta name="description" content="zsh-expand — Engineering report. World's most powerful zsh expansion plugin: 2,753 zsh lines across 4 source files, 11,688 zunit @test blocks across 79 t-*.zsh files, 62 prefix commands parsed with full flag awareness, 292 built-in misspelling corrections, 4 ZLE widgets, sub-millisecond expansion path, zero external commands in the hot path.">
   <title>zsh-expand &mdash; Engineering Report</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -56,7 +56,7 @@
             <a href="https://github.com/MenkeTechnologies/MenkeTechnologiesMeta" target="_blank" rel="noopener noreferrer">Meta</a>
           </nav>
           <p style="margin:0.35rem 0 0;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text-dim);letter-spacing:0.03em;opacity:0.75;">
-            Spacebar-triggered expansion engine &middot; pure zsh &middot; sub-millisecond hot path &middot; <code>62</code> prefix commands with full flag awareness &middot; <code>11,683</code> zunit tests
+            Spacebar-triggered expansion engine &middot; pure zsh &middot; sub-millisecond hot path &middot; <code>62</code> prefix commands with full flag awareness &middot; <code>11,688</code> zunit tests
           </p>
         </div>
         <div class="tutorial-toolbar">
@@ -72,13 +72,13 @@
       <h2 class="tutorial-title"><span class="step-hash">&gt;_</span>EXECUTIVE SUMMARY</h2>
       <p class="tutorial-subtitle">
         <strong>zsh-expand</strong> rewrites the spacebar into a live alias expander. Every press of <kbd>Space</kbd> runs a ZLE widget that walks the current command line, resolves the command position through arbitrarily deep prefix chains (<code>sudo</code>, <code>env</code>, <code>nice</code>, <code>nsenter</code>, <code>strace</code>, <code>ltrace</code>, <code>nohup</code>, <code>rlwrap</code>, <code>numactl</code>, <code>chrt</code>, <code>ionice</code>, <code>flock</code>, <code>unshare</code>, <code>setpriv</code>, <code>setarch</code>, ...), and dispatches to one of:
-        regular alias expand, global alias expand, suffix alias expand (<code>alias -s</code>), misspelling correction, glob / parameter / history expansion via <code>zle expand-word</code>, or fall-through. Total surface: <strong>2,753 zsh lines</strong> across <strong>4 source files</strong>, pinned by <strong>11,683 <code>@test</code> blocks</strong> across <strong>78</strong> zunit files. Zero external commands in the hot path &mdash; the entire expansion is pure parameter expansion, associative lookup, and shell-builtin parsing. Hot-path latency: ~<code>36&nbsp;µs</code> per regular alias expand.
+        regular alias expand, global alias expand, suffix alias expand (<code>alias -s</code>), misspelling correction, glob / parameter / history expansion via <code>zle expand-word</code>, or fall-through. Total surface: <strong>2,753 zsh lines</strong> across <strong>4 source files</strong>, pinned by <strong>11,688 <code>@test</code> blocks</strong> across <strong>79</strong> zunit files. Zero external commands in the hot path &mdash; the entire expansion is pure parameter expansion, associative lookup, and shell-builtin parsing. Hot-path latency: ~<code>36&nbsp;µs</code> per regular alias expand.
       </p>
 
       <div class="stat-grid">
         <div class="stat-card"><div class="stat-val">2,753</div><div class="stat-label">Zsh Lines</div></div>
-        <div class="stat-card"><div class="stat-val green">11,683</div><div class="stat-label">@test Blocks (zunit)</div></div>
-        <div class="stat-card"><div class="stat-val">78</div><div class="stat-label">Test Files</div></div>
+        <div class="stat-card"><div class="stat-val green">11,688</div><div class="stat-label">@test Blocks (zunit)</div></div>
+        <div class="stat-card"><div class="stat-val">79</div><div class="stat-label">Test Files</div></div>
         <div class="stat-card"><div class="stat-val accent">62</div><div class="stat-label">Prefix Commands</div></div>
         <div class="stat-card"><div class="stat-val">292</div><div class="stat-label">Built-in Corrections</div></div>
         <div class="stat-card"><div class="stat-val">4</div><div class="stat-label">ZLE Widgets</div></div>
@@ -127,7 +127,7 @@
       <hr class="section-rule">
 
       <h2 class="tutorial-title"><span class="step-hash">#</span>TEST COVERAGE</h2>
-      <p class="tutorial-subtitle"><strong>78</strong> zunit test files (<code>tests/t-*.zsh</code>) totalling <strong>11,683</strong> <code>@test</code> blocks. Coverage is partitioned by area &mdash; each file pins one class of behavior with exhaustive edge cases.</p>
+      <p class="tutorial-subtitle"><strong>79</strong> zunit test files (<code>tests/t-*.zsh</code>) totalling <strong>11,688</strong> <code>@test</code> blocks. Coverage is partitioned by area &mdash; each file pins one class of behavior with exhaustive edge cases.</p>
 
       <table class="file-table">
         <thead>
@@ -163,7 +163,7 @@
       </table>
 
       <p style="margin-top:0.6rem;font-size:11px;color:var(--text-muted);">
-        Runner: <a href="https://github.com/zunit-zsh/zunit" target="_blank" rel="noopener noreferrer">zunit</a>. CI matrix (<code>.github/workflows/ci.yml</code>) runs the full <strong>11,683</strong> on every push.
+        Runner: <a href="https://github.com/zunit-zsh/zunit" target="_blank" rel="noopener noreferrer">zunit</a>. CI matrix (<code>.github/workflows/ci.yml</code>) runs the full <strong>11,688</strong> on every push.
       </p>
 
       <hr class="section-rule">
@@ -247,7 +247,7 @@
         <tbody>
           <tr style="background:rgba(57,255,20,0.05);">
             <td style="color:var(--green);"><strong>zsh-expand</strong></td>
-            <td class="num"><strong>11,683</strong></td>
+            <td class="num"><strong>11,688</strong></td>
             <td class="num"><strong>62</strong></td>
             <td>292 entries + user-extend</td>
             <td>yes</td>
@@ -304,7 +304,7 @@
     </main>
 
     <footer style="text-align:center;padding:2rem;font-size:10px;color:var(--text-muted);font-family:'Orbitron',sans-serif;letter-spacing:2px;">
-      ZSH-EXPAND ENGINEERING REPORT &middot; 2,753 ZSH LINES &middot; 11,683 ZUNIT TESTS &middot; 78 TEST FILES &middot; 62 PREFIX COMMANDS &middot; 292 CORRECTIONS &middot; 4 ZLE WIDGETS &middot; SUB-MS HOT PATH &middot; MENKETECHNOLOGIES
+      ZSH-EXPAND ENGINEERING REPORT &middot; 2,753 ZSH LINES &middot; 11,688 ZUNIT TESTS &middot; 79 TEST FILES &middot; 62 PREFIX COMMANDS &middot; 292 CORRECTIONS &middot; 4 ZLE WIDGETS &middot; SUB-MS HOT PATH &middot; MENKETECHNOLOGIES
     </footer>
   </div>
 
