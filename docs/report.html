@@ -159,6 +159,21 @@
             <td><code>t-box-backspace-and-color.zsh</code>, <code>t-box-double-dash.zsh</code>, <code>t-box-fuzz.zsh</code></td>
             <td><kbd>Esc-Ctrl-E</kbd> debug-overlay rendering: ANSI escapes don't poison <code>${#string}</code> math; backspace doesn't corrupt the line; fuzz-input doesn't crash the widget.</td>
           </tr>
+          <tr>
+            <td>Prefix-chain parser</td>
+            <td><code>t-parse-massive.zsh</code>, <code>t-correct-multi-ctx.zsh</code>, <code>t-parser-*.zsh</code> (per-wrapper: <code>sudo</code>, <code>su</code>, <code>strace</code>, <code>nsenter</code>, <code>unshare</code>, <code>setpriv</code>, <code>firejail</code>, <code>bwrap</code>, <code>proot</code>, <code>valgrind</code>, &hellip;)</td>
+            <td>Each wrapper's combo-flag and flag-with-arg table is pinned independently; <code>VAR=val</code> vs flag-arg disambiguation; mandatory positional slots (<code>su</code>&rarr;USER, <code>chroot</code>&rarr;PATH) not mistaken for the command.</td>
+          </tr>
+          <tr>
+            <td>Suffix / global / regex</td>
+            <td><code>t-suffix-alias.zsh</code>, <code>t-suffix-alias-ext.zsh</code>, <code>t-suffix-prefix-chain.zsh</code>, <code>t-global-alias-exhaustive.zsh</code>, <code>t-regex-exhaustive.zsh</code>, <code>t-regex-edge.zsh</code></td>
+            <td>Suffix-alias expand at command position and through prefix chains; global-alias expansion anywhere on the line; regex-match command-position resolution and edge cases.</td>
+          </tr>
+          <tr>
+            <td>Preview / stats / integration</td>
+            <td><code>t-preview-resolve-and-stats.zsh</code>, <code>t-regex-cache-api.zsh</code>, <code>t-integration-flow.zsh</code>, <code>t-is-command.zsh</code></td>
+            <td>Ghost-text preview resolution; stats record/render; cache-API metadata; real-command detection (don't correct valid commands); end-to-end space-to-buffer flow.</td>
+          </tr>
         </tbody>
       </table>
 
@@ -226,6 +241,76 @@
           <h4>Zero forks in the hot path</h4>
           <p>The widget body uses only parameter expansion (<code>${var//pattern/repl}</code>), associative-array indexing (<code>$aliases[word]</code>, <code>$galiases[word]</code>), and built-in ZLE state. No <code>sed</code>, no <code>awk</code>, no <code>grep</code>, no <code>$(...)</code> in the expansion path &mdash; each fork on macOS is ~1&nbsp;ms, more than the entire ~36&nbsp;&micro;s budget.</p>
         </div>
+      </div>
+
+      <hr class="section-rule">
+
+      <h2 class="tutorial-title"><span class="step-hash">%</span>PARSER PHASES</h2>
+      <p class="tutorial-subtitle">The command-position parser (<code>zpwrExpandParserFindCommandPosition</code>) walks the word array left-to-right in two phases. Shared helpers <code>_zpwr_bare</code> (strip quotes/backslash) and <code>_zpwr_is_assignment</code> (NAME=value detection) are defined once at file scope, not per parse. A first-word precheck short-circuits the common case (plain command, no prefix) by replicating the two O(1) hash lookups inline and skipping the array copy and loop machinery &mdash; ~35% lower parser latency on non-prefixed lines.</p>
+
+      <table class="file-table">
+        <thead>
+          <tr><th>Phase</th><th>Consumes</th><th>Tokens</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Phase 1 &mdash; shell keywords</td>
+            <td>case-sensitive shell builtins/keywords, consumed before any external wrapper</td>
+            <td><code>nocorrect</code> · <code>time</code> (<code>-p -l -v</code>) · <code>-</code> · <code>builtin</code> · <code>command</code> (<code>-p</code>) · <code>exec</code> (<code>-c -l -a NAME</code>) · <code>eval</code> · <code>noglob</code> · <code>coproc</code></td>
+          </tr>
+          <tr>
+            <td>Phase 2 &mdash; external prefixes</td>
+            <td>62 privilege-escalation / wrapper commands, each with its own combo-flag and flag-with-arg table; <code>VAR=val</code> assignments stripped at any position</td>
+            <td><code>sudo</code> · <code>doas</code> · <code>su</code> · <code>env</code> · <code>nice</code> · <code>nohup</code> · <code>rlwrap</code> · <code>timeout</code> · <code>strace</code> · <code>ltrace</code> · <code>ionice</code> · <code>caffeinate</code> · <code>setsid</code> · <code>chrt</code> · <code>taskset</code> · <code>watch</code> · <code>runuser</code> · <code>flock</code> · <code>chroot</code> · <code>unshare</code> · <code>cpulimit</code> · <code>stdbuf</code> · <code>sg</code> · <code>choom</code> · <code>nsenter</code> · <code>numactl</code> · <code>prlimit</code> · <code>setpriv</code> · <code>setarch</code> · <code>linux32</code> · <code>linux64</code> · <code>runcon</code> · <code>xvfb-run</code> · <code>chpst</code> · <code>cgexec</code> · <code>trickle</code> · <code>faketime</code> · <code>proot</code> · <code>bwrap</code> · <code>capsh</code> · <code>valgrind</code> · <code>fakeroot</code> · <code>unbuffer</code> · <code>chronic</code> · <code>torsocks</code> · <code>proxychains4</code> · <code>daemonize</code> · <code>firejail</code> · <code>sem</code> · <code>systemd-run</code> · <code>nocache</code> · <code>fakechroot</code> · <code>ccache</code> · <code>distcc</code> · <code>pkexec</code> · <code>torify</code> · <code>dbus-run-session</code> · <code>dbus-launch</code> · <code>eatmydata</code> · <code>tsocks</code> · <code>catchsegv</code></td>
+          </tr>
+          <tr class="total-row">
+            <td>Result</td>
+            <td><code>ZPWR_VARS[cachedRegexMatch]</code> = command + args · <code>ZPWR_VARS[cachedParserPrefix]</code> = consumed prefix</td>
+            <td>everything remaining is the command word + its arguments</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <hr class="section-rule">
+
+      <h2 class="tutorial-title"><span class="step-hash">=</span>CONFIGURATION REFERENCE</h2>
+      <p class="tutorial-subtitle">User-facing knobs. All are plain environment variables / arrays read at load and on each keypress.</p>
+
+      <table class="file-table">
+        <thead>
+          <tr><th>Variable</th><th>Default</th><th>Effect</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>ZPWR_EXPAND</code></td><td class="num">true</td><td>Master switch. <code>false</code> makes the widget return immediately (no parse cost).</td></tr>
+          <tr><td><code>ZPWR_EXPAND_SECOND_POSITION</code></td><td class="num">true</td><td>Alias expansion after <code>sudo</code>/<code>env</code>/&hellip; prefixes.</td></tr>
+          <tr><td><code>ZPWR_EXPAND_NATIVE</code></td><td class="num">true</td><td>Expand globs, <code>$params</code>, <code>!history</code> via <code>zle expand-word</code>.</td></tr>
+          <tr><td><code>ZPWR_CORRECT</code></td><td class="num">true</td><td>Spelling correction.</td></tr>
+          <tr><td><code>ZPWR_CORRECT_EXPAND</code></td><td class="num">true</td><td>Chain alias expansion after a correction (correct-then-expand).</td></tr>
+          <tr><td><code>ZPWR_EXPAND_QUOTE_DOUBLE</code></td><td class="num">—</td><td>Expand aliases inside <code>"double"</code>-quoted argument strings.</td></tr>
+          <tr><td><code>ZPWR_EXPAND_QUOTE_SINGLE</code></td><td class="num">—</td><td>Expand aliases inside <code>'single'</code>-quoted argument strings.</td></tr>
+          <tr><td><code>ZPWR_EXPAND_TO_HISTORY</code></td><td class="num">false</td><td>Write the expanded form into history on accept-line.</td></tr>
+          <tr><td><code>ZPWR_EXPAND_PRE_EXEC_NATIVE</code></td><td class="num">—</td><td>Also expand globs/params/history on accept-line.</td></tr>
+          <tr><td><code>ZPWR_EXPAND_SUFFIX</code></td><td class="num">true</td><td>Expand suffix aliases (<code>alias -s</code>) at command position.</td></tr>
+          <tr><td><code>ZPWR_EXPAND_PREVIEW</code></td><td class="num">false</td><td>Ghost-text preview of the pending expansion via <code>zle-line-pre-redraw</code>.</td></tr>
+          <tr><td><code>ZPWR_EXPAND_BLACKLIST</code></td><td class="num">()</td><td>Array of aliases to never expand (wins in every position).</td></tr>
+          <tr><td><code>ZPWR_EXPAND_CORRECT_WORDS</code></td><td class="num">292</td><td>The correction dictionary (correct &rarr; misspellings). User-extensible.</td></tr>
+          <tr><td><code>ZPWR_EXPAND_STATS_FILE</code></td><td class="num">~/.cache/&hellip;</td><td>Stats file path (falls back through <code>$ZPWR_LOCAL</code> / <code>$XDG_CACHE_HOME</code> / <code>~/.cache</code>).</td></tr>
+          <tr><td><code>ZPWR_EXPAND_STATS_TOP</code></td><td class="num">20</td><td>Default top-N alias count in the <code>zpwrExpandStats</code> dashboard.</td></tr>
+        </tbody>
+      </table>
+
+      <hr class="section-rule">
+
+      <h2 class="tutorial-title"><span class="step-hash">*</span>STATS DASHBOARD</h2>
+      <p class="tutorial-subtitle"><code>zpwrExpandStats</code> reads the append-only stats log and renders a cyberpunk dashboard: per-trigger (spacebar <code>S:</code> vs history <code>H:</code>) and per-type tallies, total keystrokes saved, and the top aliases as proportional bar charts. The completion file <code>completions/_zpwrExpandStats</code> wires up <code>compsys</code> for these flags.</p>
+
+      <div class="feature-grid">
+        <div class="feature-card"><h4>-h, --help</h4><p>Print the dashboard help banner and exit.</p></div>
+        <div class="feature-card"><h4>-t, --top &lt;N&gt;</h4><p>Show the top N aliases. Default <code>20</code>, or <code>$ZPWR_EXPAND_STATS_TOP</code>.</p></div>
+        <div class="feature-card"><h4>-w, --width &lt;N&gt;</h4><p>Box width for the rendered dashboard. Default <code>70</code>.</p></div>
+        <div class="feature-card"><h4>-c, --color</h4><p>Force ANSI colors (e.g. when piping to a pager that supports them).</p></div>
+        <div class="feature-card"><h4>-r, --reset</h4><p>Delete the stats file and clear all tallies.</p></div>
+        <div class="feature-card"><h4>-f, --file &lt;PATH&gt;</h4><p>Read/operate on an alternate stats file path for this invocation.</p></div>
       </div>
 
       <hr class="section-rule">
