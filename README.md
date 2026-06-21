@@ -659,7 +659,7 @@ Source `zsh-expand.plugin.zsh` in `~/.zshrc`.
 
 ## [0x18] // THE MONSTER CHAIN
 
-No other expansion plugin can do this. 12 shell builtin permutations up front, then every one of the 62 command wrapper commands duplicated with different flag combos. `strace` with all 38 flags and `ltrace` with all 25 flags. Variable assignments scattered everywhere. Shell builtins come first (they only exist inside zsh), then command wrappers chain freely. The parser consumes the entire prefix and `gco` expands to `git checkout`:
+No other expansion plugin can do this. 9 shell builtin permutations up front, then every one of the 62 command wrapper commands duplicated with different flag combos. `strace` with all 38 flags and `ltrace` with all 25 flags. Variable assignments scattered everywhere. Shell builtins come first (they only exist inside zsh), then command wrappers chain freely. The parser consumes the entire prefix and `gco` expands to `git checkout`:
 
 ```
 nocorrect time -p command -p builtin eval noglob coproc       \
