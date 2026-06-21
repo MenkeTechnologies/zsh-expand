@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark light">
-  <meta name="description" content="zsh-expand — the world's most powerful zsh expansion plugin. Intercepts spacebar and expands regular aliases, global aliases, suffix aliases, misspellings, globs, history, and parameters. 62 prefix commands parsed with full flag awareness. 11,688 tests. Pure zsh, sub-millisecond.">
+  <meta name="description" content="zsh-expand — the world's most powerful zsh expansion plugin. Intercepts spacebar and expands regular aliases, global aliases, suffix aliases, misspellings, globs, history, and parameters. 62 prefix commands parsed with full flag awareness. 292 built-in spelling corrections. 11,688 tests across 79 files. Pure zsh, zero forks in the hot path, sub-millisecond.">
   <title>zsh-expand — Documentation</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -51,7 +51,7 @@
             <span class="sep">/</span>
             <a href="https://github.com/MenkeTechnologies/MenkeTechnologiesMeta" target="_blank" rel="noopener noreferrer">Meta</a>
           </nav>
-          <p class="docs-build-line">zsh plugin · spacebar-triggered expansion · aliases · global aliases · suffix aliases · globs · 290+ misspelling corrections · 62 prefix commands parsed with full flag awareness · pure zsh · sub-millisecond</p>
+          <p class="docs-build-line">zsh plugin · spacebar-triggered expansion · aliases · global aliases · suffix aliases · globs · 292 misspelling corrections · 62 prefix commands parsed with full flag awareness · pure zsh · sub-millisecond</p>
         </div>
         <div class="tutorial-toolbar">
           <button type="button" class="btn btn-secondary" id="btnTheme" title="Toggle light/dark">Theme</button>
@@ -77,7 +77,7 @@
       <div class="stat-grid">
         <div class="stat-cell"><div class="v">11,688</div><div class="k">@test blocks (zunit)</div></div>
         <div class="stat-cell"><div class="v">62</div><div class="k">prefix commands parsed</div></div>
-        <div class="stat-cell"><div class="v">290+</div><div class="k">built-in spell corrections</div></div>
+        <div class="stat-cell"><div class="v">292</div><div class="k">built-in spell corrections</div></div>
         <div class="stat-cell"><div class="v">~36 µs</div><div class="k">per regular alias expand</div></div>
         <div class="stat-cell"><div class="v">0</div><div class="k">external commands in hot path</div></div>
       </div>
@@ -104,7 +104,7 @@ source zsh-expand/zsh-expand.plugin.zsh</pre>
           <tbody>
             <tr><td>Alias expansion</td><td>regular aliases in command position and after <code>sudo</code>/<code>env</code>/<code>builtin</code>/<code>command</code>/<code>exec</code>/<code>eval</code>/<code>noglob</code>/<code>nocorrect</code>/<code>nice</code>/<code>nohup</code>/<code>rlwrap</code>/<code>time</code> &mdash; with full flag support</td></tr>
             <tr><td>Global alias</td><td>global aliases expanded anywhere on the command line</td></tr>
-            <tr><td>Spelling correction</td><td>290+ built-in corrections, user-extensible via associative array</td></tr>
+            <tr><td>Spelling correction</td><td>292 built-in corrections, user-extensible via associative array</td></tr>
             <tr><td>Native expansion</td><td>globs, <code>$params</code>, <code>$(cmd)</code>, <code>=(...)</code>, <code>!history</code></td></tr>
             <tr><td>Tabstop snippets</td><td>aliases with <code>$ZPWR_TABSTOP</code> placeholders &mdash; cursor jumps to placeholder</td></tr>
             <tr><td>Self-ref escape</td><td><code>alias git="hub"</code> expands to <code>\hub</code> &mdash; no infinite recursion</td></tr>
@@ -113,7 +113,7 @@ source zsh-expand/zsh-expand.plugin.zsh</pre>
             <tr><td>Suffix alias</td><td><code>file.txt&lt;space&gt;</code> &rarr; <code>vim file.txt</code> via <code>alias -s</code></td></tr>
             <tr><td>Autopair integration</td><td>delegates space insertion to <a href="https://github.com/hlissner/zsh-autopair">zsh-autopair</a> when present</td></tr>
             <tr><td>History injection</td><td>optionally writes the fully-expanded form into history</td></tr>
-            <tr><td>Debug widget</td><td><code>Ctrl+\</code> shows parser state without modifying the line</td></tr>
+            <tr><td>Debug widget</td><td><code>Ctrl+Opt+E</code> (<code>Esc-Ctrl-E</code>) shows parser state &mdash; prefix chain, command position, expansion action &mdash; without modifying the line</td></tr>
             <tr><td>Expansion preview</td><td>ghost text shows pending expansion before space is pressed</td></tr>
             <tr><td>Expansion stats</td><td><code>zpwrExpandStats</code> renders a cyberpunk dashboard with bar charts</td></tr>
           </tbody>
@@ -133,24 +133,31 @@ file.txt&lt;space&gt;               =&gt;  vim file.txt   (suffix alias)</pre>
 
       <section class="tutorial-section">
         <h2>Configuration matrix</h2>
-<pre># core
-export ZPWR_EXPAND=true                   # alias expansion in first position
-export ZPWR_EXPAND_SECOND_POSITION=true   # alias expansion after sudo/env
+<pre># -- core --
+export ZPWR_EXPAND=true                   # master switch; false disables the widget
+export ZPWR_EXPAND_SECOND_POSITION=true   # alias expansion after sudo/env/...
 export ZPWR_EXPAND_NATIVE=true            # expand globs, history, $params
 
-# correction
-export ZPWR_CORRECT=true
-export ZPWR_CORRECT_EXPAND=true
+# -- correction --
+export ZPWR_CORRECT=true                  # spelling correction
+export ZPWR_CORRECT_EXPAND=true           # expand aliases after correction
 
-# quotes
-export ZPWR_EXPAND_QUOTE_DOUBLE=true
-export ZPWR_EXPAND_QUOTE_SINGLE=false
+# -- quotes --
+export ZPWR_EXPAND_QUOTE_DOUBLE=true      # expand inside "double quotes"
+export ZPWR_EXPAND_QUOTE_SINGLE=false     # expand inside 'single quotes'
 
-# history / suffix / preview / blacklist
-export ZPWR_EXPAND_TO_HISTORY=false
-export ZPWR_EXPAND_SUFFIX=true
-export ZPWR_EXPAND_PREVIEW=false
-export ZPWR_EXPAND_BLACKLIST=(g gco)</pre>
+# -- history --
+export ZPWR_EXPAND_TO_HISTORY=false       # inject expanded form into history
+export ZPWR_EXPAND_PRE_EXEC_NATIVE=true   # also expand globs on accept-line
+
+# -- suffix / preview / blacklist --
+export ZPWR_EXPAND_SUFFIX=true            # expand suffix aliases (alias -s)
+export ZPWR_EXPAND_PREVIEW=false          # ghost text of pending expansion
+export ZPWR_EXPAND_BLACKLIST=(g gco)      # aliases to never expand
+
+# -- stats --
+export ZPWR_EXPAND_STATS_FILE=~/.cache/zpwr-expand-stats.dat
+export ZPWR_EXPAND_STATS_TOP=20           # default top-N in zpwrExpandStats</pre>
       </section>
 
       <section class="tutorial-section">
@@ -165,8 +172,154 @@ export ZPWR_EXPAND_BLACKLIST=(g gco)</pre>
       </section>
 
       <section class="tutorial-section">
+        <h2>Expansion rules</h2>
+        <p>Where each expansion class fires &mdash; and where it deliberately does not.</p>
+        <table class="example-tbl">
+          <tbody>
+            <tr><td>Alias in first word</td><td>expanded</td></tr>
+            <tr><td>Alias after <code>sudo</code>/<code>env</code>/<code>builtin</code>/&hellip;</td><td>expanded; prefix matching is case-insensitive (<code>SUDO</code>, <code>Sudo</code>, <code>sUdO</code> all work)</td></tr>
+            <tr><td>Word is a real command/function</td><td><strong>not</strong> corrected &mdash; valid commands are left alone</td></tr>
+            <tr><td>Global alias anywhere on line</td><td>expanded</td></tr>
+            <tr><td>Misspelling anywhere on line</td><td>corrected</td></tr>
+            <tr><td>Globs, <code>$params</code>, <code>!history</code></td><td>expanded (when <code>ZPWR_EXPAND_NATIVE=true</code>)</td></tr>
+            <tr><td>Cursor directly after word</td><td>expand</td></tr>
+            <tr><td>One space after word (menuselect)</td><td>expand</td></tr>
+            <tr><td>Two spaces after word</td><td>bypass</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="tutorial-section">
+        <h2>Bypass protocols</h2>
+        <p>Two ways to keep an alias literal.</p>
+        <ul>
+          <li><strong><code>Ctrl+Space</code></strong> &mdash; insert a literal space, no expansion (one-off).</li>
+          <li><strong>Blacklist</strong> &mdash; permanently exclude aliases:
+<pre>export ZPWR_EXPAND_BLACKLIST=(g gco)</pre>
+          The blacklist wins in command position <em>and</em> after every supported prefix. It ships empty, so every alias expands until you explicitly quiet one.</li>
+        </ul>
+      </section>
+
+      <section class="tutorial-section">
+        <h2>Supported prefix commands</h2>
+        <p><strong>62</strong> external prefix commands are parsed with their own hand-curated flag tables, plus a Phase-1 set of shell keywords consumed first. Each command knows which flags take an argument (consume the next word) and which positional slots are mandatory, so the command word is found correctly through arbitrarily deep chains.</p>
+        <p><strong>Shell keywords (Phase 1, consumed first):</strong> <code>nocorrect</code>, <code>time</code> (<code>-p -l -v</code>), <code>-</code>, <code>builtin</code>, <code>command</code> (<code>-p</code>), <code>exec</code> (<code>-c -l -a NAME</code>), <code>eval</code>, <code>noglob</code>, <code>coproc</code>.</p>
+        <p><strong>External prefixes (Phase 2):</strong> <code>sudo</code>, <code>doas</code>, <code>env</code>, <code>nice</code>, <code>nohup</code>, <code>rlwrap</code>, <code>timeout</code>, <code>strace</code>, <code>ltrace</code>, <code>ionice</code>, <code>caffeinate</code>, <code>setsid</code>, <code>chrt</code>, <code>taskset</code>, <code>watch</code>, <code>runuser</code>, <code>flock</code>, <code>chroot</code>, <code>unshare</code>, <code>cpulimit</code>, <code>su</code>, <code>stdbuf</code>, <code>sg</code>, <code>choom</code>, <code>nsenter</code>, <code>numactl</code>, <code>prlimit</code>, <code>setpriv</code>, <code>setarch</code>, <code>linux32</code>, <code>linux64</code>, <code>runcon</code>, <code>xvfb-run</code>, <code>chpst</code>, <code>cgexec</code>, <code>trickle</code>, <code>faketime</code>, <code>proot</code>, <code>bwrap</code>, <code>capsh</code>, <code>valgrind</code>, <code>fakeroot</code>, <code>unbuffer</code>, <code>chronic</code>, <code>torsocks</code>, <code>proxychains4</code>, <code>daemonize</code>, <code>firejail</code>, <code>sem</code>, <code>systemd-run</code>, <code>nocache</code>, <code>fakechroot</code>, <code>ccache</code>, <code>distcc</code>, <code>pkexec</code>, <code>torify</code>, <code>dbus-run-session</code>, <code>dbus-launch</code>, <code>eatmydata</code>, <code>tsocks</code>, <code>catchsegv</code>.</p>
+        <p>All prefixes accept <code>\escaped</code>, <code>'single-quoted'</code>, and <code>"double-quoted"</code> forms; <code>sudo</code>/<code>doas</code>/<code>env</code>/<code>nice</code>/<code>time</code>/<code>nohup</code>/<code>rlwrap</code> are matched case-insensitively. Variable assignments (<code>X=1</code>, <code>PATH=/usr/bin</code>) are stripped at any position:</p>
+<pre>X=1 sudo gco                    =&gt;  X=1 sudo git checkout
+sudo X=1 env Y=2 gco            =&gt;  sudo X=1 env Y=2 git checkout
+env FOO=bar BAZ=qux gco         =&gt;  env FOO=bar BAZ=qux git checkout
+strace -e trace=network gco     =&gt;  ...git checkout   (=  not stripped)
+su gco                          =&gt;  su gco            (gco fills USER slot, no expand)
+su root gco                     =&gt;  su root git checkout</pre>
+      </section>
+
+      <section class="tutorial-section">
+        <h2>Custom corrections</h2>
+        <p>The correction dictionary is a plain associative array. Key = the correct word, value = a space-separated list of misspellings. Add entries after the plugin loads, then rebuild the O(1) reverse lookup. Underscores in a key expand to spaces (<code>hello_world</code> &rarr; <code>hello world</code>).</p>
+<pre># map misspellings to the correct word
+ZPWR_EXPAND_CORRECT_WORDS[kubernetes]="k8ss kuberntes kuberneets"
+ZPWR_EXPAND_CORRECT_WORDS[terraform]="terrafrom terrafomr"
+
+# append to an existing built-in entry
+ZPWR_EXPAND_CORRECT_WORDS[echo]+=" oech"
+
+# remove a built-in correction
+unset 'ZPWR_EXPAND_CORRECT_WORDS[background]'
+
+# rebuild the reverse lookup table after any changes
+zpwrExpandRebuildCorrectReverse</pre>
+      </section>
+
+      <section class="tutorial-section">
+        <h2>Tabstop snippets</h2>
+        <p>Define aliases with <code>$ZPWR_TABSTOP</code> placeholders to turn them into IDE-style snippets. On expansion the cursor jumps to the placeholder instead of the end of the line.</p>
+<pre>alias gc="git commit -m ${ZPWR_TABSTOP}"
+alias gca="git commit --amend -m ${ZPWR_TABSTOP}"
+
+gc&lt;space&gt;  =&gt;  git commit -m |    (cursor lands here)</pre>
+      </section>
+
+      <section class="tutorial-section">
+        <h2>Correct-then-expand &amp; quote-aware expansion</h2>
+        <p>With <code>ZPWR_CORRECT_EXPAND=true</code>, the spelling corrector fires first, then the corrected word is re-checked for alias expansion &mdash; all before the space is inserted, in one keypress.</p>
+        <p>With <code>ZPWR_EXPAND_QUOTE_DOUBLE</code> / <code>ZPWR_EXPAND_QUOTE_SINGLE</code>, aliases expand inside quoted strings in <em>argument</em> position. Quoted words at command position are never expanded.</p>
+<pre>echo "gco&lt;space&gt;"  =&gt;  echo "git checkout "   (argument — expanded)
+"gco"&lt;space&gt;       =&gt;  "gco"                  (command position — not expanded)</pre>
+      </section>
+
+      <section class="tutorial-section">
+        <h2>Suffix alias expansion</h2>
+        <p>With <code>ZPWR_EXPAND_SUFFIX=true</code>, suffix aliases (<code>alias -s</code>) expand at command position. Works with history injection &mdash; the expanded form is saved on accept-line.</p>
+<pre>alias -s txt=vim
+alias -s py=python
+alias -s json=jq
+
+file.txt&lt;space&gt;       =&gt;  vim file.txt
+script.py&lt;space&gt;      =&gt;  python script.py
+./data.json&lt;space&gt;    =&gt;  jq ./data.json</pre>
+      </section>
+
+      <section class="tutorial-section">
+        <h2>History injection</h2>
+        <p>With <code>ZPWR_EXPAND_TO_HISTORY=true</code>, the fully-expanded form is written into history while the typed (unexpanded) form is never written to <code>$HISTFILE</code> &mdash; same expansion rules as spacebar, so <code>sudo gco</code> lands in history as <code>sudo git checkout</code>. Pair with <code>ZPWR_EXPAND_PRE_EXEC_NATIVE=true</code> to also expand globs / params / history on accept-line.</p>
+      </section>
+
+      <section class="tutorial-section">
+        <h2>Debug widget</h2>
+        <p>Press <code>Ctrl+Opt+E</code> (<code>Esc-Ctrl-E</code>) to inspect the parser's view of the line without expanding anything &mdash; the parsed prefix chain, the identified command position, the action that would fire, and whether the command word exists. Useful for diagnosing why something is or isn't expanding.</p>
+<pre>┌── zsh-expand debug ────────────────┐
+│ input:    sudo -kE -u root gco     │
+│ prefix:   sudo -kE -u root         │
+│ command:  gco                      │
+│ action:   alias -&gt; git checkout    │
+│ valid:    no (gco not found)       │
+└────────────────────────────────────┘</pre>
+      </section>
+
+      <section class="tutorial-section">
+        <h2>Expansion preview</h2>
+        <p>With <code>ZPWR_EXPAND_PREVIEW=true</code>, ghost text shows what the last word would expand to as you type, before pressing space &mdash; covering regular aliases, global aliases, suffix aliases, and spelling corrections. Press space to commit, keep typing to dismiss. Disabled by default because it shares the <code>zle -M</code> message area with other plugins; the hook chains onto any existing <code>zle-line-pre-redraw</code> and fires on the existing redraw cadence (no polling).</p>
+<pre>gco → git checkout</pre>
+      </section>
+
+      <section class="tutorial-section">
+        <h2>Expansion stats</h2>
+        <p>Every expansion is logged to a stats file. <code>zpwrExpandStats</code> renders a cyberpunk dashboard with per-trigger and per-type tallies, total keystrokes saved, and the top aliases as proportional bar charts. Spacebar (<code>S:</code>) and history accept-line (<code>H:</code>) expansions are counted separately. Stats persist across sessions in <code>$ZPWR_EXPAND_STATS_FILE</code> (defaults under <code>$ZPWR_LOCAL</code> / <code>$XDG_CACHE_HOME</code> / <code>~/.cache</code>); the parent directory is created on first write.</p>
+        <table class="example-tbl">
+          <tbody>
+            <tr><td><code>-h</code>, <code>--help</code></td><td>show the dashboard help</td></tr>
+            <tr><td><code>-t</code>, <code>--top &lt;N&gt;</code></td><td>top N aliases (default 20, or <code>$ZPWR_EXPAND_STATS_TOP</code>)</td></tr>
+            <tr><td><code>-w</code>, <code>--width &lt;N&gt;</code></td><td>box width (default 70)</td></tr>
+            <tr><td><code>-c</code>, <code>--color</code></td><td>force ANSI colors</td></tr>
+            <tr><td><code>-r</code>, <code>--reset</code></td><td>clear all stats</td></tr>
+            <tr><td><code>-f</code>, <code>--file &lt;PATH&gt;</code></td><td>override the stats file path</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="tutorial-section">
+        <h2>Command-position parser</h2>
+        <p>Instead of one ever-growing regex, <code>zpwrExpandParserFindCommandPosition</code> walks the word array left-to-right and understands shell grammar in two phases: Phase 1 consumes shell keywords, Phase 2 consumes privilege-escalation prefixes and command wrappers. Each command has its own <code>case</code> branch that knows which flags take arguments and which positional slots are mandatory, so flag values containing <code>=</code> (e.g. <code>strace -e trace=network</code>) are not mistaken for variable assignments, and mandatory positional args (<code>su</code>&rarr;USER, <code>chroot</code>&rarr;PATH, <code>timeout</code>&rarr;DURATION) are never mistaken for the command. The parser exposes two results: <code>ZPWR_VARS[cachedRegexMatch]</code> (command + args after all prefixes) and <code>ZPWR_VARS[cachedParserPrefix]</code> (everything consumed as prefix).</p>
+      </section>
+
+      <section class="tutorial-section">
+        <h2>Troubleshooting</h2>
+        <table class="example-tbl">
+          <tbody>
+            <tr><td>An alias won't expand</td><td>Check it isn't in <code>ZPWR_EXPAND_BLACKLIST</code>; press <code>Ctrl+Opt+E</code> to see the parser's command position and action.</td></tr>
+            <tr><td>Nothing expands at all</td><td><code>ZPWR_EXPAND=false</code> disables the space/accept-line widget entirely (it returns immediately). Set it to <code>true</code>.</td></tr>
+            <tr><td>Expansion after <code>sudo</code> not firing</td><td>Set <code>ZPWR_EXPAND_SECOND_POSITION=true</code>.</td></tr>
+            <tr><td>Valid command got "corrected"</td><td>By design real commands/functions are left alone; if you see a correction, the word isn't a resolvable command on <code>$PATH</code>.</td></tr>
+            <tr><td>Preview ghost text missing</td><td>It's off by default; set <code>ZPWR_EXPAND_PREVIEW=true</code> (may conflict with other plugins' <code>zle -M</code> output).</td></tr>
+            <tr><td>Custom correction ignored</td><td>Run <code>zpwrExpandRebuildCorrectReverse</code> after editing <code>ZPWR_EXPAND_CORRECT_WORDS</code>.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="tutorial-section">
         <h2>Versus the competition</h2>
-        <p>The README contains a full 21-row comparison matrix vs <a href="https://github.com/olets/zsh-abbr">zsh-abbr</a>, <a href="https://github.com/momo-lab/zsh-abbrev-alias">zsh-abbrev-alias</a>, and OMZ <a href="https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/globalias">globalias</a>. zsh-expand is the only plugin in that set that supports prefix-command parsing with flag awareness, suffix aliases, tabstop snippets, self-referential escape, correct-then-expand, history injection, live preview, and case-insensitive prefix matching &mdash; with 11,688 tests vs no test suite on two of the three.</p>
+        <p>The README contains a full comparison matrix vs <a href="https://github.com/olets/zsh-abbr">zsh-abbr</a>, <a href="https://github.com/momo-lab/zsh-abbrev-alias">zsh-abbrev-alias</a>, and OMZ <a href="https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/globalias">globalias</a>. zsh-expand is the only plugin in that set that uses native <code>alias</code>/<code>global alias</code> <em>and</em> parses prefix chains with flag awareness, ships a built-in correction dictionary, suffix-alias expansion, tabstop snippets, self-referential escape, correct-then-expand, history injection, live preview, expand-inside-quotes, and case-insensitive prefix matching &mdash; pinned by 11,688 tests, where two of the three siblings ship no test suite.</p>
       </section>
 
       <section class="tutorial-section">
