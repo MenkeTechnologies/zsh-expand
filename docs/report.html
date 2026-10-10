@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark light">
-  <meta name="description" content="zsh-expand — Engineering report. World's most powerful zsh expansion plugin: 2,753 zsh lines across 4 source files, 11,688 zunit @test blocks across 79 t-*.zsh files, 62 prefix commands parsed with full flag awareness, 292 built-in misspelling corrections, 4 ZLE widgets, sub-millisecond expansion path, zero external commands in the hot path.">
+  <meta name="description" content="zsh-expand — Engineering report. 2,753 zsh lines across 4 source files, 11,688 zunit @test blocks across 79 t-*.zsh files, 62 prefix commands parsed with full flag awareness, 292 built-in misspelling corrections, 4 ZLE widgets, sub-millisecond expansion path, zero external commands in the hot path.">
   <title>zsh-expand &mdash; Engineering Report</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -99,7 +99,7 @@
           <tr>
             <td><code>zsh-expand.plugin.zsh</code></td>
             <td class="num">443</td>
-            <td>Plugin entry point. Sources the three siblings, defines the 292 built-in correction entries, declares ZLE widgets (<code>zpwrExpandSupernaturalSpace</code>, <code>zpwrExpandTerminateSpace</code>, <code>zpwrExpandGlobalAliases</code>, <code>zpwrExpandDebugWidget</code>), binds keys, registers the <code>_zpwrExpandStats</code> completion via <code>compdef</code>.</td>
+            <td>Plugin entry point. Sources the three siblings, defines the 292 built-in correction entries and the reverse-lookup rebuild (<code>zpwrExpandRebuildCorrectReverse</code>), declares ZLE widgets (<code>zpwrExpandSupernaturalSpace</code>, <code>zpwrExpandTerminateSpace</code>, <code>zpwrExpandGlobalAliases</code>, <code>zpwrExpandDebugWidget</code>), binds keys, registers the <code>_zpwrExpandStats</code> completion via <code>compdef</code>.</td>
           </tr>
           <tr>
             <td><code>zpwrExpandParser.zsh</code></td>
@@ -109,12 +109,12 @@
           <tr>
             <td><code>zpwrExpandLib.zsh</code></td>
             <td class="num">1,179</td>
-            <td>Widget bodies. Implements the expansion state machine: alias resolve &rarr; global resolve &rarr; correction lookup &rarr; native expand. Holds the O(1) reverse-lookup dictionary build (<code>ZPWR_EXPAND_CORRECT_REVERSE</code>). Suffix alias handling, self-referential <code>\backslash</code> escape, blacklist enforcement, autopair detection / delegation, history injection, preview ghost text, stats append.</td>
+            <td>Widget bodies. Implements the expansion state machine: alias resolve &rarr; global resolve &rarr; correction lookup &rarr; native expand. Suffix alias handling, self-referential <code>\backslash</code> escape, blacklist enforcement, autopair detection / delegation, history injection, preview ghost text, stats append.</td>
           </tr>
           <tr>
             <td><code>zpwrExpandApi.zsh</code></td>
             <td class="num">202</td>
-            <td>State-container helpers and config init. Exports <code>ZPWR_VARS</code> association keys consumed by the parser/lib, sets default values for the <code>ZPWR_EXPAND_*</code> / <code>ZPWR_CORRECT_*</code> family, declares the public-callable shape (caller / enter detection, multiword tail extraction).</td>
+            <td>Parse and expand helpers: <code>zpwrExpandParseWords</code> and <code>zpwrExpandLastWordAtCommandPosAndExpand</code>, which set <code>ZPWR_VARS[LAST_WORD_WAS_AT_COMMAND]</code> and <code>ZPWR_VARS[ORIGINAL_LAST_COMMAND]</code> for external callers (caller / enter detection, multiword tail extraction). Does not set configuration defaults.</td>
           </tr>
           <tr class="total-row">
             <td>Total source</td>
@@ -178,7 +178,7 @@
       </table>
 
       <p style="margin-top:0.6rem;font-size:11px;color:var(--text-muted);">
-        Runner: <a href="https://github.com/zunit-zsh/zunit" target="_blank" rel="noopener noreferrer">zunit</a>. CI matrix (<code>.github/workflows/ci.yml</code>) runs the full <strong>11,688</strong> on every push.
+        Runner: <a href="https://github.com/zunit-zsh/zunit" target="_blank" rel="noopener noreferrer">zunit</a>. CI matrix (<code>.github/workflows/ci.yml</code>) runs the full <strong>11,688</strong> on every push to <code>main</code> and every pull request.
       </p>
 
       <hr class="section-rule">
@@ -196,7 +196,7 @@
         </div>
         <div class="feature-card">
           <h4>ZLE widgets installed</h4>
-          <p>Four widgets registered via <code>zle -N</code>: <code>zpwrExpandSupernaturalSpace</code> (bound to <kbd>Space</kbd>), <code>zpwrExpandTerminateSpace</code> (bound to <kbd>Enter</kbd> when <code>ZPWR_EXPAND_PRE_EXEC_NATIVE=true</code>), <code>zpwrExpandGlobalAliases</code> (callable from user widgets), <code>zpwrExpandDebugWidget</code> (bound to <kbd>Esc-Ctrl-E</kbd>).</p>
+          <p>Four widgets registered via <code>zle -N</code>: <code>zpwrExpandSupernaturalSpace</code> (bound to <kbd>Space</kbd>), <code>zpwrExpandTerminateSpace</code> (bound to <kbd>Ctrl-Space</kbd>; inserts a literal space), <code>zpwrExpandGlobalAliases</code> (callable from user widgets), <code>zpwrExpandDebugWidget</code> (bound to <kbd>Esc-Ctrl-E</kbd>).</p>
         </div>
         <div class="feature-card">
           <h4>Completion registration</h4>
@@ -227,11 +227,11 @@
         </div>
         <div class="feature-card">
           <h4>Flag tables hand-curated per command</h4>
-          <p>Each of the 62 supported prefixes lists its <em>combo</em> flags (consume next char) AND its <em>flag-with-arg</em> flags (consume next word). Mixing these is what lets <code>strace -cf -s 256 gco</code> and <code>su -l root gco</code> both work. The flag tables live in <code>zpwrExpandParser.zsh</code> and are pinned by <code>t-expand-combo.zsh</code> regression tests.</p>
+          <p>Each of the 62 supported prefixes lists its <em>combo</em> flags (consume next char) AND its <em>flag-with-arg</em> flags (consume next word). Mixing these is what lets <code>strace -cf -s 256 gco</code> and <code>su -l root gco</code> both work. The flag tables live in <code>zpwrExpandParser.zsh</code> and are pinned by the <code>t-parser-*.zsh</code> tests.</p>
         </div>
         <div class="feature-card">
           <h4>Self-referential alias = backslash escape</h4>
-          <p><code>alias git=hub</code> would loop forever under naive recursion. <code>zsh-expand</code> detects when the head of the expansion equals the original command and prepends <code>\\</code> to suppress the second-round lookup &mdash; the same trick zsh's own <code>_expand_alias</code> uses internally. Pinned by <code>t-alias-escape-edge.zsh</code>.</p>
+          <p><code>alias git=hub</code> would loop forever under naive recursion. <code>zsh-expand</code> detects when the head of the expansion equals the original command and prepends <code>\\</code> to suppress the second-round lookup. Pinned by <code>t-alias-escape-edge.zsh</code>.</p>
         </div>
         <div class="feature-card">
           <h4>Blacklist over whitelist</h4>
@@ -239,7 +239,7 @@
         </div>
         <div class="feature-card">
           <h4>Zero forks in the hot path</h4>
-          <p>The widget body uses only parameter expansion (<code>${var//pattern/repl}</code>), associative-array indexing (<code>$aliases[word]</code>, <code>$galiases[word]</code>), and built-in ZLE state. No <code>sed</code>, no <code>awk</code>, no <code>grep</code>, no <code>$(...)</code> in the expansion path &mdash; each fork on macOS is ~1&nbsp;ms, more than the entire ~36&nbsp;&micro;s budget.</p>
+          <p>The widget body uses only parameter expansion (<code>${var//pattern/repl}</code>), associative-array indexing (<code>$aliases[word]</code>, <code>$galiases[word]</code>), and built-in ZLE state. No <code>sed</code>, no <code>awk</code>, no <code>grep</code>, no <code>$(...)</code> in the expansion path.</p>
         </div>
       </div>
 
@@ -281,16 +281,16 @@
           <tr><th>Variable</th><th>Default</th><th>Effect</th></tr>
         </thead>
         <tbody>
-          <tr><td><code>ZPWR_EXPAND</code></td><td class="num">true</td><td>Master switch. <code>false</code> makes the widget return immediately (no parse cost).</td></tr>
-          <tr><td><code>ZPWR_EXPAND_SECOND_POSITION</code></td><td class="num">true</td><td>Alias expansion after <code>sudo</code>/<code>env</code>/&hellip; prefixes.</td></tr>
-          <tr><td><code>ZPWR_EXPAND_NATIVE</code></td><td class="num">true</td><td>Expand globs, <code>$params</code>, <code>!history</code> via <code>zle expand-word</code>.</td></tr>
-          <tr><td><code>ZPWR_CORRECT</code></td><td class="num">true</td><td>Spelling correction.</td></tr>
-          <tr><td><code>ZPWR_CORRECT_EXPAND</code></td><td class="num">true</td><td>Chain alias expansion after a correction (correct-then-expand).</td></tr>
+          <tr><td><code>ZPWR_EXPAND</code></td><td class="num">unset (enabled)</td><td>Master switch. <code>false</code> makes the widget return immediately (no parse cost).</td></tr>
+          <tr><td><code>ZPWR_EXPAND_SECOND_POSITION</code></td><td class="num">unset</td><td>Alias expansion after <code>sudo</code>/<code>env</code>/&hellip; prefixes.</td></tr>
+          <tr><td><code>ZPWR_EXPAND_NATIVE</code></td><td class="num">unset</td><td>Expand globs, <code>$params</code>, <code>!history</code> via <code>zle expand-word</code>.</td></tr>
+          <tr><td><code>ZPWR_CORRECT</code></td><td class="num">unset</td><td>Spelling correction.</td></tr>
+          <tr><td><code>ZPWR_CORRECT_EXPAND</code></td><td class="num">unset</td><td>Chain alias expansion after a correction (correct-then-expand).</td></tr>
           <tr><td><code>ZPWR_EXPAND_QUOTE_DOUBLE</code></td><td class="num">—</td><td>Expand aliases inside <code>"double"</code>-quoted argument strings.</td></tr>
           <tr><td><code>ZPWR_EXPAND_QUOTE_SINGLE</code></td><td class="num">—</td><td>Expand aliases inside <code>'single'</code>-quoted argument strings.</td></tr>
           <tr><td><code>ZPWR_EXPAND_TO_HISTORY</code></td><td class="num">false</td><td>Write the expanded form into history on accept-line.</td></tr>
           <tr><td><code>ZPWR_EXPAND_PRE_EXEC_NATIVE</code></td><td class="num">—</td><td>Also expand globs/params/history on accept-line.</td></tr>
-          <tr><td><code>ZPWR_EXPAND_SUFFIX</code></td><td class="num">true</td><td>Expand suffix aliases (<code>alias -s</code>) at command position.</td></tr>
+          <tr><td><code>ZPWR_EXPAND_SUFFIX</code></td><td class="num">true (forced at load)</td><td>Expand suffix aliases (<code>alias -s</code>) at command position.</td></tr>
           <tr><td><code>ZPWR_EXPAND_PREVIEW</code></td><td class="num">false</td><td>Ghost-text preview of the pending expansion via <code>zle-line-pre-redraw</code>.</td></tr>
           <tr><td><code>ZPWR_EXPAND_BLACKLIST</code></td><td class="num">()</td><td>Array of aliases to never expand (wins in every position).</td></tr>
           <tr><td><code>ZPWR_EXPAND_CORRECT_WORDS</code></td><td class="num">292</td><td>The correction dictionary (correct &rarr; misspellings). User-extensible.</td></tr>
@@ -315,67 +315,6 @@
 
       <hr class="section-rule">
 
-      <h2 class="tutorial-title"><span class="step-hash">$</span>POSITION</h2>
-      <p class="tutorial-subtitle">Quantitative position against the established alias-expansion plugin set. Numbers for siblings come from each project's published README/source as of writing; <code>zsh-expand</code>'s figures are derived in-tree by <code>wc -l</code> / <code>grep -c</code>.</p>
-
-      <table class="file-table">
-        <thead>
-          <tr>
-            <th>Plugin</th>
-            <th class="num">Tests</th>
-            <th class="num">Prefix cmds parsed</th>
-            <th>Correction dict</th>
-            <th>Suffix-alias expand</th>
-            <th>Preview ghost</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr style="background:rgba(57,255,20,0.05);">
-            <td style="color:var(--green);"><strong>zsh-expand</strong></td>
-            <td class="num"><strong>11,688</strong></td>
-            <td class="num"><strong>62</strong></td>
-            <td>292 entries + user-extend</td>
-            <td>yes</td>
-            <td>yes</td>
-          </tr>
-          <tr>
-            <td>globalias (OMZ)</td>
-            <td class="num">0</td>
-            <td class="num">0</td>
-            <td>none</td>
-            <td>no</td>
-            <td>no</td>
-          </tr>
-          <tr>
-            <td>zsh-abbr</td>
-            <td class="num">~100s</td>
-            <td class="num">0</td>
-            <td>none</td>
-            <td>no</td>
-            <td>partial (cursor-time)</td>
-          </tr>
-          <tr>
-            <td>zsh-abbrev-alias</td>
-            <td class="num">~0</td>
-            <td class="num">0</td>
-            <td>none</td>
-            <td>no</td>
-            <td>no</td>
-          </tr>
-          <tr>
-            <td>zsh-you-should-use</td>
-            <td class="num">~dozens</td>
-            <td class="num">0 (post-exec only)</td>
-            <td>none</td>
-            <td>n/a</td>
-            <td>n/a</td>
-          </tr>
-        </tbody>
-      </table>
-      <p style="margin-top:0.4rem;font-size:11px;color:var(--text-muted);">Sibling plugins handle the alias-in-command-position case only. <code>zsh-expand</code> is the only one that parses arbitrarily-deep prefix chains AND ships a misspelling-correction dictionary AND ships a suffix-alias hook AND ships preview ghost text &mdash; in a single ZLE widget with sub-millisecond latency.</p>
-
-      <hr class="section-rule">
-
       <h2 class="tutorial-title"><span class="step-hash">@</span>FOOTPRINT</h2>
       <p class="tutorial-subtitle">No daemons. No timers. No state outside zsh.</p>
       <ul style="font-size:12px;color:var(--text-dim);line-height:1.7;">
@@ -383,7 +322,7 @@
         <li><strong>Memory</strong>: 2 associative arrays (<code>ZPWR_EXPAND_CORRECT_WORDS</code>, <code>ZPWR_EXPAND_CORRECT_REVERSE</code>) &middot; one global association (<code>ZPWR_VARS</code>) &middot; 4 widget closures.</li>
         <li><strong>Startup cost</strong>: source + dictionary build + reverse-table build, one-shot, no compile step.</li>
         <li><strong>Runtime cost</strong>: 1 widget per <kbd>Space</kbd> keystroke &middot; zero external processes &middot; ~36&nbsp;&micro;s typical.</li>
-        <li><strong>Stats file</strong>: optional, opt-in via <code>ZPWR_EXPAND_STATS_FILE</code> &mdash; the only on-disk side effect.</li>
+        <li><strong>Stats file</strong>: every expansion is appended to the stats file (location overridable via <code>ZPWR_EXPAND_STATS_FILE</code>) &mdash; the only on-disk side effect.</li>
       </ul>
 
     </main>

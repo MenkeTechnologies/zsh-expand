@@ -361,7 +361,6 @@ alias gca="git commit --amend -m ${ZPWR_TABSTOP}"
 gc<space>  =>  git commit -m |    (cursor here)
 ```
 
-No other zsh expansion plugin supports cursor placement on expansion.
 
 ---
 
@@ -377,7 +376,6 @@ alias git="hub"
 git<space>  =>  \hub    (escaped, won't re-expand)
 ```
 
-Other plugins either infinite-loop or silently break on this.
 
 ---
 
@@ -482,7 +480,6 @@ Disabled by default (conflicts with `zle -M` output from other plugins). Enable 
 export ZPWR_EXPAND_PREVIEW=true
 ```
 
-No other zsh expansion plugin shows a live preview of pending expansions.
 
 ---
 
@@ -661,7 +658,7 @@ Source `zsh-expand.plugin.zsh` in `~/.zshrc`.
 
 ## [0x18] // THE MONSTER CHAIN
 
-No other expansion plugin can do this. 9 shell builtin permutations up front, then every one of the 62 command wrapper commands duplicated with different flag combos. `strace` with all 38 flags and `ltrace` with all 25 flags. Variable assignments scattered everywhere. Shell builtins come first (they only exist inside zsh), then command wrappers chain freely. The parser consumes the entire prefix and `gco` expands to `git checkout`:
+9 shell builtin permutations up front, then command wrappers repeated with different flag combos. `strace` with all 38 flags and `ltrace` with all 25 flags. Variable assignments scattered everywhere. Shell builtins come first (they only exist inside zsh), then command wrappers chain freely. The parser consumes the entire prefix and `gco` expands to `git checkout`:
 
 ```
 nocorrect time -p command -p builtin eval noglob coproc       \
@@ -776,9 +773,9 @@ nocorrect time -p command -p builtin eval noglob coproc       \
   =>  ...git checkout
 ```
 
-Scales to 96,000+ tokens (468KB) and beyond. `ARG_MAX` only matters at `execve()` time -- zsh's line editor is just a string in memory with no kernel limit. Try that with a regex.
+`ARG_MAX` only matters at `execve()` time -- zsh's line editor is just a string in memory with no kernel limit.
 
-And if you want one that looks like it was written by someone who should be institutionalized -- triple-proxied through tor, user-switched twice, namespace-entered, NUMA-pinned, OOM-adjusted, stream-buffered, resource-limited, traced at the syscall AND library level with every flag maxed, CPU limited to 1%, real-time priority 99, pinned to 64 cores, locked, chrooted, jailed, namespaced, sandboxed, daemonized, caffeinated for 24 hours:
+A second, longer chain:
 
 ```
 nocorrect noglob builtin eval coproc time -p command -p       \
